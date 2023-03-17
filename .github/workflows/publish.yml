@@ -1,14 +1,13 @@
-name: CI
+name: Publish
 on:
   push:
     branches:
-      - '**'
-  pull_request:
-    branches:
-      - '**'
+      - 'main'
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,8 +16,19 @@ jobs:
           version: 7
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 18.x
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run ci
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm run release
+        env:
+          EMAIL: ${{ secrets.EMAIL }}
+          COMMUNITY_ID: ${{ secrets.COMMUNITY_ID }}
+          COMMUNITY_URL: ${{ secrets.COMMUNITY_URL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
