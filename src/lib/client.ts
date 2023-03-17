@@ -686,10 +686,20 @@ export class PubPub {
    *
    */
   uploadFile = async (
-    file: Blob | Buffer,
+    file: Blob | Buffer | File,
     fileName: string,
     mimeType: (typeof allowedMimeTypes)[number]
   ) => {
+    if (
+      typeof window === 'undefined' &&
+      process.version &&
+      parseInt(process.version.slice(1).split('.')[0]) < 18
+    ) {
+      throw new Error(
+        'Node version must be 18 or higher to use uploadFile, as it depends on native FormData and Blob support'
+      )
+    }
+
     const blb =
       file instanceof Blob ? file : new Blob([file], { type: mimeType })
 
