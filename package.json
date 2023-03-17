@@ -1,5 +1,5 @@
 {
-  "name": "pubpub-sdx",
+  "name": "pubpub-sdk",
   "version": "1.0.0",
   "description": "Unofficial PubPub API client for Node.js and the browser.",
   "type": "module",
