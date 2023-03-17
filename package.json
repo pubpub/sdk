@@ -1,6 +1,6 @@
 {
-  "name": "pubpub-sdk",
-  "version": "1.0.2",
+  "name": "pubpub-client",
+  "version": "0.1.2",
   "description": "Unofficial PubPub API client for Node.js and the browser.",
   "type": "module",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
     "pubpub",
     "api",
     "client",
-    "sdk",
+    "client",
     "publishing"
   ],
   "author": "Thomas F. K. Jorna",

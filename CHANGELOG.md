@@ -1,4 +1,4 @@
-# pubpub-sdk
+# pubpub-client
 
 ## 1.0.1
 
