@@ -26,7 +26,7 @@
   "author": "Thomas F. K. Jorna",
   "license": "GPL-3.0-or-later",
   "engines": {
-    "node": "^14"
+    "node": ">=14.0.0"
   },
   "exports": {
     ".": {
