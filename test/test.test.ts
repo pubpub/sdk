@@ -68,6 +68,16 @@ describe('PubPub', () => {
     expect(collectionWithAttributions).toHaveProperty('crossrefDepositRecordId')
   })
 
+  const testUrl = 'pub/67lseb8m/draft'
+
+  it('should be able to get firebasetoken for a pub', async () => {
+    const pageData = await pubpub.hacks.getPageData(testUrl, 'view-data')
+
+    const firebaseToken = pageData.pubData.firebaseToken
+
+    expect(firebaseToken.length).toBeGreaterThan(0)
+  })
+
   afterAll(async () => {
     pubpub && (await pubpub.logout())
   })

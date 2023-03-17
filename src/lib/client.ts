@@ -20,6 +20,7 @@ import { Collection, CollectionScopeData } from './collectionData'
 import axios from 'axios'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
+import { PubViewData } from './viewData'
 // create a http client that can make authenticated requests to an api by setting a cookie
 
 /**
@@ -332,21 +333,36 @@ export class PubPub {
   pub = this.makePubOperations()
 
   private makeHacks = () => {
-    const getCommunityData = async () => {
-      const response = await this.getPage(`dash/overview`)
+    const getPageData = (async (
+      page: string,
+      data: 'initial-data' | 'view-data' = 'initial-data'
+    ) => {
+      const response = await this.getPage(page)
 
       const unparsedCommunityData = response.match(
-        /<script id="initial-data" type="text\/plain" data-json="(.*?)"/
+        new RegExp(`<script id="${data}" type="text\\/plain" data-json="(.*?)"`)
       )
 
       if (!unparsedCommunityData) {
-        throw new Error('Could not find community data')
+        throw new Error(`Could not find ${data} data`)
       }
 
-      const communityData = JSON.parse(
-        unparsedCommunityData[1].replace(/&quot;/g, '"')
-      ) as InitialData
+      if (data === 'initial-data') {
+        const communityData = JSON.parse(
+          unparsedCommunityData[1].replace(/&quot;/g, '"')
+        ) as InitialData
 
+        return communityData
+      } else {
+        return JSON.parse(
+          unparsedCommunityData[1].replace(/&quot;/g, '"')
+        ) as PubViewData
+      }
+    }) as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
+      ((page: string, data?: 'view-data') => Promise<PubViewData>)
+
+    const getCommunityData = async () => {
+      const communityData = await getPageData('dash/overview')
       return communityData?.communityData
     }
 
@@ -357,24 +373,14 @@ export class PubPub {
     }
 
     const getCollection = async (slug: string) => {
-      const response = await this.getPage(
+      const collectionData = await getPageData(
         `dash/collection/${slug}/settings/details`
       )
 
-      const unparsedCollectionData = response.match(
-        /<script id="initial-data" type="text\/plain" data-json="(.*?)"/
-      )
+      const collectionElements = collectionData?.scopeData
+        ?.elements as unknown as CollectionScopeData['elements']
 
-      if (!unparsedCollectionData) {
-        throw new Error('Could not find collection data')
-      }
-
-      const collectionData = JSON.parse(
-        unparsedCollectionData[1].replace(/&quot;/g, '"')
-      )
-
-      const collectionScopeData = collectionData?.scopeData?.elements
-        ?.activeCollection as CollectionScopeData['elements']['activeCollection']
+      const collectionScopeData = collectionElements?.activeCollection
 
       return collectionScopeData
     }
@@ -396,6 +402,7 @@ export class PubPub {
     }
 
     return {
+      getPageData,
       getCommunityData,
       /**
        * The only way I currently know to get collections is to go to the dashboard and scrape the data from there
@@ -1128,4 +1135,13 @@ export interface FacetsProps {
   pubEdgeDisplay?: PubEdgeDisplay
   pubHeaderTheme?: PubHeaderTheme
   citationStyle?: CitationStyle
+}
+
+type GetPageDataOverload = {
+  (page: string, data: 'initial-data'): Promise<InitialData>
+  (page: string, data: 'view-data'): Promise<PubViewData>
+
+  (page: string, data: 'view-data' | 'initial-data'):
+    | Promise<PubViewData>
+    | Promise<InitialData>
 }

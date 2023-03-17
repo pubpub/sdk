@@ -1,10 +1,10 @@
 export type Chapter = {
   chapter: number
   id: string
-  data: Data
+  data: Pub
 }
 
-export type Data = {
+export type Pub = {
   id: string
   licenseSlug: string
   citationStyle: string
