@@ -9,11 +9,11 @@
   "scripts": {
     "build": "tsup",
     "lint": "tsc",
-    "ci": "npm run build && npm run lint && npm run test",
-    "prepublish": "npm run ci",
+    "ci": "rm -rf dist && pnpm run build && pnpm run lint && pnpm run test",
+    "prepublish": "pnpm run ci",
     "test": "vitest run",
     "dev": "vitest",
-    "release": "npm run ci && changeset publish",
+    "release": "pnpm run ci && changeset publish",
     "prepare": "husky install"
   },
   "keywords": [
