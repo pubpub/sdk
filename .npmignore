@@ -3,3 +3,8 @@ node_modules
 pnpm-lock.yaml
 tsconfig.json
 tsup.config.ts
+test
+.husky
+.github
+out
+.prettierrc
