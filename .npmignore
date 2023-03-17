@@ -8,3 +8,5 @@ test
 .github
 out
 .prettierrc
+.env
+.env.example
