@@ -12,6 +12,6 @@
   />
 </svelte:head>
 
-<main>
+<main class="bg-pink-100">
   <slot />
 </main>
