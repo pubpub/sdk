@@ -12,11 +12,11 @@ export default {
 
     /* NodeView Options. These are not part of the standard Prosemirror Schema spec */
     isNodeView: true,
-    onInsert: (view) => {
-      const discussionNode = view.state.schema.nodes.discussion.create()
-      const transaction = view.state.tr.replaceSelectionWith(discussionNode)
-      view.dispatch(transaction)
-    },
+    // onInsert: (view) => {
+    //   const discussionNode = view.state.schema.nodes.discussion.create()
+    //   const transaction = view.state.tr.replaceSelectionWith(discussionNode)
+    //   view.dispatch(transaction)
+    // },
     defaultOptions: {
       getThreads: () => {
         return []
