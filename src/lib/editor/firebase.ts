@@ -3,6 +3,7 @@ import { Step, ReplaceStep } from 'prosemirror-transform'
 import {
   compressStateJSON,
   compressStepJSON,
+  // @ts-expect-error pubpub no typey
 } from 'prosemirror-compress-pubpub'
 import uuid from 'uuid'
 import firebase from 'firebase'
@@ -94,12 +95,20 @@ export type ProposedMetadata = {
 export const writeDocumentToPubDraft = async (
   draftRef: firebase.database.Reference,
   document: Doc,
-  schema?: ReturnType<typeof buildSchema>
+  {
+    schema,
+    initalDocKey,
+  }: {
+    schema?: ReturnType<typeof buildSchema>
+    initalDocKey?: string
+  } = {}
 ) => {
+  const key = initalDocKey ?? 0
+
   const documentSchema = schema || buildSchema()
   const hydratedDocument = Node.fromJSON(documentSchema, document)
   const documentSlice = new Slice(Fragment.from(hydratedDocument.content), 0, 0)
   const replaceStep = new ReplaceStep(0, 0, documentSlice)
   const change = createFirebaseChange([replaceStep], 'bulk-importer')
-  await draftRef.child('changes').child('0').set(change)
+  await draftRef.child('changes').child(key.toString()).set(change)
 }

@@ -81,16 +81,7 @@ export const baseNodes: { [key: string]: NodeSpec } = {
 }
 
 export const baseMarks = {
-  em: {
-    parseDOM: [
-      { tag: 'i' },
-      { tag: 'em' },
-      {
-        style: 'font-style',
-        getAttrs: (value) => value === 'italic' && null,
-      },
-    ],
-  },
+  em: {},
 
   strong: {},
   link: {

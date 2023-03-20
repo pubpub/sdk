@@ -1,49 +1,54 @@
 import { Schema } from 'prosemirror-model'
 
-import { defaultNodes, defaultMarks } from './schemas'
+import { defaultNodes, defaultMarks } from './schemas-min'
 
-export const buildSchema = (
-  customNodes = {},
-  customMarks = {},
-  nodeOptions = {}
-) => {
-  const schemaNodes = {
-    ...defaultNodes,
-    ...customNodes,
-  }
-  const schemaMarks = {
-    ...defaultMarks,
-    ...customMarks,
-  }
+export const buildSchema = () =>
+  //   customNodes = {},
+  //   customMarks = {},
+  //   nodeOptions = {}
+  {
+    const schemaNodes = {
+      ...defaultNodes,
+      // ...customNodes,
+    }
+    const schemaMarks = {
+      ...defaultMarks,
+      // ...customMarks,
+    }
+    /* Overwrite defaultOptions with custom supplied nodeOptions */
+    //   Object.keys(nodeOptions).forEach((nodeKey) => {
+    //     const nodeSpec = schemaNodes[nodeKey]
+    //     if (nodeSpec) {
+    //       schemaNodes[nodeKey].defaultOptions = {
+    //         ...nodeSpec.defaultOptions,
+    //         ...nodeOptions[nodeKey],
+    //       }
+    //     }
+    //   })
 
-  /* Overwrite defaultOptions with custom supplied nodeOptions */
-  Object.keys(nodeOptions).forEach((nodeKey) => {
-    const nodeSpec = schemaNodes[nodeKey]
-    if (nodeSpec) {
-      schemaNodes[nodeKey].defaultOptions = {
-        ...nodeSpec.defaultOptions,
-        ...nodeOptions[nodeKey],
+    /* Filter out undefined (e.g. overwritten) nodes and marks */
+    ;(Object.keys(defaultNodes) as (keyof typeof defaultNodes)[]).forEach(
+      (nodeKey) => {
+        if (!(nodeKey in defaultNodes)) {
+          const { [nodeKey]: _, ...rest } = defaultNodes
+          defaultNodes = rest
+          //   delete schemaNodes[nodeKey]
+        }
       }
-    }
-  })
+    )
+    Object.keys(schemaMarks).forEach((markKey) => {
+      if (!schemaMarks[markKey]) {
+        const { [markKey]: _, ...rest } = schemaMarks
+        schemaMarks = rest
+        //   delete schemaMarks[markKey]
+      }
+    })
 
-  /* Filter out undefined (e.g. overwritten) nodes and marks */
-  Object.keys(schemaNodes).forEach((nodeKey) => {
-    if (!schemaNodes[nodeKey]) {
-      delete schemaNodes[nodeKey]
-    }
-  })
-  Object.keys(schemaMarks).forEach((markKey) => {
-    if (!schemaMarks[markKey]) {
-      delete schemaMarks[markKey]
-    }
-  })
-
-  return new Schema({
-    nodes: schemaNodes,
-    marks: schemaMarks,
-    topNode: 'doc',
-  })
-}
+    return new Schema({
+      nodes: schemaNodes,
+      marks: schemaMarks,
+      topNode: 'doc',
+    })
+  }
 
 export const editorSchema = buildSchema()

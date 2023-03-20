@@ -23,8 +23,10 @@ import axios from 'axios'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
 import { PubViewData } from './viewData'
-import { ProposedMetadata } from './editor/firebase'
+import { ProposedMetadata, writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
+import { initFirebase } from './firebase/initFirebase'
+import { ResourceWarning } from './editor/types'
 // create a http client that can make authenticated requests to an api by setting a cookie
 
 /**
@@ -323,6 +325,56 @@ export class PubPub {
       return response
     }
 
+    /**
+     * First connects to Firebase
+     * Imports the files
+     * Then sends the imported file to firebase
+     */
+    const importPub = async (
+      pubUrl: string,
+      filesToImport: {
+        file: Blob | Buffer | File
+        fileName: string
+        mimeType: (typeof allowedMimeTypes)[number]
+      }[]
+    ) => {
+      // if it doesnt end with /draft, add it
+
+      const testUrl = pubUrl.endsWith('/draft') ? pubUrl : `${pubUrl}/draft`
+
+      const pageData = await this.hacks.getPageData(testUrl, 'view-data')
+
+      const initialDocKey = pageData.pubData.initialDocKey
+
+      const firebaseToken = pageData.pubData.firebaseToken
+      const firebasePath = pageData.pubData.draft.firebasePath
+      console.log({
+        firebaseToken,
+        firebasePath,
+      })
+
+      const firebaseRef = await initFirebase(firebasePath, firebaseToken)
+      console.log({ firebaseRef })
+      if (!firebaseRef) {
+        throw new Error('Could not connect to firebase')
+      }
+
+      console.log({ childs: firebaseRef.child('changes') })
+
+      const importedFiles = await this.importFull(filesToImport)
+
+      const docImport = await writeDocumentToPubDraft(
+        firebaseRef,
+        importedFiles.doc,
+        initialDocKey
+      )
+      console.log(
+        `Succesfully imported ${filesToImport.length} files to ${pubUrl}`
+      )
+
+      return docImport
+    }
+
     return {
       create,
       modify: put,
@@ -331,6 +383,7 @@ export class PubPub {
       getMany: this.getManyPubs,
       attributions: this.makeAttributionsOperations<'pub'>('pub'),
       release,
+      import: importPub,
     }
   }
 
@@ -852,7 +905,7 @@ export class PubPub {
     }
   }
 
-  private import = async (
+  importFull = async (
     files: {
       file: Blob | Buffer | File
       fileName: string
@@ -944,8 +997,8 @@ type WorkerTaskResponse = {
 }
 
 interface WorkerTaskImportOutput {
-  doc: Record<string, any>
-  warnings: any[]
+  doc: any
+  warnings: ResourceWarning[]
   proposedMetadata: ProposedMetadata
   pandocErrorOutput: string
 }

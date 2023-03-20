@@ -1,4 +1,4 @@
-import { counter } from './reactive/counter'
+// import { counter } from './reactive/counter'
 
 export default {
   equation: {
