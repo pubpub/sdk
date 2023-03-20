@@ -98,7 +98,10 @@ describe('PubPub', () => {
         format: 'docx',
       })
 
-      expect(exported.startsWith('https://assets.pubpub.org')).toBeTruthy()
+      expect(
+        typeof exported === 'string' &&
+          exported.startsWith('https://assets.pubpub.org')
+      ).toBeTruthy()
     } catch (e) {
       console.log(e)
       throw e

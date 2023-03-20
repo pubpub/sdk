@@ -31,14 +31,18 @@ export const buildSchema = () =>
       (nodeKey) => {
         if (!(nodeKey in defaultNodes)) {
           const { [nodeKey]: _, ...rest } = defaultNodes
+          // @ts-expect-error types??
           defaultNodes = rest
           //   delete schemaNodes[nodeKey]
         }
       }
     )
     Object.keys(schemaMarks).forEach((markKey) => {
+      // @ts-expect-error types??
       if (!schemaMarks[markKey]) {
+        // @ts-expect-error types??
         const { [markKey]: _, ...rest } = schemaMarks
+        // @ts-expect-error types??
         schemaMarks = rest
         //   delete schemaMarks[markKey]
       }
