@@ -100,7 +100,8 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "noEmit": true /* Disable emitting files from a compilation. */
+    "noEmit": true /* Disable emitting files from a compilation. */,
+    "noImplicitAny": true
   },
   "include": ["src/**.ts", "src/lib/client.ts", "src/lib/initialData.ts"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
