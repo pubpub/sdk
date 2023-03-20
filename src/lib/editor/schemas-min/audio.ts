@@ -1,6 +1,3 @@
-import { counter } from './reactive/counter'
-import { label } from './reactive/label'
-
 export default {
   audio: {
     atom: true,
