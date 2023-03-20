@@ -71,22 +71,24 @@ export type Doc = {
   doc: any
   warnings: ResourceWarning[]
   pandocErrorOutput: any
-  proposedMetadata: {
-    slug?: string
-    title?: string
-    description?: string
-    attributions?: {
-      name: string
-      users:
-        | Record<
-            'id' | 'slug' | 'fullName' | 'initials' | 'avatar',
-            string | undefined
-          >[]
-        | null
-    }[]
-    customPublishedAt?: string
-    metadata?: Record<string, unknown>
-  }
+  proposedMetadata: ProposedMetadata
+}
+
+export type ProposedMetadata = {
+  slug?: string
+  title?: string
+  description?: string
+  attributions?: {
+    name: string
+    users:
+      | Record<
+          'id' | 'slug' | 'fullName' | 'initials' | 'avatar',
+          string | undefined
+        >[]
+      | null
+  }[]
+  customPublishedAt?: string
+  metadata?: Record<string, unknown>
 }
 
 export const writeDocumentToPubDraft = async (

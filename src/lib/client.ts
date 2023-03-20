@@ -14,6 +14,8 @@ import {
   CollectionKind,
   CommunityPutPayload,
   CommunityPutResponse,
+  SourceFile,
+  ImportPayload,
 } from './types'
 import { InitialData } from './initialData'
 import { Collection, CollectionScopeData } from './collectionData'
@@ -21,6 +23,8 @@ import axios from 'axios'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
 import { PubViewData } from './viewData'
+import { ProposedMetadata } from './editor/firebase'
+import { labelFiles } from './formats'
 // create a http client that can make authenticated requests to an api by setting a cookie
 
 /**
@@ -710,6 +714,8 @@ export class PubPub {
     const blb =
       file instanceof Blob ? file : new Blob([file], { type: mimeType })
 
+    const size = blb.size
+
     const policy = await this.uploadPolicy(mimeType)
 
     const formData = new FormData()
@@ -734,6 +740,8 @@ export class PubPub {
 
       return {
         url: `https://assets.pubpub.org/${key}`,
+        size,
+        key,
         data: response.data,
       }
     } catch (error) {
@@ -843,6 +851,103 @@ export class PubPub {
       },
     }
   }
+
+  private import = async (
+    files: {
+      file: Blob | Buffer | File
+      fileName: string
+      mimeType: (typeof allowedMimeTypes)[number]
+    }[]
+  ) => {
+    const importedFiles = await Promise.all(
+      files.map(async ({ file, fileName, mimeType }) => {
+        const { url, size, key } = await this.uploadFile(
+          file,
+          fileName,
+          mimeType
+        )
+
+        return {
+          url,
+          fileName,
+          mimeType,
+          size,
+          key,
+        }
+      })
+    )
+
+    const sourceFiles: SourceFile[] = importedFiles.map(
+      ({ url, size, key, fileName, mimeType }, idx) => ({
+        assetKey: key,
+        clientPath: fileName,
+        id: idx + 1,
+        state: 'complete',
+        loaded: size,
+        total: size,
+      })
+    )
+
+    const labeledFiles = labelFiles(sourceFiles)
+
+    return await this.importFiles(labeledFiles)
+  }
+
+  private importFiles = async (sourceFiles: SourceFile[]) => {
+    const payload: ImportPayload = {
+      importerFlags: {},
+      sourceFiles,
+      useNewImporter: true,
+    }
+    const workerTaskId = await this.authedRequest(`import`, 'POST', payload)
+
+    if (typeof workerTaskId !== 'string') {
+      console.log({ workerTaskId })
+      throw new Error('Worker task id is not a string')
+    }
+
+    return await this.waitForImportWorkerTask(workerTaskId)
+  }
+
+  /**
+   * Pings workertask endpoint until every second until the task is complete
+   */
+  private waitForImportWorkerTask = async (workerTaskId: string) => {
+    const poll = async (): Promise<WorkerTaskImportOutput> => {
+      const task = (await this.authedRequest(
+        `workerTasks?workerTaskId=${workerTaskId}`,
+        'GET'
+      )) as WorkerTaskResponse
+
+      if (!task.isProcessing && task.output) {
+        return task.output
+      }
+
+      if (task.error) {
+        throw new Error(task.error)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      return poll()
+    }
+
+    return poll()
+  }
+}
+
+type WorkerTaskResponse = {
+  id: string
+  isProcessing: boolean
+  error?: any
+  output?: WorkerTaskImportOutput
+}
+
+interface WorkerTaskImportOutput {
+  doc: Record<string, any>
+  warnings: any[]
+  proposedMetadata: ProposedMetadata
+  pandocErrorOutput: string
 }
 
 interface PubsManyResponse {

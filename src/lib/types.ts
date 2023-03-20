@@ -311,3 +311,21 @@ type ExternalLink = {
 }
 
 type Child = PageOrCollectionLink | ExternalLink
+
+export type ImportPayload = {
+  sourceFiles: SourceFile[]
+  importerFlags: ImporterFlags
+  useNewImporter: boolean
+}
+
+type ImporterFlags = {}
+
+export type SourceFile = {
+  id: number
+  state: string
+  clientPath: string
+  loaded: number
+  total: number
+  label?: string
+  assetKey: string
+}
