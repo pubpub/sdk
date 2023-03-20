@@ -9,6 +9,13 @@ export interface PubDataViewData extends Pub {
     attrs: Record<string, unknown>
     content: any[]
   }
+  draft: {
+    id: string
+    latestKeyAt: string
+    firebasePath: string
+    createdAt: string
+    updatedAt: string
+  }
   initialDocKey: number
   historyData: {
     timestamps: { [key: string]: number }
