@@ -348,12 +348,8 @@ export class PubPub {
 
       const firebaseToken = pageData.pubData.firebaseToken
       const firebasePath = pageData.pubData.draft.firebasePath
-      console.log({
-        firebaseToken,
-        firebasePath,
-      })
-
       const firebaseRef = await initFirebase(firebasePath, firebaseToken)
+
       console.log({ firebaseRef })
       if (!firebaseRef) {
         throw new Error('Could not connect to firebase')
@@ -366,7 +362,9 @@ export class PubPub {
       const docImport = await writeDocumentToPubDraft(
         firebaseRef,
         importedFiles.doc,
-        initialDocKey
+        {
+          initialDocKey,
+        }
       )
       console.log(
         `Succesfully imported ${filesToImport.length} files to ${pubUrl}`

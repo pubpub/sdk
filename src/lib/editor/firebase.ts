@@ -97,13 +97,13 @@ export const writeDocumentToPubDraft = async (
   document: Doc,
   {
     schema,
-    initalDocKey,
+    initialDocKey,
   }: {
     schema?: ReturnType<typeof buildSchema>
-    initalDocKey?: string
+    initialDocKey?: number
   } = {}
 ) => {
-  const key = initalDocKey ?? 0
+  const key = initialDocKey ? initialDocKey + 1 : 0
 
   const documentSchema = schema || buildSchema()
   const hydratedDocument = Node.fromJSON(documentSchema, document)
