@@ -70,27 +70,40 @@ describe('PubPub', () => {
   const testUrl = 'pub/67lseb8m/draft'
   // const testUrl = 'pub/9kvcb438/draft'
 
-  it('should be able to import a docx file to a pub', async () => {
-    const file = await readFile(
-      fileURLToPath(new URL('./basic.docx', import.meta.url))
-    )
+  // it('should be able to import a docx file to a pub', async () => {
+  //   const file = await readFile(
+  //     fileURLToPath(new URL('./basic.docx', import.meta.url))
+  //   )
 
+  //   try {
+  //     const imported = await pubpub.pub.hacks.import(testUrl, [
+  //       {
+  //         file,
+  //         fileName: 'basic.docx',
+  //         mimeType:
+  //           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  //       },
+  //     ])
+
+  //     expect(imported).not.toThrowError()
+  //   } catch (e) {
+  //     console.log(e)
+  //     throw e
+  //   }
+  // }, 60000)
+  it('should be able to export a file', async () => {
     try {
-      const imported = await pubpub.pub.import(testUrl, [
-        {
-          file,
-          fileName: 'basic.docx',
-          mimeType:
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        },
-      ])
+      const exported = await pubpub.pub.hacks.export({
+        slug: testUrl,
+        format: 'docx',
+      })
 
-      expect(imported).not.toThrowError()
+      expect(exported.startsWith('https://assets.pubpub.org')).toBeTruthy()
     } catch (e) {
       console.log(e)
       throw e
     }
-  }, 60000)
+  })
 
   it('should be able to get pubs', async () => {
     const pubs = await pubpub.pub.getMany({

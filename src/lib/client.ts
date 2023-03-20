@@ -16,6 +16,7 @@ import {
   CommunityPutResponse,
   SourceFile,
   ImportPayload,
+  ExportFormats,
 } from './types'
 import { InitialData } from './initialData'
 import { Collection, CollectionScopeData } from './collectionData'
@@ -373,6 +374,51 @@ export class PubPub {
       return docImport
     }
 
+    const exportPub = async ({
+      slug,
+      id,
+      format,
+    }: ({ slug: string; id?: undefined } | { slug?: undefined; id: string }) & {
+      format: ExportFormats
+    }) => {
+      if (!slug && id) {
+        const pub = await get(id)
+        if (format === 'formatted' && pub.downloads[0]?.type === 'formatted') {
+          return pub.downloads[0].url
+        }
+        slug = pub.slug
+      }
+
+      if (!slug) {
+        throw new Error('No slug or id provided')
+      }
+
+      const viewData = await this.hacks.getPageData(slug, 'view-data')
+
+      const {
+        initialDocKey,
+        downloads,
+        id: pubId,
+        initialDoc,
+      } = viewData.pubData
+
+      if (format === 'json') {
+        return initialDoc
+      }
+
+      if (format === 'formatted' && downloads?.[0]?.type === 'formatted') {
+        return downloads[0].url
+      }
+
+      const { url } = await this.exportPub({
+        historyKey: initialDocKey,
+        format,
+        pubId,
+      })
+
+      return url
+    }
+
     return {
       create,
       modify: put,
@@ -381,7 +427,10 @@ export class PubPub {
       getMany: this.getManyPubs,
       attributions: this.makeAttributionsOperations<'pub'>('pub'),
       release,
-      import: importPub,
+      hacks: {
+        import: importPub,
+        export: exportPub,
+      },
     }
   }
 
@@ -944,6 +993,41 @@ export class PubPub {
     return await this.importFiles(labeledFiles)
   }
 
+  private exportPub = async ({
+    pubId,
+    format,
+    historyKey,
+  }: {
+    pubId: string
+    format: ExportFormats
+    historyKey: number
+  }) => {
+    const payload: ExportPayload = {
+      communityId: this.communityId,
+      pubId,
+      format,
+      historyKey,
+    }
+
+    const workerTaskId = await this.authedRequest(`export`, 'POST', payload)
+
+    if (typeof workerTaskId !== 'string') {
+      /**
+       * If its cached, pubpub just immediately returns the url
+       */
+      if (!workerTaskId.url) {
+        console.log({ workerTaskId })
+        throw new Error('Worker task id is not a string')
+      }
+
+      return workerTaskId as WorkerTaskExportOutput
+    }
+
+    return (await this.waitForWorkerTask(
+      workerTaskId
+    )) as WorkerTaskExportOutput
+  }
+
   private importFiles = async (sourceFiles: SourceFile[]) => {
     const payload: ImportPayload = {
       importerFlags: {},
@@ -957,14 +1041,16 @@ export class PubPub {
       throw new Error('Worker task id is not a string')
     }
 
-    return await this.waitForImportWorkerTask(workerTaskId)
+    return (await this.waitForWorkerTask(
+      workerTaskId
+    )) as WorkerTaskImportOutput
   }
 
   /**
    * Pings workertask endpoint until every second until the task is complete
    */
-  private waitForImportWorkerTask = async (workerTaskId: string) => {
-    const poll = async (): Promise<WorkerTaskImportOutput> => {
+  private waitForWorkerTask = async (workerTaskId: string) => {
+    const poll = async (): Promise<any> => {
       const task = (await this.authedRequest(
         `workerTasks?workerTaskId=${workerTaskId}`,
         'GET'
@@ -987,11 +1073,22 @@ export class PubPub {
   }
 }
 
+export type ExportPayload = {
+  communityId: string
+  format: ExportFormats
+  historyKey: number
+  pubId: string
+}
+
 type WorkerTaskResponse = {
   id: string
   isProcessing: boolean
   error?: any
-  output?: WorkerTaskImportOutput
+  output?: unknown
+}
+
+interface WorkerTaskExportOutput {
+  url: string
 }
 
 interface WorkerTaskImportOutput {

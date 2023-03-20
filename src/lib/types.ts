@@ -1,3 +1,5 @@
+import { ExportPayload } from './client'
+
 export type Chapter = {
   chapter: number
   id: string
@@ -23,30 +25,30 @@ export type Pub = {
   draftId: string
   updatedAt: string
   createdAt: string
-  description?: any
-  avatar?: any
-  useHeaderImage?: any
-  firstPublishedAt?: any
-  lastPublishedAt?: any
-  draftEditHash?: any
-  draftViewHash?: any
-  doi?: any
+  description?: string
+  avatar?: string
+  useHeaderImage?: boolean
+  firstPublishedAt?: string
+  lastPublishedAt?: string
+  draftEditHash?: string
+  draftViewHash?: string
+  doi?: string
   labels?: any
-  isCommunityAdminManaged?: any
+  isCommunityAdminManaged?: boolean
   communityAdminDraftPermissions: string
   draftPermissions: string
   review?: any
-  downloads?: any
+  downloads?: Downloads[]
   headerBackgroundType: string
   headerBackgroundImage?: any
-  customPublishedAt?: any
+  customPublishedAt?: string
   metadata?: any
-  crossrefDepositRecordId?: any
+  crossrefDepositRecordId?: string
   nodeLabels: NodeLabels
   scopeSummaryId?: any
-  htmlTitle?: any
+  htmlTitle?: string
   facetsMigratedAt?: any
-  htmlDescription?: any
+  htmlDescription?: string
 }
 
 export type PubAttributionsPostPayload = {
@@ -118,6 +120,25 @@ export type PubAttributionsPutPayload = {
   communityId: string
   pubId: string
 }
+export type Downloads = {
+  url: string
+  type: ExportFormats
+  branchId?: string
+  createdAt: string
+}
+
+export type ExportFormats =
+  | 'docx'
+  | 'html'
+  | 'pdf'
+  | 'md'
+  | 'odt'
+  | 'text'
+  | 'txt'
+  | 'epub'
+  | 'jats'
+  | 'formatted'
+  | 'json'
 
 export type PubPutPayload = {
   pubId: string
