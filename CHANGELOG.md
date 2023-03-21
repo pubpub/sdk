@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.3.0
+
+### Minor Changes
+
+- Change some methods to private as to avoid abuse, make client Node only due to CORS issues, and make managing uploads easier.
+
 ## 0.2.0
 
 ### Minor Changes
