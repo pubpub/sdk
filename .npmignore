@@ -10,3 +10,8 @@ out
 .prettierrc
 .env
 .env.example
+web
+.npmignore
+.npmrc
+.prettierignore
+prettier.config.cjs
