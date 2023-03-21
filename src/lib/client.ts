@@ -17,6 +17,18 @@ import {
   SourceFile,
   ImportPayload,
   ExportFormats,
+  allowedMimeTypes,
+  AttributionsPayload,
+  ExportPayload,
+  FacetsProps,
+  GetManyOptions,
+  Pub,
+  PubsManyResponse,
+  UpdateCollectionsMetaData,
+  UploadPolicyResponse,
+  WorkerTaskExportOutput,
+  WorkerTaskImportOutput,
+  WorkerTaskResponse,
 } from './types'
 import { InitialData } from './initialData'
 import { Collection, CollectionScopeData } from './collectionData'
@@ -31,7 +43,6 @@ import { ResourceWarning } from './editor/types'
 import { createReadStream, ReadStream } from 'fs'
 import FormData from 'form-data'
 import { stat } from 'fs/promises'
-// create a http client that can make authenticated requests to an api by setting a cookie
 
 /**
  * PubPub API client
@@ -883,7 +894,6 @@ export class PubPub {
     formData.append('signature', policy.signature)
     formData.append('Content-Type', mimeType)
     formData.append('success_action_status', '200')
-    // formData.append('file', createReadStream(filePath), fileName)
     formData.append('file', blb, fileName)
 
     try {
@@ -1144,330 +1154,4 @@ export class PubPub {
 
     return poll()
   }
-}
-
-export type ExportPayload = {
-  communityId: string
-  format: ExportFormats
-  historyKey: number
-  pubId: string
-}
-
-type WorkerTaskResponse = {
-  id: string
-  isProcessing: boolean
-  error?: any
-  output?: unknown
-}
-
-interface WorkerTaskExportOutput {
-  url: string
-}
-
-interface WorkerTaskImportOutput {
-  doc: any
-  warnings: ResourceWarning[]
-  proposedMetadata: ProposedMetadata
-  pandocErrorOutput: string
-}
-
-interface PubsManyResponse {
-  pubIds: string[]
-  pubsById: PubsById
-  loadedAllPubs: boolean
-}
-
-interface PubsById {
-  [key: string]: Pub
-}
-
-interface Pub {
-  id: string
-  slug: string
-  title: string
-  htmlTitle?: string
-  description?: string
-  htmlDescription?: string
-  avatar: string
-  customPublishedAt?: string
-  doi: string
-  labels?: any
-  downloads: Download[]
-  metadata?: Metadata
-  viewHash?: string
-  editHash?: string
-  reviewHash?: string
-  commentHash?: string
-  draftId: string
-  communityId: string
-  createdAt: string
-  updatedAt: string
-  crossrefDepositRecordId?: string
-  scopeSummaryId: string
-  members: Member[]
-  draft: Draft
-  crossrefDepositRecord?: any
-  scopeSummary: ScopeSummary
-  outboundEdges: any[]
-  reviews: any[]
-  inboundEdges: any[]
-  releases: Release[]
-  attributions: Attribution[]
-  collectionPubs: CollectionPub[]
-  isRelease: boolean
-  releaseNumber?: any
-}
-
-interface CollectionPub {
-  id: string
-  pubId: string
-  collectionId: string
-  contextHint?: string
-  rank: string
-  pubRank: string
-  createdAt: string
-  updatedAt: string
-  collection: Collection
-}
-
-interface Metadata {
-  doi?: string
-  url?: string
-  issue?: string
-  volume?: string
-  electronicIssn?: string
-  publicationDate?: string
-  printPublicationDate?: string
-}
-
-interface Attribution {
-  id: string
-  name: string
-  avatar?: any
-  title?: any
-  order: number
-  isAuthor: boolean
-  roles?: any
-  affiliation?: any
-  orcid?: any
-  userId?: any
-  pubId: string
-  createdAt: string
-  updatedAt: string
-  user: User
-}
-
-interface User {
-  isShadowUser: boolean
-  id: string
-  initials: string
-  fullName: string
-  firstName: string
-  lastName: string
-  avatar?: any
-  title?: any
-  orcid?: any
-}
-
-interface Release {
-  id: string
-  noteContent?: NoteContent
-  noteText?: string
-  pubId: string
-  userId: string
-  docId: string
-  historyKey: number
-  historyKeyMissing: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-interface NoteContent {
-  type: string
-  attrs: Attrs
-  content: Content2[]
-}
-
-interface Content2 {
-  type: string
-  attrs: Attrs2
-  content: Content[]
-}
-
-interface Content {
-  text: string
-  type: string
-}
-
-interface Attrs2 {
-  id: string
-  rtl?: any
-  class?: any
-  textAlign?: any
-}
-
-interface Attrs {
-  meta: Meta
-}
-
-interface Meta {}
-
-interface ScopeSummary {
-  id: string
-  collections: number
-  pubs: number
-  discussions: number
-  reviews: number
-  submissions: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface Draft {
-  id: string
-  latestKeyAt: string
-  firebasePath: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface Member {
-  id: string
-  permissions: string
-  isOwner: boolean
-  subscribedToActivityDigest: boolean
-  userId: string
-  pubId: string
-  collectionId?: any
-  communityId?: any
-  organizationId?: any
-  createdAt: string
-  updatedAt: string
-}
-
-interface Download {
-  url: string
-  type: string
-  createdAt: string
-}
-
-export type AttributionsPayload = {
-  pubId: string
-  order?: number
-  roles: Roles
-  affiliation?: string
-  isAuthor?: boolean
-} & (
-  | {
-      userId: string
-      name?: undefined
-      orcid?: undefined
-    }
-  | {
-      name: string
-      userId?: undefined
-      orcid?: string
-    }
-)
-
-export type GetManyOptions = {
-  excludeCollectionIds?: string[]
-  ordering?: {
-    field: 'updatedDate' | 'creationDate' | 'collectionRank' | 'title'
-    direction: 'ASC' | 'DESC'
-  }
-  limit?: number
-  offset?: number
-} & (
-  | { collectionIds: string[]; pubIds?: undefined[] }
-  | { pubIds: string[]; collectionIds?: undefined[] }
-  | { pubIds?: undefined[]; collectionIds?: undefined[] }
-)
-
-export interface UpdateCollectionPayload {
-  metadata: Metadata
-  id: string
-  communityId: string
-}
-
-interface CommonCollectionsMetadata {
-  slug?: string
-  title?: string
-}
-
-export interface UpdateCollectionsBookMetadata {
-  doi?: string
-  url?: string
-  isbn?: string
-  copyrightYear?: string
-  publicationDate?: string
-  edition?: string
-  issue?: undefined
-  volume?: undefined
-}
-
-export interface UpdateCollectionsIssueMetadata {
-  doi?: string
-  url?: string
-  issn?: string
-  copyrightYear?: string
-  publicationDate?: string
-  issue?: string
-  volume?: string
-  edition?: undefined
-  isbn?: undefined
-}
-
-export interface UpdateCollectionsConferenceMetadata {
-  doi?: string
-  url?: string
-
-  issn?: undefined
-  copyrightYear?: undefined
-  publicationDate?: undefined
-  issue?: undefined
-  volume?: undefined
-  edition?: undefined
-  isbn?: undefined
-}
-
-export type UpdateCollectionsMetaData = CommonCollectionsMetadata &
-  (
-    | UpdateCollectionsBookMetadata
-    | UpdateCollectionsIssueMetadata
-    | UpdateCollectionsConferenceMetadata
-  )
-
-export interface UploadPolicyResponse {
-  acl: string
-  awsAccessKeyId: string
-  policy: string
-  signature: string
-  bucket: string
-}
-
-export const allowedMimeTypes = [
-  'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/json',
-  'image/png',
-  'image/jpeg',
-  'image/gif',
-] as const
-
-export interface FacetsProps {
-  license?: License
-  nodeLabels?: NodeLabels
-  pubEdgeDisplay?: PubEdgeDisplay
-  pubHeaderTheme?: PubHeaderTheme
-  citationStyle?: CitationStyle
-}
-
-type GetPageDataOverload = {
-  (page: string, data: 'initial-data'): Promise<InitialData>
-  (page: string, data: 'view-data'): Promise<PubViewData>
-
-  (page: string, data: 'view-data' | 'initial-data'):
-    | Promise<PubViewData>
-    | Promise<InitialData>
 }
