@@ -28,6 +28,9 @@ import { ProposedMetadata, writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
 import { ResourceWarning } from './editor/types'
+import { createReadStream, ReadStream } from 'fs'
+import FormData from 'form-data'
+import { stat } from 'fs/promises'
 // create a http client that can make authenticated requests to an api by setting a cookie
 
 /**
@@ -242,6 +245,30 @@ export class PubPub {
       pubHeaderTheme?: PubHeaderTheme
       citationStyle?: CitationStyle
     }) => {
+      const uploadedDownloads = await Promise.all(
+        (downloads ?? ([] as NonNullable<PubPutPayload['downloads']>)).map(
+          async (download) => {
+            if ('url' in download) {
+              return download
+            }
+
+            const { fileOrPath, fileName, mimeType } = download
+
+            const uploadedFile = await this.uploadFile(
+              fileOrPath,
+              fileName,
+              mimeType
+            )
+
+            return {
+              url: uploadedFile.url,
+              type: 'formatted',
+              createdAt: new Date().toISOString(),
+            }
+          }
+        )
+      )
+
       const facetsPayload: FacetsPayload = {
         facets: {
           License: license ?? {},
@@ -264,7 +291,7 @@ export class PubPub {
         avatar,
         slug,
         customPublishedAt,
-        downloads,
+        downloads: uploadedDownloads.length ? uploadedDownloads : undefined,
         htmlTitle,
       }
 
@@ -334,7 +361,7 @@ export class PubPub {
     const importPub = async (
       pubUrl: string,
       filesToImport: {
-        file: Blob | Buffer | File
+        file: Blob | Buffer | File | string
         fileName: string
         mimeType: (typeof allowedMimeTypes)[number]
       }[]
@@ -351,7 +378,6 @@ export class PubPub {
       const firebasePath = pageData.pubData.draft.firebasePath
       const firebaseRef = await initFirebase(firebasePath, firebaseToken)
 
-      console.log({ firebaseRef })
       if (!firebaseRef) {
         throw new Error('Could not connect to firebase')
       }
@@ -469,7 +495,11 @@ export class PubPub {
       const communityData = await getPageData('dash/overview')
       return communityData?.communityData
     }
-
+    /**
+     * The only way I currently know to get collections is to go to the dashboard and scrape the data from there
+     *
+     * Very unreliable, could break at any time, plus very slow.
+     */
     const getCollections = async () => {
       const communityData = await getCommunityData()
 
@@ -505,14 +535,13 @@ export class PubPub {
       return collection
     }
 
-    return {
+    /**
+     * @namespace
+     * @borrows getCollections as getCollections
+     */
+    const hacks = {
       getPageData,
       getCommunityData,
-      /**
-       * The only way I currently know to get collections is to go to the dashboard and scrape the data from there
-       *
-       * Very unreliable, could break at any time, plus very slow.
-       */
       getCollections,
       getCollection,
       /**
@@ -522,6 +551,8 @@ export class PubPub {
        */
       getFullCollectionById_SLOW,
     }
+
+    return hacks
   }
 
   /**
@@ -533,6 +564,9 @@ export class PubPub {
   hacks = this.makeHacks()
 
   private makeCollectionOperations = () => {
+    /**
+     * Create a new collection
+     */
     const create = async ({
       title,
       kind,
@@ -646,7 +680,10 @@ export class PubPub {
       return response
     }
 
-    return {
+    /**
+     * @borrows this.hacks as hacks
+     */
+    const collection = {
       create,
       modify,
       addPub,
@@ -670,6 +707,7 @@ export class PubPub {
         getByIdSlow: this.hacks.getFullCollectionById_SLOW,
       },
     }
+    return collection
   }
 
   collection = this.makeCollectionOperations()
@@ -678,6 +716,7 @@ export class PubPub {
     type: T
   ) {
     const path = type === 'pub' ? 'pubAttributions' : 'collectionAttributions'
+
     const getAttributions = async (id: string) => {
       const manyPubs = await this.getManyPubs({ pubIds: [id] })
 
@@ -758,6 +797,9 @@ export class PubPub {
     return {
       ...(type === 'pub' ? { get: getAttributions } : {}),
       create: post,
+      /**
+       * @inheritdoc put
+       */
       modify: put,
       remove: del,
     } as T extends 'pub'
@@ -795,9 +837,12 @@ export class PubPub {
    * const { url } = await pubpub.uploadFile(pdfBlob, 'file.pdf', 'application/pdf')
    * ```
    *
+   * @since 0.3.0 private, allows for passing strings
+   *
+   * This method has been made private to avoid abuse of the upload feature.
    */
-  uploadFile = async (
-    file: Blob | Buffer | File,
+  private uploadFile = async (
+    fileOrPath: Blob | Buffer | File | string,
     fileName: string,
     mimeType: (typeof allowedMimeTypes)[number]
   ) => {
@@ -811,10 +856,19 @@ export class PubPub {
       )
     }
 
-    const blb =
-      file instanceof Blob ? file : new Blob([file], { type: mimeType })
+    const file =
+      typeof fileOrPath === 'string' ? createReadStream(fileOrPath) : fileOrPath
+    console.log(file)
 
-    const size = blb.size
+    const blb =
+      file instanceof ReadStream || file instanceof Blob
+        ? file
+        : new Blob([file], { type: mimeType })
+
+    const size =
+      blb instanceof ReadStream
+        ? (await stat(fileOrPath as string))?.size
+        : blb.size
 
     const policy = await this.uploadPolicy(mimeType)
 
@@ -850,7 +904,10 @@ export class PubPub {
     }
   }
 
-  uploadPolicy = async (
+  /**
+   * Returns a signed policy for uploading a file to PubPub.
+   */
+  private uploadPolicy = async (
     mimeType: (typeof allowedMimeTypes)[number]
   ): Promise<UploadPolicyResponse> => {
     // mimettypes for pdf, docx, json, png, jpg, gif
@@ -865,7 +922,10 @@ export class PubPub {
     return response as UploadPolicyResponse
   }
 
-  makeCommuntiyOperations = () => {
+  /**
+   * Constructs the `PubPub.community` methods
+   */
+  private makeCommuntiyOperations = () => {
     const put = async ({
       pubHeaderTheme,
       license,
@@ -952,9 +1012,14 @@ export class PubPub {
     }
   }
 
-  importFull = async (
+  community = this.makeCommuntiyOperations()
+
+  /**
+   * More complete import function thta also takes care of properly uploading and labeling all files.
+   */
+  private importFull = async (
     files: {
-      file: Blob | Buffer | File
+      file: Blob | Buffer | File | string
       fileName: string
       mimeType: (typeof allowedMimeTypes)[number]
     }[]
@@ -993,6 +1058,9 @@ export class PubPub {
     return await this.importFiles(labeledFiles)
   }
 
+  /**
+   * Basic export function, equivalent to the `/api/export` endpoint
+   */
   private exportPub = async ({
     pubId,
     format,
@@ -1015,6 +1083,7 @@ export class PubPub {
       /**
        * If its cached, pubpub just immediately returns the url
        */
+      console.log(workerTaskId)
       if (!workerTaskId.url) {
         console.log({ workerTaskId })
         throw new Error('Worker task id is not a string')
@@ -1028,6 +1097,9 @@ export class PubPub {
     )) as WorkerTaskExportOutput
   }
 
+  /**
+   * Basic import function, equivalent to the `/api/import` endpoint
+   */
   private importFiles = async (sourceFiles: SourceFile[]) => {
     const payload: ImportPayload = {
       importerFlags: {},
@@ -1051,6 +1123,7 @@ export class PubPub {
    */
   private waitForWorkerTask = async (workerTaskId: string) => {
     const poll = async (): Promise<any> => {
+      console.log(`Polling for ${workerTaskId}`)
       const task = (await this.authedRequest(
         `workerTasks?workerTaskId=${workerTaskId}`,
         'GET'

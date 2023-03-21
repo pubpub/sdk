@@ -71,14 +71,14 @@ describe('PubPub', () => {
   // const testUrl = 'pub/9kvcb438/draft'
 
   // it('should be able to import a docx file to a pub', async () => {
-  //   const file = await readFile(
-  //     fileURLToPath(new URL('./basic.docx', import.meta.url))
-  //   )
+  //   // const file = await readFile(
+  //   //   fileURLToPath(new URL('./basic.docx', import.meta.url))
+  //   // )
 
   //   try {
   //     const imported = await pubpub.pub.hacks.import(testUrl, [
   //       {
-  //         file,
+  //         file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
   //         fileName: 'basic.docx',
   //         mimeType:
   //           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/pubpub-client.svg)](https://www.npmjs.com/package/pubpub-client)
 ![GitHub license](https://img.shields.io/github/license/tefkah/pubpub-client)
 
-Unofficial Node/Browser Client for [PubPub](https://pubpub.org/).
+Unofficial Node Client for [PubPub](https://pubpub.org/).
 
 > **Warning**
 > This is not an official Client and is not supported by the PubPub team.
@@ -115,6 +115,10 @@ pnpm run publish
 ### How do I get the ID of my community/page/collection?
 
 You can use the [PubPub ID Finder](https://pubpub.tefkah.com/) to find the ID of a community, page, or collection.
+
+### Can I run this in the browser?
+
+While the SDK was designed to also be run in the browser, I realized that PubPub does not send CORS headers. This means that you can't use the SDK in the browser, sadly.
 
 ## License
 

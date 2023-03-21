@@ -1,4 +1,4 @@
-import { ExportPayload } from './client'
+import { allowedMimeTypes, ExportPayload } from './client'
 
 export type Chapter = {
   chapter: number
@@ -152,17 +152,29 @@ export type PubPutPayload = {
    * Links to files that should be added to the pub
    *
    * You can directly link to already existing files,
-   * or you can upload new files first using `PubPub.uploadFile`
+   * or you can pass the necessary information to upload a new file
+   * and we will do it for you.
    *
+   * You can only upload pdf files
    */
-  downloads?: FilePut[]
+  downloads?: (
+    | FilePut
+    | {
+        /**
+         * You are required to pass the mimeType to double check that you are uploading a pdf file
+         */
+        mimeType: 'application/pdf'
+        fileOrPath: string | Buffer | Blob | File
+        fileName: string
+      }
+  )[]
   communityId?: string
 }
 
 type FilePut = {
   type: 'formatted'
   url: string
-  createdAt: string
+  createdAt?: string
 }
 
 export type FacetsPayload = {
