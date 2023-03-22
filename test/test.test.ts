@@ -160,8 +160,7 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to modify a pub', async () => {
-    const modded = await pubpub.pub.modify({
-      pubId: testId,
+    const modded = await pubpub.pub.modify(testId, {
       citationStyle: {
         citationStyle: 'apa-7',
         inlineCitationStyle: 'author',

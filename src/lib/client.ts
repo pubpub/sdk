@@ -176,6 +176,7 @@ export class PubPub {
     })
     return response
   }
+
   private makePageOperations = () => {
     const create = async ({
       title,
@@ -235,27 +236,29 @@ export class PubPub {
       return response
     }
 
-    const put = async ({
-      pubId,
-      title,
-      description,
-      avatar,
-      slug,
-      customPublishedAt,
-      downloads,
-      htmlTitle,
-      license,
-      nodeLabels,
-      pubEdgeDisplay,
-      pubHeaderTheme,
-      citationStyle,
-    }: Omit<PubPutPayload, 'communityId'> & {
-      license?: License
-      nodeLabels?: NodeLabels
-      pubEdgeDisplay?: PubEdgeDisplay
-      pubHeaderTheme?: PubHeaderTheme
-      citationStyle?: CitationStyle
-    }) => {
+    const put = async (
+      pubId: string,
+      {
+        title,
+        description,
+        avatar,
+        slug,
+        customPublishedAt,
+        downloads,
+        htmlTitle,
+        license,
+        nodeLabels,
+        pubEdgeDisplay,
+        pubHeaderTheme,
+        citationStyle,
+      }: Omit<PubPutPayload, 'communityId' | 'pubId'> & {
+        license?: License
+        nodeLabels?: NodeLabels
+        pubEdgeDisplay?: PubEdgeDisplay
+        pubHeaderTheme?: PubHeaderTheme
+        citationStyle?: CitationStyle
+      }
+    ) => {
       const uploadedDownloads = await Promise.all(
         (downloads ?? ([] as NonNullable<PubPutPayload['downloads']>)).map(
           async (download) => {
@@ -354,7 +357,7 @@ export class PubPub {
       }: {
         noteText?: string
         noteContent?: string
-      }
+      } = {}
     ) => {
       const response = await this.authedRequest(`releases`, 'POST', {
         pubId,
@@ -414,13 +417,16 @@ export class PubPub {
 
     const exportPub = async ({
       slug,
-      id,
+      pubId,
       format,
-    }: ({ slug: string; id?: undefined } | { slug?: undefined; id: string }) & {
+    }: (
+      | { slug: string; pubId?: undefined }
+      | { slug?: undefined; pubId: string }
+    ) & {
       format: ExportFormats
     }) => {
-      if (!slug && id) {
-        const pub = await get(id)
+      if (!slug && pubId) {
+        const pub = await get(pubId)
         if (format === 'formatted' && pub.downloads[0]?.type === 'formatted') {
           return pub.downloads[0].url
         }
@@ -433,12 +439,7 @@ export class PubPub {
 
       const viewData = await this.hacks.getPageData(slug, 'view-data')
 
-      const {
-        initialDocKey,
-        downloads,
-        id: pubId,
-        initialDoc,
-      } = viewData.pubData
+      const { initialDocKey, downloads, id, initialDoc } = viewData.pubData
 
       if (format === 'json') {
         return initialDoc
@@ -451,7 +452,7 @@ export class PubPub {
       const { url } = await this.exportPub({
         historyKey: initialDocKey,
         format,
-        pubId,
+        pubId: pubId ?? id,
       })
 
       return url
