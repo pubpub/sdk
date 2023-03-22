@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.3.2
+
+### Patch Changes
+
+- Make API more consistent wrt requiring ids
+
 ## 0.3.1
 
 ### Patch Changes
