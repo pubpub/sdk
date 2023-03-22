@@ -170,7 +170,7 @@ export class PubPub {
   }
 
   async updateFacets(scope: Scope, facets: Facets) {
-    const response = await this.authedRequest(`facets`, 'PUT', {
+    const response = await this.authedRequest(`facets`, 'POST', {
       scope,
       facets,
     })
@@ -289,7 +289,7 @@ export class PubPub {
           CitationStyle: citationStyle ?? {},
         },
         scope: {
-          id: 'pubId',
+          id: pubId,
           kind: 'pub',
         },
       }
@@ -325,7 +325,8 @@ export class PubPub {
           facetsPayload.scope,
           facetsPayload.facets
         )
-        response.facets = facets as typeof facetsPayload.facets
+        // facets does not return the facets, so we just set them if nothing went wrong
+        response.facets = facetsPayload.facets //facets as typeof facetsPayload.facets
       }
       return response
     }
@@ -660,13 +661,13 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        const facetsResponse = await this.authedRequest(
-          `facets`,
-          'POST',
-          facetsPayload
+        const facetsResponse = await this.updateFacets(
+          facetsPayload.scope,
+          facetsPayload.facets
         )
 
-        response.facets = facetsResponse as typeof facetsPayload.facets
+        // facets does not return the facets, so we just set them if nothing went wrong
+        response.facets = facetsPayload.facets //facetsResponse as typeof facetsPayload.facets
       }
 
       return response
@@ -1008,7 +1009,9 @@ export class PubPub {
           facetsPayload.scope,
           facetsPayload.facets
         )) as { facets: (typeof facetsPayload)['facets'] }
-        response = { ...response, facets: facetsResponse.facets }
+
+        // facets does not return the facets, so we just set them if nothing went wrong
+        response = { ...response, facets: facetsPayload.facets } //facetsResponse.facets }
       }
 
       return response

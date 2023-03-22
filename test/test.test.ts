@@ -68,6 +68,7 @@ describe('PubPub', () => {
   })
 
   const testUrl = 'pub/67lseb8m/draft'
+  const testId = '6925db79-440b-4f72-8ff6-3d7e81565e33'
   // const testUrl = 'pub/9kvcb438/draft'
 
   // it('should be able to import a docx file to a pub', async () => {
@@ -106,7 +107,7 @@ describe('PubPub', () => {
       console.log(e)
       throw e
     }
-  })
+  }, 10000)
 
   it('should be able to get pubs', async () => {
     const pubs = await pubpub.pub.getMany({
@@ -115,14 +116,14 @@ describe('PubPub', () => {
 
     const firstPubId = pubs.pubIds[0]
     expect(pubs.pubsById[firstPubId]).toHaveProperty('title')
-  })
+  }, 10000)
 
   it('should be able to get collections', async () => {
     const collections = await pubpub.collection.hacks.getMany()
 
     expect(collections).toBeInstanceOf(Array)
     expect(collections[0]).toHaveProperty('title')
-  })
+  }, 10000)
 
   it('should be able to find the attributions of a collection through annoying means', async () => {
     const collections = await pubpub.collection.hacks.getMany()
@@ -156,7 +157,21 @@ describe('PubPub', () => {
     expect(collectionWithAttributions).toHaveProperty('createdAt')
     expect(collectionWithAttributions).toHaveProperty('updatedAt')
     expect(collectionWithAttributions).toHaveProperty('crossrefDepositRecordId')
-  })
+  }, 10000)
+
+  it('should be able to modify a pub', async () => {
+    const modded = await pubpub.pub.modify({
+      pubId: testId,
+      citationStyle: {
+        citationStyle: 'apa-7',
+        inlineCitationStyle: 'author',
+      },
+      description: 'This is a test description',
+    })
+
+    console.log(modded)
+    expect(modded).toHaveProperty('description')
+  }, 10000)
 
   // it('should be able to get firebasetoken for a pub', async () => {
   //   const pageData = await pubpub.hacks.getPageData(testUrl, 'view-data')
