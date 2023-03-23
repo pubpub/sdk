@@ -1018,8 +1018,19 @@ export class PubPub {
       return response
     }
 
+    const css = async (css: string) => {
+      const response = await this.authedRequest('customScripts', 'POST', {
+        communityId: this.communityId,
+        type: 'css',
+        content: css,
+      })
+
+      return response
+    }
+
     return {
       modify: put,
+      css,
       hacks: {
         get: this.hacks.getCommunityData,
       },
