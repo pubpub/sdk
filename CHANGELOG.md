@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.4.0
+
+### Minor Changes
+
+- Correctly import files for both ESM and CJS
+
 ## 0.3.2
 
 ### Patch Changes
