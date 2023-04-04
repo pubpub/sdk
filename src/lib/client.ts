@@ -456,7 +456,6 @@ export class PubPub {
         format,
         pubId: pubId ?? id,
       })
-      console.log({ url })
 
       return url
     }
@@ -883,7 +882,6 @@ export class PubPub {
 
     const file =
       typeof fileOrPath === 'string' ? createReadStream(fileOrPath) : fileOrPath
-    console.log(file)
 
     const blb =
       file instanceof ReadStream || file instanceof Blob
@@ -923,7 +921,7 @@ export class PubPub {
         data: response.data,
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
       throw new Error('Upload failed')
     }
   }
@@ -1120,9 +1118,7 @@ export class PubPub {
       /**
        * If its cached, pubpub just immediately returns the url
        */
-      console.log(workerTaskId)
       if (workerTaskId.url) {
-        console.log({ workerTaskId })
         // throw new Error('Worker task id is not a string')
         return workerTaskId as WorkerTaskExportOutput
       }
@@ -1151,7 +1147,7 @@ export class PubPub {
     const workerTaskId = await this.authedRequest(`import`, 'POST', payload)
 
     if (typeof workerTaskId !== 'string') {
-      console.log({ workerTaskId })
+      console.error(workerTaskId)
       throw new Error('Worker task id is not a string')
     }
 
@@ -1171,13 +1167,12 @@ export class PubPub {
         'GET'
       )) as WorkerTaskResponse
 
-      console.log(task)
-
       if (!task.isProcessing && task.output) {
         return task.output
       }
 
       if (task.error) {
+        console.error(task.error)
         throw new Error(task.error)
       }
 

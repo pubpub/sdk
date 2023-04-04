@@ -173,20 +173,6 @@ describe('PubPub', () => {
     expect(modded).toHaveProperty('description')
   }, 10000)
 
-  // it('should be able to get firebasetoken for a pub', async () => {
-  //   const pageData = await pubpub.hacks.getPageData(testUrl, 'view-data')
-
-  //   const firebaseToken = pageData.pubData.firebaseToken
-  //   const firebasePath = pageData.pubData.draft.firebasePath
-
-  //   expect(firebaseToken.length).toBeGreaterThan(0)
-
-  //   const firebaseRef = await initFirebase(firebasePath, firebaseToken)
-  //   console.log(firebaseRef?.child('changes'))
-
-  //   expect(firebaseRef).not.toBeNull()
-  // })
-
   afterAll(async () => {
     pubpub && (await pubpub.logout())
   })
