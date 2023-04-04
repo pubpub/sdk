@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.5.0
+
+### Minor Changes
+
+- Change firebase dependency and improve how exporting works
+
 ## 0.4.0
 
 ### Minor Changes
