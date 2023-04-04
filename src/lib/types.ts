@@ -563,7 +563,7 @@ type Download = {
 export type AttributionsPayload = {
   pubId: string
   order?: number
-  roles: Roles
+  roles: Roles[]
   affiliation?: string
   isAuthor?: boolean
 } & (

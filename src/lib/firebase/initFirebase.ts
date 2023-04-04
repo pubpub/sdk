@@ -1,27 +1,28 @@
-import firebase from 'firebase/app'
-import 'firebase/auth'
-import 'firebase/database'
+import { initializeApp, FirebaseApp } from 'firebase/app'
+import { getAuth, signInWithCustomToken, signOut } from 'firebase/auth'
+
+import { getDatabase, ref } from 'firebase/database'
 
 import { firebaseConfig } from './firebaseConfig'
 
 export const initFirebase = async (
   rootKey: string,
   authToken: string,
-  existingApp?: firebase.app.App
+  existingApp?: FirebaseApp
 ) => {
   const firebaseAppName = `App-${rootKey}`
   /* Use the existing Firebase App or initialize a new one */
   const firebaseApp =
-    existingApp || firebase.initializeApp(firebaseConfig, firebaseAppName)
+    existingApp || initializeApp(firebaseConfig, firebaseAppName)
 
-  const database = firebase.database(firebaseApp)
+  const database = getDatabase(firebaseApp)
 
   /* Authenticate with the server-generated token */
   try {
-    const auth = await firebase.auth(firebaseApp)
-    await auth.signOut()
-    await auth.signInWithCustomToken(authToken)
-    return database.ref(rootKey)
+    const auth = await getAuth(firebaseApp)
+    await signOut(auth)
+    await signInWithCustomToken(auth, authToken)
+    return ref(database, rootKey)
   } catch (err) {
     console.error('Error authenticating firebase', err)
     return null

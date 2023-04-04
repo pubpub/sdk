@@ -1,9 +1,7 @@
 import { describe, it, beforeAll, expect } from 'vitest'
-import { readFile, writeFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { PubPub } from '../src/lib/client'
 import { afterAll } from 'vitest'
-import { initFirebase } from '../src/lib/firebase/initFirebase'
 import { buildSchema } from '../src/lib/editor/schema'
 import { Node, Fragment, Slice } from 'prosemirror-model'
 import uuid from 'uuid'
@@ -67,37 +65,40 @@ describe('PubPub', () => {
     await pubpub.login(process.env.EMAIL ?? '', process.env.PASSWORD ?? '')
   })
 
-  const testUrl = 'pub/67lseb8m/draft'
-  const testId = '6925db79-440b-4f72-8ff6-3d7e81565e33'
+  const testUrl = 'pub/25f1ymdq/draft'
+  const testId = '10a6ef16-4d19-4e9f-93bf-0ae1a5e247bc'
   // const testUrl = 'pub/9kvcb438/draft'
 
-  // it('should be able to import a docx file to a pub', async () => {
-  //   // const file = await readFile(
-  //   //   fileURLToPath(new URL('./basic.docx', import.meta.url))
-  //   // )
+  it('should be able to import a docx file to a pub', async () => {
+    // const file = await readFile(
+    //   fileURLToPath(new URL('./basic.docx', import.meta.url))
+    // )
 
-  //   try {
-  //     const imported = await pubpub.pub.hacks.import(testUrl, [
-  //       {
-  //         file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
-  //         fileName: 'basic.docx',
-  //         mimeType:
-  //           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  //       },
-  //     ])
+    try {
+      const imported = await pubpub.pub.hacks.import(testUrl, [
+        {
+          file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
+          fileName: 'basic.docx',
+          mimeType:
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        },
+      ])
 
-  //     expect(imported).not.toThrowError()
-  //   } catch (e) {
-  //     console.log(e)
-  //     throw e
-  //   }
-  // }, 60000)
+      console.log({ imported })
+
+      expect(imported).toBeDefined()
+    } catch (e) {
+      console.log(e)
+      throw e
+    }
+  }, 60000)
   it('should be able to export a file', async () => {
     try {
       const exported = await pubpub.pub.hacks.export({
         slug: testUrl,
         format: 'docx',
       })
+      console.log({ exported })
 
       expect(
         typeof exported === 'string' &&

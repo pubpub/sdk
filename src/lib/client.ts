@@ -153,7 +153,8 @@ export class PubPub {
   }
 
   getPage = async (slug: string) => {
-    const response = await axios(`${this.communityUrl}/${slug}`, {
+    const bareSlug = slug.replace(this.communityUrl, '')?.replace(/^\//, '')
+    const response = await axios(`${this.communityUrl}/${bareSlug}`, {
       method: 'GET',
       headers: {
         Cookie: this.cookie || '',
@@ -374,7 +375,10 @@ export class PubPub {
      * Then sends the imported file to firebase
      */
     const importPub = async (
-      pubUrl: string,
+      /**
+       * The slug of the pub you want to import, including /draft
+       */
+      pubSlug: string,
       filesToImport: {
         file: Blob | Buffer | File | string
         fileName: string
@@ -383,7 +387,7 @@ export class PubPub {
     ) => {
       // if it doesnt end with /draft, add it
 
-      const testUrl = pubUrl.endsWith('/draft') ? pubUrl : `${pubUrl}/draft`
+      const testUrl = pubSlug.endsWith('/draft') ? pubSlug : `${pubSlug}/draft`
 
       const pageData = await this.hacks.getPageData(testUrl, 'view-data')
 
@@ -397,8 +401,6 @@ export class PubPub {
         throw new Error('Could not connect to firebase')
       }
 
-      console.log({ childs: firebaseRef.child('changes') })
-
       const importedFiles = await this.importFull(filesToImport)
 
       const docImport = await writeDocumentToPubDraft(
@@ -409,10 +411,10 @@ export class PubPub {
         }
       )
       console.log(
-        `Succesfully imported ${filesToImport.length} files to ${pubUrl}`
+        `Succesfully imported ${filesToImport.length} files to ${pubSlug}`
       )
 
-      return docImport
+      return { importedFiles }
     }
 
     const exportPub = async ({
@@ -454,6 +456,7 @@ export class PubPub {
         format,
         pubId: pubId ?? id,
       })
+      console.log({ url })
 
       return url
     }
@@ -477,10 +480,19 @@ export class PubPub {
 
   private makeHacks = () => {
     const getPageData = (async (
-      page: string,
+      /**
+       * The slug of the page
+       *
+       * This is the part after the community url
+       *
+       * @example /pub/pub-slug
+       *
+       * You can also use the full url, we will extract the slug
+       */
+      slug: string,
       data: 'initial-data' | 'view-data' = 'initial-data'
     ) => {
-      const response = await this.getPage(page)
+      const response = await this.getPage(slug)
 
       const unparsedCommunityData = response.match(
         new RegExp(`<script id="${data}" type="text\\/plain" data-json="(.*?)"`)
@@ -750,7 +762,7 @@ export class PubPub {
      * If you pass a name, it will find the attribution with that name and modify it
      */
     const put = async (
-      props: T extends Pub
+      props: T extends 'pub'
         ? AttributionsPayload
         : Omit<AttributionsPayload, 'name'>
     ) => {
@@ -779,7 +791,7 @@ export class PubPub {
     }
 
     const del = async (
-      props: T extends Pub
+      props: T extends 'pub'
         ? AttributionsPayload
         : Omit<AttributionsPayload, 'name'>
     ) => {
@@ -1102,19 +1114,24 @@ export class PubPub {
       historyKey,
     }
 
-    const workerTaskId = await this.authedRequest(`export`, 'POST', payload)
+    let workerTaskId = await this.authedRequest(`export`, 'POST', payload)
 
     if (typeof workerTaskId !== 'string') {
       /**
        * If its cached, pubpub just immediately returns the url
        */
       console.log(workerTaskId)
-      if (!workerTaskId.url) {
+      if (workerTaskId.url) {
         console.log({ workerTaskId })
+        // throw new Error('Worker task id is not a string')
+        return workerTaskId as WorkerTaskExportOutput
+      }
+
+      if (!('taskId' in workerTaskId)) {
         throw new Error('Worker task id is not a string')
       }
 
-      return workerTaskId as WorkerTaskExportOutput
+      workerTaskId = workerTaskId.taskId as string
     }
 
     return (await this.waitForWorkerTask(
@@ -1153,6 +1170,8 @@ export class PubPub {
         `workerTasks?workerTaskId=${workerTaskId}`,
         'GET'
       )) as WorkerTaskResponse
+
+      console.log(task)
 
       if (!task.isProcessing && task.output) {
         return task.output

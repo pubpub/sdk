@@ -6,7 +6,7 @@ import {
   // @ts-expect-error pubpub no typey
 } from 'prosemirror-compress-pubpub'
 import uuid from 'uuid'
-import firebase from 'firebase'
+import { DatabaseReference, child, set } from 'firebase/database'
 import { buildSchema } from './schema'
 
 import { CompressedChange, CompressedKeyable, ResourceWarning } from './types'
@@ -14,7 +14,7 @@ import { CompressedChange, CompressedKeyable, ResourceWarning } from './types'
 export const firebaseTimestamp = { '.sv': 'timestamp' }
 
 export const storeCheckpoint = async (
-  firebaseRef: firebase.database.Reference,
+  firebaseRef: DatabaseReference,
   doc: Node,
   keyNumber: number
 ) => {
@@ -24,9 +24,9 @@ export const storeCheckpoint = async (
     t: firebaseTimestamp,
   }
   await Promise.all([
-    firebaseRef.child(`checkpoints/${keyNumber}`).set(checkpoint),
-    firebaseRef.child('checkpoint').set(checkpoint),
-    firebaseRef.child(`checkpointMap/${keyNumber}`).set(firebaseTimestamp),
+    set(child(firebaseRef, `checkpoints/${keyNumber}`), checkpoint),
+    set(child(firebaseRef, 'checkpoint'), checkpoint),
+    set(child(firebaseRef, `checkpointMap/${keyNumber}`), firebaseTimestamp),
   ])
 }
 
@@ -57,10 +57,8 @@ export const createFirebaseChange = (
   }
 }
 
-export const getFirebaseConnectionMonitorRef = (
-  ref: firebase.database.Reference
-) => {
-  return ref.root.child('.info/connected')
+export const getFirebaseConnectionMonitorRef = (ref: DatabaseReference) => {
+  return child(ref.root, '.info/connected')
 }
 
 export type Doc = {
@@ -93,7 +91,7 @@ export type ProposedMetadata = {
 }
 
 export const writeDocumentToPubDraft = async (
-  draftRef: firebase.database.Reference,
+  draftRef: DatabaseReference,
   document: Doc,
   {
     schema,
@@ -110,5 +108,5 @@ export const writeDocumentToPubDraft = async (
   const documentSlice = new Slice(Fragment.from(hydratedDocument.content), 0, 0)
   const replaceStep = new ReplaceStep(0, 0, documentSlice)
   const change = createFirebaseChange([replaceStep], 'bulk-importer')
-  await draftRef.child('changes').child(key.toString()).set(change)
+  await set(child(child(draftRef, 'changes'), key.toString()), change)
 }
