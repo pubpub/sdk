@@ -96,16 +96,45 @@ export const writeDocumentToPubDraft = async (
   {
     schema,
     initialDocKey,
+    postProcessor,
   }: {
     schema?: ReturnType<typeof buildSchema>
     initialDocKey?: number
+    /**
+     * A function that takes the document and returns a new document.
+     *
+     * This allows you to do custom post-processing on the document to do things that the PubPub importer does not allow yet,
+     * e.g. setting captions on Figures from an imported Word document.
+     *
+     */
+    postProcessor?: (
+      doc: Fragment,
+      schema: ReturnType<typeof buildSchema>
+    ) => Fragment
   } = {}
 ) => {
   const key = initialDocKey ? initialDocKey + 1 : 0
 
   const documentSchema = schema || buildSchema()
   const hydratedDocument = Node.fromJSON(documentSchema, document)
-  const documentSlice = new Slice(Fragment.from(hydratedDocument.content), 0, 0)
+  let possiblyPostProcessedDocument: Fragment = hydratedDocument.content
+
+  if (postProcessor) {
+    try {
+      possiblyPostProcessedDocument = postProcessor(
+        hydratedDocument.content,
+        documentSchema
+      )
+    } catch (err) {
+      console.error('Error post-processing document', err)
+    }
+  }
+
+  const documentSlice = new Slice(
+    Fragment.from(possiblyPostProcessedDocument),
+    0,
+    0
+  )
   const replaceStep = new ReplaceStep(0, 0, documentSlice)
   const change = createFirebaseChange([replaceStep], 'bulk-importer')
   await set(child(child(draftRef, 'changes'), key.toString()), change)

@@ -39,10 +39,10 @@ import { PubViewData } from './viewData'
 import { ProposedMetadata, writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
-import { ResourceWarning } from './editor/types'
 import { createReadStream, ReadStream } from 'fs'
 import FormData from 'form-data'
-import { stat } from 'fs/promises'
+import { Fragment } from 'prosemirror-model'
+import { buildSchema } from './editor/schema'
 
 /**
  * PubPub API client
@@ -269,11 +269,11 @@ export class PubPub {
 
             const { fileOrPath, fileName, mimeType } = download
 
-            const uploadedFile = await this.uploadFile(
-              fileOrPath,
+            const uploadedFile = await this.uploadFile({
+              file: fileOrPath,
               fileName,
-              mimeType
-            )
+              mimeType,
+            })
 
             return {
               url: uploadedFile.url,
@@ -379,11 +379,76 @@ export class PubPub {
        * The slug of the pub you want to import, including /draft
        */
       pubSlug: string,
-      filesToImport: {
-        file: Blob | Buffer | File | string
-        fileName: string
-        mimeType: (typeof allowedMimeTypes)[number]
-      }[]
+      /**
+       * The files you want to import
+       *
+       * You can either pass an array of files, or an array of arrays of files
+       *
+       * If you pass a `FileImportPayload[]`, you can only have one "document" file, the rest must be supplemental files such as
+       * bibliography, images, etc.
+       *
+       * If you pass a `FileImportPayload[][]`, you can have multiple "document" files, and each document file can have its own supplemental files
+       *
+       * @example
+       * ```ts
+       * // import a single document file and a single supplemental file
+       * pubpub.pub.hacks.importPub('my-pub-slug/draft', [
+       *  {
+       *   fileOrPath: 'path/to/file.md',
+       *   fileName: 'file.md',
+       *   mimeType: 'text/markdown',
+       *  },
+       *  {
+       *   fileOrPath: 'path/to/file.bib',
+       *   fileName: 'file.bib',
+       *   mimeType: 'application/x-bibtex',
+       * },
+       * // here you could not specify say another Word, Markdown, or TeX file, as PubPub needs to treat one of these as the "document" file
+       * ])
+       * ```
+       *
+       * @example
+       * ```ts
+       * // import multiple document files and their supplemental files
+       * pubpub.pub.hacks.importPub('my-pub-slug/draft', [
+       * [
+       *  {
+       *   fileOrPath: 'path/to/file.md',
+       *   fileName: 'file.md',
+       *   mimeType: 'text/markdown',
+       *  },
+       *  {
+       *    fileOrPath: 'path/to/file.bib',
+       *    fileName: 'file.bib',
+       *    mimeType: 'application/x-bibtex',
+       *  },
+       * ],
+       * [
+       * // this file will be imported separately and appended to the end of the pub
+       *  {
+       *   fileOrPath: 'path/to/file.docx',
+       *   fileName: 'file.docx',
+       *   mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+       *   },
+       *  ]
+       * ])
+       *
+       */
+      filesToImport: FileImportPayload[] | FileImportPayload[][],
+      /**
+       * A function that takes the document and returns a new document.
+       *
+       * This allows you to do custom post-processing on the document to do things that the PubPub importer does not allow yet,
+       * e.g. setting captions on Figures from an imported Word document.
+       *
+       * @param doc The document that was imported
+       * @param schema The schema that was used to import the document. You can use this to create new nodes.
+       * @returns The new document
+       */
+      postProcessor?: (
+        doc: Fragment,
+        schema: ReturnType<typeof buildSchema>
+      ) => Fragment
     ) => {
       // if it doesnt end with /draft, add it
 
@@ -401,13 +466,25 @@ export class PubPub {
         throw new Error('Could not connect to firebase')
       }
 
-      const importedFiles = await this.importFull(filesToImport)
+      const importedFiles = Array.isArray(filesToImport?.[0])
+        ? (
+            await Promise.all(
+              (filesToImport as FileImportPayload[][]).map((file) =>
+                this.importFull(file)
+              )
+            )
+          )?.reduce((acc, curr) => {
+            acc.doc.content = [...acc.doc.content, ...curr.doc.content]
+            return acc
+          })
+        : await this.importFull(filesToImport as FileImportPayload[])
 
       const docImport = await writeDocumentToPubDraft(
         firebaseRef,
         importedFiles.doc,
         {
           initialDocKey,
+          postProcessor,
         }
       )
       console.log(
@@ -865,66 +942,76 @@ export class PubPub {
    *
    * This method has been made private to avoid abuse of the upload feature.
    */
-  private uploadFile = async (
-    fileOrPath: Blob | Buffer | File | string,
-    fileName: string,
-    mimeType: (typeof allowedMimeTypes)[number]
-  ) => {
-    if (
-      typeof window === 'undefined' &&
-      process.version &&
-      parseInt(process.version.slice(1).split('.')[0]) < 18
-    ) {
-      throw new Error(
-        'Node version must be 18 or higher to use uploadFile, as it depends on native FormData and Blob support'
-      )
-    }
-
-    const file =
-      typeof fileOrPath === 'string' ? createReadStream(fileOrPath) : fileOrPath
-
-    const blb =
-      file instanceof ReadStream || file instanceof Blob
-        ? file
-        : new Blob([file], { type: mimeType })
-
-    const size =
-      blb instanceof ReadStream
-        ? (await stat(fileOrPath as string))?.size
-        : blb.size
-
-    const policy = await this.uploadPolicy(mimeType)
-
-    const formData = new FormData()
-
-    const key = generateFileNameForUpload(fileName)
-
-    formData.append('key', key)
-    formData.append('AWSAccessKeyId', policy.awsAccessKeyId)
-    formData.append('acl', policy.acl)
-    formData.append('policy', policy.policy)
-    formData.append('signature', policy.signature)
-    formData.append('Content-Type', mimeType)
-    formData.append('success_action_status', '200')
-    formData.append('file', blb, fileName)
-
-    try {
-      const response = await axios.post(
-        `${this.AWS_S3}/${policy.bucket}`,
-        formData
-      )
-
-      return {
-        url: `https://assets.pubpub.org/${key}`,
-        size,
-        key,
-        data: response.data,
+  private uploadFile = async ({
+    file,
+    fileName,
+    mimeType,
+  }: FileImportPayload) =>
+    // fileOrPath: Blob | Buffer | File | string,
+    // fileName: string,
+    // mimeType: (typeof allowedMimeTypes)[number]
+    {
+      if (
+        typeof window === 'undefined' &&
+        process.version &&
+        parseInt(process.version.slice(1).split('.')[0]) < 18
+      ) {
+        throw new Error(
+          'Node version must be 18 or higher to use uploadFile, as it depends on native FormData and Blob support'
+        )
       }
-    } catch (error) {
-      console.error(error)
-      throw new Error('Upload failed')
+
+      const fileOrStream =
+        typeof file === 'string' ? createReadStream(file) : file
+
+      // const file =
+      //   file instanceof ReadStream || file instanceof Blob
+      //     ? file
+      //     : new Blob([file], { type: mimeType })
+
+      const res =
+        fileOrStream instanceof ReadStream || fileOrStream instanceof Buffer
+          ? fileOrStream
+          : Buffer.from(await fileOrStream.arrayBuffer())
+
+      // const size =
+      //   typeof file === 'string'
+      //     ? (await stat(file as string))?.size
+      //     : res.byteLength
+
+      const policy = await this.uploadPolicy(mimeType)
+
+      const formData = new FormData()
+
+      const key = generateFileNameForUpload(fileName)
+
+      formData.append('key', key)
+      formData.append('AWSAccessKeyId', policy.awsAccessKeyId)
+      formData.append('acl', policy.acl)
+      formData.append('policy', policy.policy)
+      formData.append('signature', policy.signature)
+      formData.append('Content-Type', mimeType)
+      formData.append('success_action_status', '200')
+      formData.append('file', res, fileName)
+
+      try {
+        const response = await axios.post(
+          `${this.AWS_S3}/${policy.bucket}`,
+          formData
+        )
+
+        const size = formData.getLengthSync()
+        return {
+          url: `https://assets.pubpub.org/${key}`,
+          size,
+          key,
+          data: response.data,
+        }
+      } catch (error) {
+        console.error(error)
+        throw new Error('Upload failed')
+      }
     }
-  }
 
   /**
    * Returns a signed policy for uploading a file to PubPub.
@@ -1052,20 +1139,14 @@ export class PubPub {
   /**
    * More complete import function thta also takes care of properly uploading and labeling all files.
    */
-  private importFull = async (
-    files: {
-      file: Blob | Buffer | File | string
-      fileName: string
-      mimeType: (typeof allowedMimeTypes)[number]
-    }[]
-  ) => {
+  private importFull = async (files: FileImportPayload[]) => {
     const importedFiles = await Promise.all(
       files.map(async ({ file, fileName, mimeType }) => {
-        const { url, size, key } = await this.uploadFile(
+        const { url, size, key } = await this.uploadFile({
           file,
           fileName,
-          mimeType
-        )
+          mimeType,
+        })
 
         return {
           url,
@@ -1183,4 +1264,10 @@ export class PubPub {
 
     return poll()
   }
+}
+
+interface FileImportPayload {
+  file: Blob | Buffer | File | string
+  fileName: string
+  mimeType: (typeof allowedMimeTypes)[number]
 }

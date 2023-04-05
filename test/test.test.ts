@@ -75,16 +75,28 @@ describe('PubPub', () => {
     // )
 
     try {
-      const imported = await pubpub.pub.hacks.import(testUrl, [
-        {
-          file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
-          fileName: 'basic.docx',
-          mimeType:
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        },
-      ])
-
-      console.log({ imported })
+      const imported = await pubpub.pub.hacks.import(
+        testUrl,
+        [
+          {
+            file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
+            fileName: 'basic.docx',
+            mimeType:
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          },
+        ],
+        (doc, schema) => {
+          console.dir(doc, { depth: 5 })
+          const newDoc = doc.addToEnd(
+            schema.nodes.paragraph.create(
+              { id: 'test-id' },
+              schema.text('manually insterted text')
+            )
+          )
+          console.dir(newDoc, { depth: 5 })
+          return newDoc
+        }
+      )
 
       expect(imported).toBeDefined()
     } catch (e) {
@@ -92,13 +104,12 @@ describe('PubPub', () => {
       throw e
     }
   }, 60000)
-  it('should be able to export a file', async () => {
+  it('should be able to export a file, and that file should include the manually added test text', async () => {
     try {
       const exported = await pubpub.pub.hacks.export({
         slug: testUrl,
-        format: 'docx',
+        format: 'markdown',
       })
-      console.log({ exported })
 
       expect(
         typeof exported === 'string' &&

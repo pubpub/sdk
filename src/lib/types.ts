@@ -135,9 +135,9 @@ export type ExportFormats =
   | 'docx'
   | 'html'
   | 'pdf'
-  | 'md'
+  | 'markdown'
   | 'odt'
-  | 'text'
+  | 'tex'
   | 'txt'
   | 'epub'
   | 'jats'
@@ -662,6 +662,9 @@ export const allowedMimeTypes = [
   'image/png',
   'image/jpeg',
   'image/gif',
+  'text/tex-x',
+  'text/html',
+  'text/plain',
 ] as const
 
 export type FacetsProps = {
