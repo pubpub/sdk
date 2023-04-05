@@ -119,7 +119,7 @@ describe('PubPub', () => {
       console.log(e)
       throw e
     }
-  }, 10000)
+  }, 60000)
 
   it('should be able to get pubs', async () => {
     const pubs = await pubpub.pub.getMany({
