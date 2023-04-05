@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.6.0
+
+### Minor Changes
+
+- Add ability to import multiple main document. Add ability to do manual postprocessing of prosemirror tree before importing.
+
 ## 0.5.0
 
 ### Minor Changes
