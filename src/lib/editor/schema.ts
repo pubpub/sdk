@@ -38,9 +38,7 @@ export const buildSchema = () =>
       }
     )
     Object.keys(schemaMarks).forEach((markKey) => {
-      // @ts-expect-error types??
       if (!schemaMarks[markKey]) {
-        // @ts-expect-error types??
         const { [markKey]: _, ...rest } = schemaMarks
         // @ts-expect-error types??
         schemaMarks = rest
