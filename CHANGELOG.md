@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.7.0
+
+### Minor Changes
+
+- Fix crucial authentication issues
+
 ## 0.6.0
 
 ### Minor Changes
