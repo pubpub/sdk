@@ -244,11 +244,17 @@ export const baseMarks: Record<string, MarkSpec> = {
 			*/
       {
         tag: 'b',
-        getAttrs: (node) => node.style.fontWeight !== 'normal' && null,
+        getAttrs: (node) =>
+          typeof node !== 'string' &&
+          node.style.fontWeight !== 'normal' &&
+          null,
       },
       {
         style: 'font-weight',
-        getAttrs: (value) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null,
+        getAttrs: (value) =>
+          typeof value === 'string' &&
+          /^(bold(er)?|[5-9]\d{2,})$/.test(value) &&
+          null,
       },
     ],
     toDOM: () => {
@@ -266,6 +272,9 @@ export const baseMarks: Record<string, MarkSpec> = {
       {
         tag: 'a[href]',
         getAttrs: (dom) => {
+          if (typeof dom === 'string') {
+            return false
+          }
           if (dom.getAttribute('data-node-type') === 'reference') {
             return false
           }
@@ -283,6 +292,7 @@ export const baseMarks: Record<string, MarkSpec> = {
       /* only strings can be a target attr. */
       const attrs = node.attrs
       if (attrs.target && typeof attrs.target !== 'string') {
+        // @ts-expect-error I will overwrite what i want
         attrs.target = null
       }
       return ['a', attrs] as DOMOutputSpec
