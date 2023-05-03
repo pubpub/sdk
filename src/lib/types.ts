@@ -151,6 +151,7 @@ export type PubPutPayload = {
   slug?: string
   htmlTitle?: string
   title?: string
+  doi?: string
   customPublishedAt?: string
   /**
    * Links to files that should be added to the pub
