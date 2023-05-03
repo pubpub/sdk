@@ -32,7 +32,7 @@ import {
 } from './types'
 import { InitialData } from './initialData'
 import { Collection, CollectionScopeData } from './collectionData'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
 import { PubViewData } from './viewData'
@@ -99,7 +99,7 @@ export class PubPub {
       ${response.data}`)
     }
 
-    this.cookie = cookie[0]
+    this.cookie = cookie.join('; ')
   }
 
   async logout() {
@@ -114,19 +114,19 @@ export class PubPub {
   async authedRequest(
     path: string,
     method: 'GET',
-    options?: RequestInit
+    options?: AxiosRequestConfig
   ): Promise<Record<string, any> | string>
   async authedRequest(
     path: string,
     method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     body?: Record<string, any>,
-    options?: RequestInit
+    options?: AxiosRequestConfig
   ): Promise<Record<string, any> | string>
   async authedRequest(
     path: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    bodyOrOptions: Record<string, any> | RequestInit,
-    optionsMabye?: RequestInit
+    bodyOrOptions: Record<string, any> | AxiosRequestConfig,
+    optionsMabye?: AxiosRequestConfig
   ): Promise<Record<string, any> | string> {
     const options = method === 'GET' ? bodyOrOptions : optionsMabye
     const body = method !== 'GET' ? JSON.stringify(bodyOrOptions) : undefined

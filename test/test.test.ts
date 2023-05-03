@@ -63,6 +63,8 @@ describe('PubPub', () => {
     pubpub = new PubPub(process.env.COMMUNITY_ID!, process.env.COMMUNITY_URL)
 
     await pubpub.login(process.env.EMAIL ?? '', process.env.PASSWORD ?? '')
+
+    expect(/connect.sid/.test(pubpub.cookie ?? '')).toBeTruthy()
   })
 
   const testUrl = 'pub/25f1ymdq/draft'
