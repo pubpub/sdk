@@ -77,7 +77,7 @@ describe('PubPub', () => {
     // )
 
     try {
-      const imported = await pubpub.pub.hacks.import(
+      const imported = await pubpub.pub.import(
         testUrl,
         [
           {
@@ -108,7 +108,7 @@ describe('PubPub', () => {
   }, 60000)
   it('should be able to export a file, and that file should include the manually added test text', async () => {
     try {
-      const exported = await pubpub.pub.hacks.export({
+      const exported = await pubpub.pub.export({
         slug: testUrl,
         format: 'markdown',
       })
@@ -174,7 +174,7 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to modify a pub', async () => {
-    const modded = await pubpub.pub.modify(testId, {
+    const modded = await pubpub.pub.update(testId, {
       citationStyle: {
         citationStyle: 'apa-7',
         inlineCitationStyle: 'author',

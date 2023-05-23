@@ -8,7 +8,6 @@ import {
   PubHeaderTheme,
   NodeLabels,
   CitationStyle,
-  Roles,
   Scope,
   Facets,
   CollectionKind,
@@ -22,7 +21,6 @@ import {
   ExportPayload,
   FacetsProps,
   GetManyOptions,
-  Pub,
   PubsManyResponse,
   UpdateCollectionsMetaData,
   UploadPolicyResponse,
@@ -31,12 +29,12 @@ import {
   WorkerTaskResponse,
 } from './types'
 import { InitialData } from './initialData'
-import { Collection, CollectionScopeData } from './collectionData'
+import { CollectionScopeData } from './collectionData'
 import axios, { AxiosRequestConfig } from 'axios'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
 import { PubViewData } from './viewData'
-import { ProposedMetadata, writeDocumentToPubDraft } from './editor/firebase'
+import { writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
 import { createReadStream, ReadStream } from 'fs'
@@ -227,17 +225,18 @@ export class PubPub {
     return response as PubsManyResponse
   }
 
-  private makePubOperations = () => {
-    const create = async (collectionId?: string) => {
+  // private makePubOperations = () => {
+  pub = {
+    create: async (collectionId?: string) => {
       const response = await this.authedRequest('pubs', 'POST', {
         collectionId,
         communityId: this.communityId,
       })
 
       return response
-    }
+    },
 
-    const put = async (
+    update: async (
       pubId: string,
       {
         title,
@@ -335,24 +334,24 @@ export class PubPub {
         response.facets = facetsPayload.facets //facets as typeof facetsPayload.facets
       }
       return response
-    }
+    },
 
-    const del = async (pubId: string) => {
+    remove: async (pubId: string) => {
       const response = await this.authedRequest(`pubs`, 'DELETE', {
         pubId,
         communityId: this.communityId,
       })
       return response
-    }
+    },
 
-    const get = async (pubId: string) => {
+    get: async (pubId: string) => {
       const response = await this.getManyPubs({
         pubIds: [pubId],
       })
       return response.pubsById[pubId]
-    }
+    },
 
-    const release = async (
+    createRelease: async (
       pubId: string,
       {
         noteText,
@@ -369,14 +368,14 @@ export class PubPub {
         noteContent,
       })
       return response
-    }
+    },
 
     /**
      * First connects to Firebase
      * Imports the files
      * Then sends the imported file to firebase
      */
-    const importPub = async (
+    import: async (
       /**
        * The slug of the pub you want to import, including /draft
        */
@@ -494,9 +493,9 @@ export class PubPub {
       )
 
       return { importedFiles }
-    }
+    },
 
-    const exportPub = async ({
+    export: async ({
       slug,
       pubId,
       format,
@@ -507,7 +506,7 @@ export class PubPub {
       format: ExportFormats
     }) => {
       if (!slug && pubId) {
-        const pub = await get(pubId)
+        const pub = await this.pub.get(pubId)
         if (format === 'formatted' && pub.downloads[0]?.type === 'formatted') {
           return pub.downloads[0].url
         }
@@ -537,27 +536,29 @@ export class PubPub {
       })
 
       return url
-    }
+    },
 
-    return {
-      create,
-      modify: put,
-      remove: del,
-      get,
-      getMany: this.getManyPubs,
-      attributions: this.makeAttributionsOperations<'pub'>('pub'),
-      release,
-      hacks: {
-        import: importPub,
-        export: exportPub,
-      },
-    }
+    getMany: this.getManyPubs,
+    // return {
+    //   create,
+    //   update: put,
+    //   remove: del,
+    //   get,
+    //   getMany: this.getManyPubs,
+    //   attributions: this.makeAttributionsOperations<'pub'>('pub'),
+    //   release,
+    //   hacks: {
+    //     import: importPub,
+    //     export: exportPub,
+    //   },
+    // }
   }
 
-  pub = this.makePubOperations()
+  // pub = this.makePubOperations()
 
-  private makeHacks = () => {
-    const getPageData = (async (
+  //  private makeHacks = () => {
+  hacks = {
+    getPageData: (async (
       /**
        * The slug of the page
        *
@@ -592,25 +593,26 @@ export class PubPub {
         ) as PubViewData
       }
     }) as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
-      ((page: string, data?: 'view-data') => Promise<PubViewData>)
+      ((page: string, data?: 'view-data') => Promise<PubViewData>),
 
-    const getCommunityData = async () => {
-      const communityData = await getPageData('dash/overview')
+    getCommunityData: async () => {
+      const communityData = await this.hacks.getPageData('dash/overview')
       return communityData?.communityData
-    }
+    },
+
     /**
      * The only way I currently know to get collections is to go to the dashboard and scrape the data from there
      *
      * Very unreliable, could break at any time, plus very slow.
      */
-    const getCollections = async () => {
-      const communityData = await getCommunityData()
+    getCollections: async () => {
+      const communityData = await this.hacks.getCommunityData()
 
       return communityData?.collections
-    }
+    },
 
-    const getCollection = async (slug: string) => {
-      const collectionData = await getPageData(
+    getCollection: async (slug: string) => {
+      const collectionData = await this.hacks.getPageData(
         `dash/collection/${slug}/settings/details`
       )
 
@@ -620,10 +622,10 @@ export class PubPub {
       const collectionScopeData = collectionElements?.activeCollection
 
       return collectionScopeData
-    }
+    },
 
-    const getFullCollectionById_SLOW = async (collectionId: string) => {
-      const collections = await getCollections()
+    getFullCollectionById_SLOW: async (collectionId: string) => {
+      const collections = await this.hacks.getCollections()
 
       const incompleteCollection = collections?.find(
         (x) => x.id === collectionId
@@ -633,29 +635,31 @@ export class PubPub {
         throw new Error('Could not find collection')
       }
 
-      const collection = await getCollection(incompleteCollection.slug)
+      const collection = await this.hacks.getCollection(
+        incompleteCollection.slug
+      )
 
       return collection
-    }
+    },
 
-    /**
-     * @namespace
-     * @borrows getCollections as getCollections
-     */
-    const hacks = {
-      getPageData,
-      getCommunityData,
-      getCollections,
-      getCollection,
-      /**
-       * Convenience method to get a full collection by ID, which is otherwise not possible.
-       *
-       * First calls getCollections, finds the correct URL for said collection, then calls getCollection.
-       */
-      getFullCollectionById_SLOW,
-    }
+    // /**
+    //  * @namespace
+    //  * @borrows getCollections as getCollections
+    //  */
+    // const hacks = {
+    //   getPageData,
+    //   getCommunityData,
+    //   getCollections,
+    //   getCollection,
+    //   /**
+    //    * Convenience method to get a full collection by ID, which is otherwise not possible.
+    //    *
+    //    * First calls getCollections, finds the correct URL for said collection, then calls getCollection.
+    //    */
+    //   getFullCollectionById_SLOW,
+    // }
 
-    return hacks
+    // return hacks
   }
 
   /**
@@ -664,13 +668,14 @@ export class PubPub {
    * Basically, we're scraping the page and parsing the (initial) data from the page, usually in a script tag in JSON format
    * Very unreliable, could break at any time.
    */
-  hacks = this.makeHacks()
+  // hacks = this.makeHacks()
 
-  private makeCollectionOperations = () => {
+  //private makeCollectionOperations = () => {
+  collection = {
     /**
      * Create a new collection
      */
-    const create = async ({
+    create: async ({
       title,
       kind,
     }: {
@@ -683,9 +688,9 @@ export class PubPub {
         kind,
       })
       return response
-    }
+    },
 
-    const modify = async (
+    update: async (
       collectionId: string,
       {
         citationStyle,
@@ -762,157 +767,175 @@ export class PubPub {
       }
 
       return response
-    }
+    },
 
-    const addPub = async (props: { collectionId: string; pubId: string }) => {
+    remove: async (collectionId: string) => {
+      const response = await this.authedRequest(`collections`, 'DELETE', {
+        id: collectionId,
+        communityId: this.communityId,
+      })
+      return response ?? { success: true }
+    },
+
+    addPub: async (props: { collectionId: string; pubId: string }) => {
       const response = await this.authedRequest(`collectionPubs`, 'POST', {
         ...props,
         communityId: this.communityId,
       })
       return response
-    }
+    },
 
-    const removePub = async (props: {
-      collectionId: string
-      pubId: string
-    }) => {
+    removePub: async (props: { collectionId: string; pubId: string }) => {
       const response = await this.authedRequest(`collectionPubs`, 'DELETE', {
         ...props,
         communityId: this.communityId,
       })
       return response
-    }
+    },
 
-    /**
-     * @borrows this.hacks as hacks
-     */
-    const collection = {
-      create,
-      modify,
-      addPub,
-      removePub,
-      attributions: this.makeAttributionsOperations<'collection'>('collection'),
-      /**
-       * As there are no native ways to get collections, we're using the hacks to get them
-       *
-       * Very unreliable, could break at any time, plus very slow.
-       */
-      hacks: {
-        getMany: this.hacks.getCollections,
-        /**
-         * The only way I currently know to get a collection is to go to the dashboard and scrape the data from there
-         *
-         * Tip: this data is also stored on any Pub that belongs to a collection if you get it through any of the `pub.get` or `pub.getMany` methods!
-         * This saves you from doing the extra two requests to get all collections, find the one slug you want from the id, then get the collection.
-         *
-         */
-        get: this.hacks.getCollection,
-        getByIdSlow: this.hacks.getFullCollectionById_SLOW,
-      },
-    }
-    return collection
+    attributions: this.makeAttributionsOperations('collection'),
+    hacks: {
+      getMany: this.hacks.getCollections,
+      get: this.hacks.getCollection,
+      getByIdSlow: this.hacks.getFullCollectionById_SLOW,
+    },
+    // /**
+    //  * @borrows this.hacks as hacks
+    //  */
+    // const collection = {
+    //   create,
+    //   update,
+    //   addPub,
+    //   removePub,
+    //   attributions: this.makeAttributionsOperations<'collection'>('collection'),
+    //   /**
+    //    * As there are no native ways to get collections, we're using the hacks to get them
+    //    *
+    //    * Very unreliable, could break at any time, plus very slow.
+    //    */
+    //   hacks: {
+    //     getMany: this.hacks.getCollections,
+    //     /**
+    //      * The only way I currently know to get a collection is to go to the dashboard and scrape the data from there
+    //      *
+    //      * Tip: this data is also stored on any Pub that belongs to a collection if you get it through any of the `pub.get` or `pub.getMany` methods!
+    //      * This saves you from doing the extra two requests to get all collections, find the one slug you want from the id, then get the collection.
+    //      *
+    //      */
+    //     get: this.hacks.getCollection,
+    //     getByIdSlow: this.hacks.getFullCollectionById_SLOW,
+    //   },
+    // }
+    // return collection
   }
 
-  collection = this.makeCollectionOperations()
+  // collection = this.makeCollectionOperations()
 
-  private makeAttributionsOperations<T extends 'pub' | 'collection' = 'pub'>(
-    type: T
-  ) {
+  private makeAttributionsOperations<T extends 'pub' | 'collection'>(type: T) {
     const path = type === 'pub' ? 'pubAttributions' : 'collectionAttributions'
 
-    const getAttributions = async (id: string) => {
-      const manyPubs = await this.getManyPubs({ pubIds: [id] })
-
-      const attributions = manyPubs?.pubsById[id]?.attributions ?? []
-      return attributions
-    }
-
-    const post = async (props: AttributionsPayload) => {
-      const response = await this.authedRequest(path, 'POST', props)
-
-      return response
-    }
-
-    /**
-     * Modify an attribution
-     *
-     * You can either pass a name or a userId
-     * If you pass a name, it will find the attribution with that name and modify it
-     */
-    const put = async (
-      props: T extends 'pub'
-        ? AttributionsPayload
-        : Omit<AttributionsPayload, 'name'>
-    ) => {
-      if (!('name' in props) || !props.name) {
-        const response = await this.authedRequest(path, 'PUT', props)
-        return response
-      }
-
-      const attributions = await getAttributions(props.pubId)
-
-      // check if name in attributions
-      const existingAttribution = attributions.find(
-        (x) => x.name === props.name
-      )
-
-      if (!existingAttribution) {
-        throw new Error('Attribution not found')
-      }
-
-      const response = await this.authedRequest(path, 'PUT', {
-        ...props,
-        userId: existingAttribution.userId,
-      })
-
-      return response
-    }
-
-    const del = async (
-      props: T extends 'pub'
-        ? AttributionsPayload
-        : Omit<AttributionsPayload, 'name'>
-    ) => {
-      if (!('name' in props) || !props.name) {
-        const response = await this.authedRequest(path, 'DELETE', props)
-        return response
-      }
-
-      const attributions = await getAttributions(props.pubId)
-
-      // check if name in attributions
-      const existingAttribution = attributions.find(
-        (x) => x.name === props.name
-      )
-
-      if (!existingAttribution) {
-        throw new Error('Attribution not found')
-      }
-
-      const response = await this.authedRequest(path, 'DELETE', {
-        ...props,
-        userId: existingAttribution.userId,
-      })
-
-      return response
-    }
-
     return {
-      ...(type === 'pub' ? { get: getAttributions } : {}),
-      create: post,
+      get:
+        type === 'collection'
+          ? undefined
+          : async (id: string) => {
+              const manyPubs = await this.getManyPubs({ pubIds: [id] })
+
+              const attributions = manyPubs?.pubsById[id]?.attributions ?? []
+              return attributions
+            },
+
+      create: async (props: AttributionsPayload) => {
+        const response = await this.authedRequest(path, 'POST', props)
+
+        return response
+      },
+
       /**
-       * @inheritdoc put
+       * update an attribution
+       *
+       * You can either pass a name or a userId
+       * If you pass a name, it will find the attribution with that name and update it
        */
-      modify: put,
-      remove: del,
-    } as T extends 'pub'
-      ? {
-          get: typeof getAttributions
-          create: typeof post
-          modify: typeof put
-          remove: typeof del
+      update: async (
+        props: T extends 'pub'
+          ? AttributionsPayload
+          : Omit<AttributionsPayload, 'name'>
+      ) => {
+        if (!('name' in props) || !props.name) {
+          const response = await this.authedRequest(path, 'PUT', props)
+          return response
         }
-      : { create: typeof post; modify: typeof put; remove: typeof del }
+
+        const manyPubs = await this.getManyPubs({ pubIds: [props.pubId] })
+
+        const attributions = manyPubs?.pubsById[props.pubId]?.attributions ?? []
+
+        // check if name in attributions
+        const existingAttribution = attributions.find(
+          (x) => x.name === props.name
+        )
+
+        if (!existingAttribution) {
+          throw new Error('Attribution not found')
+        }
+
+        const response = await this.authedRequest(path, 'PUT', {
+          ...props,
+          userId: existingAttribution.userId,
+        })
+
+        return response
+      },
+
+      remove: async (
+        props: T extends 'pub'
+          ? AttributionsPayload
+          : Omit<AttributionsPayload, 'name'>
+      ) => {
+        if (!('name' in props) || !props.name) {
+          const response = await this.authedRequest(path, 'DELETE', props)
+          return response
+        }
+
+        const manyPubs = await this.getManyPubs({ pubIds: [props.pubId] })
+
+        const attributions = manyPubs?.pubsById[props.pubId]?.attributions ?? []
+
+        // check if name in attributions
+        const existingAttribution = attributions.find(
+          (x) => x.name === props.name
+        )
+
+        if (!existingAttribution) {
+          throw new Error('Attribution not found')
+        }
+
+        const response = await this.authedRequest(path, 'DELETE', {
+          ...props,
+          userId: existingAttribution.userId,
+        })
+
+        return response
+      },
+
+      // return {
+      //   ...(type === 'pub' ? { get: getAttributions } : {}),
+      //   create: post,
+      //   /**
+      //    * @inheritdoc put
+      //    */
+      //   update: put,
+      //   remove: del,
+      // } as T extends 'pub'
+      //   ? {
+      //       get: typeof getAttributions
+      //       create: typeof post
+      //       update: typeof put
+      //       remove: typeof del
+      //     }
+      //   : { create: typeof post; update: typeof put; remove: typeof del }
+    }
   }
 
   /**
@@ -948,72 +971,58 @@ export class PubPub {
     file,
     fileName,
     mimeType,
-  }: FileImportPayload) =>
-    // fileOrPath: Blob | Buffer | File | string,
-    // fileName: string,
-    // mimeType: (typeof allowedMimeTypes)[number]
-    {
-      if (
-        typeof window === 'undefined' &&
-        process.version &&
-        parseInt(process.version.slice(1).split('.')[0]) < 18
-      ) {
-        throw new Error(
-          'Node version must be 18 or higher to use uploadFile, as it depends on native FormData and Blob support'
-        )
-      }
-
-      const fileOrStream =
-        typeof file === 'string' ? createReadStream(file) : file
-
-      // const file =
-      //   file instanceof ReadStream || file instanceof Blob
-      //     ? file
-      //     : new Blob([file], { type: mimeType })
-
-      const res =
-        fileOrStream instanceof ReadStream || fileOrStream instanceof Buffer
-          ? fileOrStream
-          : Buffer.from(await fileOrStream.arrayBuffer())
-
-      // const size =
-      //   typeof file === 'string'
-      //     ? (await stat(file as string))?.size
-      //     : res.byteLength
-
-      const policy = await this.uploadPolicy(mimeType)
-
-      const formData = new FormData()
-
-      const key = generateFileNameForUpload(fileName)
-
-      formData.append('key', key)
-      formData.append('AWSAccessKeyId', policy.awsAccessKeyId)
-      formData.append('acl', policy.acl)
-      formData.append('policy', policy.policy)
-      formData.append('signature', policy.signature)
-      formData.append('Content-Type', mimeType)
-      formData.append('success_action_status', '200')
-      formData.append('file', res, fileName)
-
-      try {
-        const response = await axios.post(
-          `${this.AWS_S3}/${policy.bucket}`,
-          formData
-        )
-
-        const size = formData.getLengthSync()
-        return {
-          url: `https://assets.pubpub.org/${key}`,
-          size,
-          key,
-          data: response.data,
-        }
-      } catch (error) {
-        console.error(error)
-        throw new Error('Upload failed')
-      }
+  }: FileImportPayload) => {
+    if (
+      typeof window === 'undefined' &&
+      process.version &&
+      parseInt(process.version.slice(1).split('.')[0]) < 18
+    ) {
+      throw new Error(
+        'Node version must be 18 or higher to use uploadFile, as it depends on native FormData and Blob support'
+      )
     }
+
+    const fileOrStream =
+      typeof file === 'string' ? createReadStream(file) : file
+
+    const res =
+      fileOrStream instanceof ReadStream || fileOrStream instanceof Buffer
+        ? fileOrStream
+        : Buffer.from(await fileOrStream.arrayBuffer())
+
+    const policy = await this.uploadPolicy(mimeType)
+
+    const formData = new FormData()
+
+    const key = generateFileNameForUpload(fileName)
+
+    formData.append('key', key)
+    formData.append('AWSAccessKeyId', policy.awsAccessKeyId)
+    formData.append('acl', policy.acl)
+    formData.append('policy', policy.policy)
+    formData.append('signature', policy.signature)
+    formData.append('Content-Type', mimeType)
+    formData.append('success_action_status', '200')
+    formData.append('file', res, fileName)
+
+    try {
+      const response = await axios.post(
+        `${this.AWS_S3}/${policy.bucket}`,
+        formData
+      )
+
+      const size = formData.getLengthSync()
+      return {
+        url: `https://assets.pubpub.org/${key}`,
+        size,
+        key,
+        data: response.data,
+      }
+    } catch (error) {
+      console.error(error)
+      throw new Error('Upload failed')
+    }
+  }
 
   /**
    * Returns a signed policy for uploading a file to PubPub.
@@ -1036,8 +1045,9 @@ export class PubPub {
   /**
    * Constructs the `PubPub.community` methods
    */
-  private makeCommuntiyOperations = () => {
-    const put = async ({
+  // private makeCommuntiyOperations = () => {
+  community = {
+    put: async ({
       pubHeaderTheme,
       license,
       citationStyle,
@@ -1115,9 +1125,9 @@ export class PubPub {
       }
 
       return response
-    }
+    },
 
-    const css = async (css: string) => {
+    css: async (css: string) => {
       const response = await this.authedRequest('customScripts', 'POST', {
         communityId: this.communityId,
         type: 'css',
@@ -1125,18 +1135,20 @@ export class PubPub {
       })
 
       return response
-    }
+    },
 
-    return {
-      modify: put,
-      css,
-      hacks: {
-        get: this.hacks.getCommunityData,
-      },
-    }
+    get: this.hacks.getCommunityData,
+
+    // return {
+    //   update: put,
+    //   css,
+    //   hacks: {
+    //     get: this.hacks.getCommunityData,
+    //   },
+    // }
   }
 
-  community = this.makeCommuntiyOperations()
+  // community = this.makeCommuntiyOperations()
 
   /**
    * More complete import function thta also takes care of properly uploading and labeling all files.
