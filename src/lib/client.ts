@@ -30,17 +30,19 @@ import {
 } from './types'
 import { InitialData } from './initialData'
 import { CollectionScopeData } from './collectionData'
-import axios, { AxiosRequestConfig } from 'axios'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
 import { PubViewData } from './viewData'
 import { writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
+
+// import axios, { AxiosRequestConfig } from 'axios'
 import { createReadStream, ReadStream } from 'fs'
-import FormData from 'form-data'
+// import FormData from 'form-data'
 import { Fragment } from 'prosemirror-model'
 import { buildSchema } from './editor/schema'
+import { readFile } from 'fs/promises'
 
 /**
  * PubPub API client
@@ -79,25 +81,29 @@ export class PubPub {
    * Login to the PubPub API. Needs to be called before any other method.
    **/
   async login(email: string, password: string) {
-    const response = await axios(`${this.communityUrl}/api/login`, {
+    const response = await fetch(`${this.communityUrl}/api/login`, {
       method: 'POST',
+      keepalive: false,
       headers: {
         'Content-Type': 'application/json',
       },
-      data: JSON.stringify({
+      body: JSON.stringify({
         email,
         password: SHA3(password).toString(encHex),
       }),
     })
 
-    const cookie = response.headers['set-cookie']
+    const cookie = response.headers
+      .get('set-cookie')
+      ?.replace(/.*(connect.sid=.*?);.*/ms, '$1')
+    const data = await response.json()
 
     if (!cookie) {
       throw new Error(`Login failed
-      ${response.data}`)
+      ${data}`)
     }
 
-    this.cookie = cookie.join('; ')
+    this.cookie = cookie //.join('; ')
   }
 
   async logout() {
@@ -112,25 +118,25 @@ export class PubPub {
   async authedRequest(
     path: string,
     method: 'GET',
-    options?: AxiosRequestConfig
+    options?: RequestInit
   ): Promise<Record<string, any> | string>
   async authedRequest(
     path: string,
     method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     body?: Record<string, any>,
-    options?: AxiosRequestConfig
+    options?: RequestInit
   ): Promise<Record<string, any> | string>
   async authedRequest(
     path: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    bodyOrOptions: Record<string, any> | AxiosRequestConfig,
-    optionsMabye?: AxiosRequestConfig
+    bodyOrOptions: Record<string, any> | RequestInit,
+    optionsMabye?: RequestInit
   ): Promise<Record<string, any> | string> {
     const options = method === 'GET' ? bodyOrOptions : optionsMabye
     const body = method !== 'GET' ? JSON.stringify(bodyOrOptions) : undefined
 
-    const response = await axios(`${this.communityUrl}/api/${path}`, {
-      data: body,
+    const response = await fetch(`${this.communityUrl}/api/${path}`, {
+      body,
       // body,
       method,
       ...options,
@@ -147,13 +153,16 @@ export class PubPub {
       )
     }
 
-    return response.data
+    const data = await response.json()
+
+    return data
   }
 
   getPage = async (slug: string) => {
     const bareSlug = slug.replace(this.communityUrl, '')?.replace(/^\//, '')
-    const response = await axios(`${this.communityUrl}/${bareSlug}`, {
+    const response = await fetch(`${this.communityUrl}/${bareSlug}`, {
       method: 'GET',
+      keepalive: false,
       headers: {
         Cookie: this.cookie || '',
       },
@@ -165,7 +174,9 @@ export class PubPub {
       )
     }
 
-    return response.data
+    const data = await response.text()
+
+    return data
   }
 
   async updateFacets(scope: Scope, facets: Facets) {
@@ -982,13 +993,10 @@ export class PubPub {
       )
     }
 
-    const fileOrStream =
-      typeof file === 'string' ? createReadStream(file) : file
+    const fileOrStream = typeof file === 'string' ? await readFile(file) : file
 
     const res =
-      fileOrStream instanceof ReadStream || fileOrStream instanceof Buffer
-        ? fileOrStream
-        : Buffer.from(await fileOrStream.arrayBuffer())
+      fileOrStream instanceof Buffer ? new Blob([fileOrStream]) : fileOrStream
 
     const policy = await this.uploadPolicy(mimeType)
 
@@ -1006,17 +1014,16 @@ export class PubPub {
     formData.append('file', res, fileName)
 
     try {
-      const response = await axios.post(
-        `${this.AWS_S3}/${policy.bucket}`,
-        formData
-      )
+      const response = await fetch(`${this.AWS_S3}/${policy.bucket}`, {
+        method: 'POST',
+        body: formData,
+      })
 
-      const size = formData.getLengthSync()
       return {
         url: `https://assets.pubpub.org/${key}`,
-        size,
+        size: res.size,
         key,
-        data: response.data,
+        //      data,
       }
     } catch (error) {
       console.error(error)
