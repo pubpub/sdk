@@ -64,7 +64,7 @@ describe('PubPub', () => {
 
     await pubpub.login(process.env.EMAIL ?? '', process.env.PASSWORD ?? '')
 
-    expect(/connect.sid/.test(pubpub.cookie ?? '')).toBeTruthy()
+    expect(pubpub.loggedIn).toBeTruthy()
   })
 
   const testUrl = 'pub/25f1ymdq/draft'

@@ -37,9 +37,6 @@ import { writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
 
-// import axios, { AxiosRequestConfig } from 'axios'
-import { createReadStream, ReadStream } from 'fs'
-// import FormData from 'form-data'
 import { Fragment } from 'prosemirror-model'
 import { buildSchema } from './editor/schema'
 import { readFile } from 'fs/promises'
@@ -64,13 +61,13 @@ import { readFile } from 'fs/promises'
  * ```
  */
 export class PubPub {
-  cookie?: string
+  private cookie?: string
   communityId: string
   communityUrl: string
 
-  AWS_S3 = 'https://s3-external-1.amazonaws.com'
+  loggedIn = false
 
-  self = this
+  private AWS_S3 = 'https://s3-external-1.amazonaws.com'
 
   constructor(communityId: string, communityUrl: string) {
     this.communityId = communityId
@@ -104,12 +101,14 @@ export class PubPub {
     }
 
     this.cookie = cookie //.join('; ')
+    this.loggedIn = true
   }
 
   async logout() {
     const response = await this.authedRequest('logout', 'GET')
 
     this.cookie = undefined
+    this.loggedIn = false
     console.log('Succesfully logged out!')
 
     return response
