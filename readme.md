@@ -7,9 +7,9 @@
 Unofficial Node Client for [PubPub](https://pubpub.org/).
 
 > **Warning**
-> This is not an official Client and is not supported by the PubPub team.
+> This is not (yet) and official Client.
 > Anything here may break at any time.
-> Please use responsibly, don't spam the API, and don't blame me if you get banned.
+> Please use responsibly, don't spam the API.
 
 ## Installation
 
