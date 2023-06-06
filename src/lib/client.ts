@@ -27,6 +27,7 @@ import {
   WorkerTaskExportOutput,
   WorkerTaskImportOutput,
   WorkerTaskResponse,
+  Pub,
 } from './types'
 import { InitialData } from './initialData'
 import { CollectionScopeData } from './collectionData'
@@ -114,23 +115,23 @@ export class PubPub {
     return response
   }
 
-  async authedRequest(
+  async authedRequest<T extends Record<string, any> = Record<string, unknown>>(
     path: string,
     method: 'GET',
     options?: RequestInit
-  ): Promise<Record<string, any> | string>
-  async authedRequest(
+  ): Promise<T | string>
+  async authedRequest<T extends Record<string, any> = Record<string, unknown>>(
     path: string,
     method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     body?: Record<string, any>,
     options?: RequestInit
-  ): Promise<Record<string, any> | string>
-  async authedRequest(
+  ): Promise<T | string>
+  async authedRequest<T extends Record<string, any> = Record<string, unknown>>(
     path: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     bodyOrOptions: Record<string, any> | RequestInit,
     optionsMabye?: RequestInit
-  ): Promise<Record<string, any> | string> {
+  ): Promise<T | string> {
     const options = method === 'GET' ? bodyOrOptions : optionsMabye
     const body = method !== 'GET' ? JSON.stringify(bodyOrOptions) : undefined
 
@@ -178,7 +179,10 @@ export class PubPub {
     return data
   }
 
-  async updateFacets(scope: Scope, facets: Facets) {
+  /**
+   * Helper method to update the facets of a pub or collection
+   */
+  private async updateFacets(scope: Scope, facets: Facets) {
     const response = await this.authedRequest(`facets`, 'POST', {
       scope,
       facets,
@@ -186,8 +190,16 @@ export class PubPub {
     return response
   }
 
-  private makePageOperations = () => {
-    const create = async ({
+  /**
+   * Methods for interacting with pages
+   *
+   * Very limited for now
+   */
+  page = {
+    /**
+     * Create a new page
+     */
+    create: async ({
       title,
       slug,
       description,
@@ -203,14 +215,8 @@ export class PubPub {
         description,
       })
       return response
-    }
-
-    return {
-      create,
-    }
+    },
   }
-
-  pages = this.makePageOperations()
 
   getManyPubs = async (options?: GetManyOptions) => {
     const { limit, offset, ordering, collectionIds, pubIds } = options ?? {}
@@ -235,17 +241,34 @@ export class PubPub {
     return response as PubsManyResponse
   }
 
-  // private makePubOperations = () => {
+  /**
+   * Methods for interacting with pubs
+   */
   pub = {
+    /**
+     * Create a new pub
+     *
+     * At the moment it isn't possible to set any properties of the Pub when creating it, so you'll have to call `pub.update` after creating it
+     *
+     * @param collectionId The id of the collection you want to add the pub to
+     */
     create: async (collectionId?: string) => {
       const response = await this.authedRequest('pubs', 'POST', {
         collectionId,
         communityId: this.communityId,
       })
 
-      return response
+      return response as Pub
     },
 
+    /**
+     * Update a pub
+     *
+     * This is a helper method that calls `/api/facets` and `PUT /api/pubs` under the hood
+     *
+     * @param pubId The id of the pub you want to update
+     * @param props The properties you want to update
+     */
     update: async (
       pubId: string,
       {
@@ -346,6 +369,11 @@ export class PubPub {
       return response
     },
 
+    /**
+     * Remove a pub
+     *
+     * @param pubId The id of the pub you want to remove
+     */
     remove: async (pubId: string) => {
       const response = await this.authedRequest(`pubs`, 'DELETE', {
         pubId,
@@ -354,6 +382,11 @@ export class PubPub {
       return response
     },
 
+    /**
+     * Get a pub by its id
+     *
+     * @param pubId The id of the pub you want to get
+     */
     get: async (pubId: string) => {
       const response = await this.getManyPubs({
         pubIds: [pubId],
@@ -361,6 +394,11 @@ export class PubPub {
       return response.pubsById[pubId]
     },
 
+    /**
+     * Create a release for a pub
+     *
+     * @param pubId The id of the pub you want to create a release for
+     */
     createRelease: async (
       pubId: string,
       {
@@ -384,6 +422,10 @@ export class PubPub {
      * First connects to Firebase
      * Imports the files
      * Then sends the imported file to firebase
+     *
+     * @param pubSlug: The slug of the pub you want to import, including /draft. The slug is everything after the community url, e.g. /pub/my-pub-slug/draft
+     * @param filesToImport: The files you want to import
+     * @param postProcessor: A function that takes the document and returns a new document. This allows you to do custom post-processing on the document to do things that the PubPub importer does not allow yet, e.g. setting captions on Figures from an imported Word document.
      */
     import: async (
       /**
@@ -548,25 +590,18 @@ export class PubPub {
       return url
     },
 
+    /**
+     * Get a list of pubs
+     */
     getMany: this.getManyPubs,
-    // return {
-    //   create,
-    //   update: put,
-    //   remove: del,
-    //   get,
-    //   getMany: this.getManyPubs,
-    //   attributions: this.makeAttributionsOperations<'pub'>('pub'),
-    //   release,
-    //   hacks: {
-    //     import: importPub,
-    //     export: exportPub,
-    //   },
-    // }
   }
 
-  // pub = this.makePubOperations()
-
-  //  private makeHacks = () => {
+  /**
+   * These are hacks that are not part of the (un)official API
+   *
+   * Basically, we're scraping the page and parsing the (initial) data from the page, usually in a script tag in JSON format
+   * Very unreliable, could break at any time.
+   */
   hacks = {
     getPageData: (async (
       /**
@@ -651,36 +686,11 @@ export class PubPub {
 
       return collection
     },
-
-    // /**
-    //  * @namespace
-    //  * @borrows getCollections as getCollections
-    //  */
-    // const hacks = {
-    //   getPageData,
-    //   getCommunityData,
-    //   getCollections,
-    //   getCollection,
-    //   /**
-    //    * Convenience method to get a full collection by ID, which is otherwise not possible.
-    //    *
-    //    * First calls getCollections, finds the correct URL for said collection, then calls getCollection.
-    //    */
-    //   getFullCollectionById_SLOW,
-    // }
-
-    // return hacks
   }
 
   /**
-   * These are hacks that are not part of the (un)official API
-   *
-   * Basically, we're scraping the page and parsing the (initial) data from the page, usually in a script tag in JSON format
-   * Very unreliable, could break at any time.
+   * Methods for interacting with collections
    */
-  // hacks = this.makeHacks()
-
-  //private makeCollectionOperations = () => {
   collection = {
     /**
      * Create a new collection
@@ -700,6 +710,14 @@ export class PubPub {
       return response
     },
 
+    /**
+     * Update a collection
+     *
+     * This is a helper method that calls `/api/facets` and `PUT /api/collections` under the hood
+     *
+     * @param collectionId The id of the collection you want to update
+     * @param props The properties you want to update
+     */
     update: async (
       collectionId: string,
       {
@@ -779,6 +797,10 @@ export class PubPub {
       return response
     },
 
+    /**
+     * Remove a collection
+     * @param collectionId The id of the collection you want to remove
+     */
     remove: async (collectionId: string) => {
       const response = await this.authedRequest(`collections`, 'DELETE', {
         id: collectionId,
@@ -787,9 +809,17 @@ export class PubPub {
       return response ?? { success: true }
     },
 
-    addPub: async (props: { collectionId: string; pubId: string }) => {
+    /**
+     * Add a pub to a collection
+     *
+     * @param collectionId The id of the collection you want to add the pub to
+     * @param pubId The id of the pub you want to add to the collection
+     *
+     */
+    addPub: async (collectionId: string, pubId: string) => {
       const response = await this.authedRequest(`collectionPubs`, 'POST', {
-        ...props,
+        collectionId,
+        pubId,
         communityId: this.communityId,
       })
       return response
@@ -803,43 +833,27 @@ export class PubPub {
       return response
     },
 
+    /**
+     * Methods for interacting with attributions
+     */
     attributions: this.makeAttributionsOperations('collection'),
     hacks: {
+      /**
+       * HACK: Get a list of all collections. Currently done by scraping the dashboard.
+       */
       getMany: this.hacks.getCollections,
+      /**
+       * HACK: Gets the data from a specific collection, requires the slug.
+       * If you do not have the slug, use `getByIdSlow` instead.
+       */
       get: this.hacks.getCollection,
+      /**
+       * HACK: Get a specific collection. Currently just runs getMany and finds the correct collection from the list,
+       * therefore is not faster than getMany.
+       */
       getByIdSlow: this.hacks.getFullCollectionById_SLOW,
     },
-    // /**
-    //  * @borrows this.hacks as hacks
-    //  */
-    // const collection = {
-    //   create,
-    //   update,
-    //   addPub,
-    //   removePub,
-    //   attributions: this.makeAttributionsOperations<'collection'>('collection'),
-    //   /**
-    //    * As there are no native ways to get collections, we're using the hacks to get them
-    //    *
-    //    * Very unreliable, could break at any time, plus very slow.
-    //    */
-    //   hacks: {
-    //     getMany: this.hacks.getCollections,
-    //     /**
-    //      * The only way I currently know to get a collection is to go to the dashboard and scrape the data from there
-    //      *
-    //      * Tip: this data is also stored on any Pub that belongs to a collection if you get it through any of the `pub.get` or `pub.getMany` methods!
-    //      * This saves you from doing the extra two requests to get all collections, find the one slug you want from the id, then get the collection.
-    //      *
-    //      */
-    //     get: this.hacks.getCollection,
-    //     getByIdSlow: this.hacks.getFullCollectionById_SLOW,
-    //   },
-    // }
-    // return collection
   }
-
-  // collection = this.makeCollectionOperations()
 
   private makeAttributionsOperations<T extends 'pub' | 'collection'>(type: T) {
     const path = type === 'pub' ? 'pubAttributions' : 'collectionAttributions'
@@ -928,23 +942,6 @@ export class PubPub {
 
         return response
       },
-
-      // return {
-      //   ...(type === 'pub' ? { get: getAttributions } : {}),
-      //   create: post,
-      //   /**
-      //    * @inheritdoc put
-      //    */
-      //   update: put,
-      //   remove: del,
-      // } as T extends 'pub'
-      //   ? {
-      //       get: typeof getAttributions
-      //       create: typeof post
-      //       update: typeof put
-      //       remove: typeof del
-      //     }
-      //   : { create: typeof post; update: typeof put; remove: typeof del }
     }
   }
 
@@ -1049,11 +1046,13 @@ export class PubPub {
   }
 
   /**
-   * Constructs the `PubPub.community` methods
+   * Methods for interacting with PubPub on the community level, e.g. changing the community name, adding CSS etc.
    */
-  // private makeCommuntiyOperations = () => {
   community = {
-    put: async ({
+    /**
+     * Update the community settings
+     */
+    update: async ({
       pubHeaderTheme,
       license,
       citationStyle,
@@ -1133,6 +1132,9 @@ export class PubPub {
       return response
     },
 
+    /**
+     * Update the global community CSS
+     */
     css: async (css: string) => {
       const response = await this.authedRequest('customScripts', 'POST', {
         communityId: this.communityId,
@@ -1143,18 +1145,11 @@ export class PubPub {
       return response
     },
 
+    /**
+     * HACK: Get community data
+     */
     get: this.hacks.getCommunityData,
-
-    // return {
-    //   update: put,
-    //   css,
-    //   hacks: {
-    //     get: this.hacks.getCommunityData,
-    //   },
-    // }
   }
-
-  // community = this.makeCommuntiyOperations()
 
   /**
    * More complete import function thta also takes care of properly uploading and labeling all files.
