@@ -28,12 +28,18 @@ import {
   WorkerTaskImportOutput,
   WorkerTaskResponse,
   Pub,
+  ReleaseResponse,
 } from './types'
 import { InitialData } from './initialData'
-import { CollectionScopeData } from './collectionData'
+import { CollectionInitialData, CollectionScopeData } from './collectionData'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
-import { PubViewData } from './viewData'
+import {
+  CollectionViewData,
+  CommunityViewData,
+  PubViewDataDash,
+  PubViewDataPub,
+} from './viewData'
 import { writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
@@ -41,6 +47,13 @@ import { initFirebase } from './firebase/initFirebase'
 import { Fragment } from 'prosemirror-model'
 import { buildSchema } from './editor/schema'
 import { readFile } from 'fs/promises'
+
+/**
+ * Small test to see if a string looks like a pub slug,
+ * such that we have better type inference for the result
+ */
+const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
+  /pub\/.*?$/.test(pub)
 
 /**
  * PubPub API client
@@ -115,23 +128,31 @@ export class PubPub {
     return response
   }
 
-  async authedRequest<T extends Record<string, any> = Record<string, unknown>>(
-    path: string,
-    method: 'GET',
-    options?: RequestInit
-  ): Promise<T | string>
-  async authedRequest<T extends Record<string, any> = Record<string, unknown>>(
+  async authedRequest<
+    T extends Record<string, any> | string | void =
+      | Record<string, unknown>
+      | string
+  >(path: string, method: 'GET', options?: RequestInit): Promise<T>
+  async authedRequest<
+    T extends Record<string, any> | string | void =
+      | Record<string, unknown>
+      | string
+  >(
     path: string,
     method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     body?: Record<string, any>,
     options?: RequestInit
-  ): Promise<T | string>
-  async authedRequest<T extends Record<string, any> = Record<string, unknown>>(
+  ): Promise<T>
+  async authedRequest<
+    T extends Record<string, any> | string | void =
+      | Record<string, unknown>
+      | string
+  >(
     path: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     bodyOrOptions: Record<string, any> | RequestInit,
     optionsMabye?: RequestInit
-  ): Promise<T | string> {
+  ): Promise<T> {
     const options = method === 'GET' ? bodyOrOptions : optionsMabye
     const body = method !== 'GET' ? JSON.stringify(bodyOrOptions) : undefined
 
@@ -409,12 +430,16 @@ export class PubPub {
         noteContent?: string
       } = {}
     ) => {
-      const response = await this.authedRequest(`releases`, 'POST', {
-        pubId,
-        communityId: this.communityId,
-        noteText,
-        noteContent,
-      })
+      const response = await this.authedRequest<ReleaseResponse>(
+        `releases`,
+        'POST',
+        {
+          pubId,
+          communityId: this.communityId,
+          noteText,
+          noteContent,
+        }
+      )
       return response
     },
 
@@ -506,6 +531,9 @@ export class PubPub {
       // if it doesnt end with /draft, add it
 
       const testUrl = pubSlug.endsWith('/draft') ? pubSlug : `${pubSlug}/draft`
+      if (!looksLikePubSlug(testUrl)) {
+        throw new Error('Invalid pub slug, should be of the form pub/slug')
+      }
 
       const pageData = await this.hacks.getPageData(testUrl, 'view-data')
 
@@ -569,6 +597,10 @@ export class PubPub {
         throw new Error('No slug or id provided')
       }
 
+      if (!looksLikePubSlug(slug)) {
+        throw new Error('Invalid slug, should be of the form pub/slug')
+      }
+
       const viewData = await this.hacks.getPageData(slug, 'view-data')
 
       const { initialDocKey, downloads, id, initialDoc } = viewData.pubData
@@ -603,7 +635,16 @@ export class PubPub {
    * Very unreliable, could break at any time.
    */
   hacks = {
-    getPageData: (async (
+    /**
+     * Get the data from a page that's passed as JSON in a script tag to the page
+     *
+     * @param slug The slug of the page
+     * @param data The type of data you want to get, either `initial-data` or `view-data`
+     */
+    getPageData: async <
+      S extends string = string,
+      D extends 'initial-data' | 'view-data' = 'initial-data'
+    >(
       /**
        * The slug of the page
        *
@@ -613,9 +654,27 @@ export class PubPub {
        *
        * You can also use the full url, we will extract the slug
        */
-      slug: string,
-      data: 'initial-data' | 'view-data' = 'initial-data'
-    ) => {
+      slug: S,
+      data: D = 'initial-data' as D
+    ): Promise<
+      D extends 'initial-data' | undefined
+        ? S extends `dash/${infer T}/${string}`
+          ? T extends 'collection'
+            ? CollectionInitialData
+            : InitialData
+          : InitialData
+        : S extends `dash/${infer T}/${string}`
+        ? T extends 'collection'
+          ? CollectionViewData
+          : T extends 'pub'
+          ? PubViewDataDash
+          : T extends 'overview'
+          ? CommunityViewData
+          : Record<string, unknown>
+        : S extends `pub/${string}`
+        ? PubViewDataPub
+        : Record<string, unknown>
+    > => {
       const response = await this.getPage(slug)
 
       const unparsedCommunityData = response.match(
@@ -626,22 +685,22 @@ export class PubPub {
         throw new Error(`Could not find ${data} data`)
       }
 
-      if (data === 'initial-data') {
+      if (data !== 'view-data') {
         const communityData = JSON.parse(
           unparsedCommunityData[1].replace(/&quot;/g, '"')
-        ) as InitialData
+        )
 
         return communityData
       } else {
-        return JSON.parse(
-          unparsedCommunityData[1].replace(/&quot;/g, '"')
-        ) as PubViewData
+        return JSON.parse(unparsedCommunityData[1].replace(/&quot;/g, '"'))
       }
-    }) as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
-      ((page: string, data?: 'view-data') => Promise<PubViewData>),
+    },
+    //as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
+    //      ((page: string, data?: 'view-data') => Promise<PubViewData>),
 
     getCommunityData: async () => {
       const communityData = await this.hacks.getPageData('dash/overview')
+      console.log(communityData)
       return communityData?.communityData
     },
 
@@ -661,12 +720,7 @@ export class PubPub {
         `dash/collection/${slug}/settings/details`
       )
 
-      const collectionElements = collectionData?.scopeData
-        ?.elements as unknown as CollectionScopeData['elements']
-
-      const collectionScopeData = collectionElements?.activeCollection
-
-      return collectionScopeData
+      return collectionData.scopeData.elements.activeCollection
     },
 
     getFullCollectionById_SLOW: async (collectionId: string) => {
@@ -702,7 +756,7 @@ export class PubPub {
       title: string
       kind: CollectionKind
     }) => {
-      const response = await this.authedRequest(`collections`, 'POST', {
+      const response = await this.authedRequest<void>(`collections`, 'POST', {
         communityId: this.communityId,
         title,
         kind,
@@ -802,11 +856,11 @@ export class PubPub {
      * @param collectionId The id of the collection you want to remove
      */
     remove: async (collectionId: string) => {
-      const response = await this.authedRequest(`collections`, 'DELETE', {
+      const response = await this.authedRequest<void>(`collections`, 'DELETE', {
         id: collectionId,
         communityId: this.communityId,
       })
-      return response ?? { success: true }
+      return { success: true }
     },
 
     /**
@@ -816,20 +870,40 @@ export class PubPub {
      * @param pubId The id of the pub you want to add to the collection
      *
      */
-    addPub: async (collectionId: string, pubId: string) => {
-      const response = await this.authedRequest(`collectionPubs`, 'POST', {
-        collectionId,
-        pubId,
+    addPub: async (collectionPubId: string) => {
+      const response = await this.authedRequest<{
+        id: string
+        collectionId: string
+        pubId: string
+        rank: string
+        pubRank: string
+        updatedAt: string
+        createdAt: string
+        contextHint: null
+        isPrimary: boolean
+      }>(`collectionPubs`, 'POST', {
+        collectionPubId,
         communityId: this.communityId,
       })
       return response
     },
 
-    removePub: async (props: { collectionId: string; pubId: string }) => {
-      const response = await this.authedRequest(`collectionPubs`, 'DELETE', {
-        ...props,
-        communityId: this.communityId,
-      })
+    /**
+     * Remove a pub from a collection
+     *
+     * @param collectionPubId The id of the pub you want to remove
+     *
+     * @returns The id of the removed pub
+     */
+    removePub: async (collectinPubId: string) => {
+      const response = await this.authedRequest<string>(
+        `collectionPubs`,
+        'DELETE',
+        {
+          id: collectinPubId,
+          communityId: this.communityId,
+        }
+      )
       return response
     },
 
@@ -1136,7 +1210,7 @@ export class PubPub {
      * Update the global community CSS
      */
     css: async (css: string) => {
-      const response = await this.authedRequest('customScripts', 'POST', {
+      const response = await this.authedRequest<{}>('customScripts', 'POST', {
         communityId: this.communityId,
         type: 'css',
         content: css,
@@ -1214,7 +1288,7 @@ export class PubPub {
       /**
        * If its cached, pubpub just immediately returns the url
        */
-      if (workerTaskId.url) {
+      if ('url' in workerTaskId) {
         // throw new Error('Worker task id is not a string')
         return workerTaskId as WorkerTaskExportOutput
       }

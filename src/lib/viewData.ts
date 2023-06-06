@@ -1,8 +1,20 @@
-import { Pub } from './types'
+import { Collection } from './collectionData'
+import {
+  CollectionPubWithAttributions,
+  Discussion,
+  Pub,
+  PubAttribution,
+  Release,
+  UserScopeVisit,
+} from './types'
 
-export interface PubViewData {
+export interface PubViewDataDash {
+  pubData: SanitizedPubData
+}
+export interface PubViewDataPub {
   pubData: PubDataViewData
 }
+
 export interface PubDataViewData extends Pub {
   initialDoc: {
     type: 'doc'
@@ -25,4 +37,47 @@ export interface PubDataViewData extends Pub {
   firebaseToken: string
   isAVisitingCommenter: boolean
   isReviewingPub: boolean
+}
+
+export type SanitizedPubData = Pub & {
+  viewHash: string | null
+  editHash: string | null
+  reviewHash: string | null
+  commentHash: string | null
+  attributions: PubAttribution[]
+  discussions: Discussion[]
+  collectionPubs: CollectionPubWithAttributions[]
+  isRelease: boolean
+  releases: Release[]
+  releaseNumber: number | null
+}
+
+export interface CollectionViewData {
+  overviewData: {
+    collection: Collection
+    pubs: Pub[]
+    collectionPubs: CollectionPub[]
+    hasEnabledSubmissionWorkflow: null
+  }
+}
+
+export interface CollectionPub {
+  id: string
+  pubId: string
+  collectionId: string
+  contextHint: string | null
+  rank: string
+  pubRank: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CommunityViewData {
+  overviewData: {
+    collections: Collection[]
+    pubs: Pub[]
+    includesAllPubs: boolean
+    userScopeVisits: UserScopeVisit[]
+    recentPubs: Pub[]
+  }
 }

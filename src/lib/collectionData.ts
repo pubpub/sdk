@@ -1,3 +1,7 @@
+export type CollectionInitialData = {
+  scopeData: CollectionScopeData
+}
+
 export type CollectionScopeData = {
   elements: Elements
   optionsData: any[]

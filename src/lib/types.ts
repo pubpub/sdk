@@ -3,57 +3,13 @@ import { ProposedMetadata } from './editor/firebase'
 import { ResourceWarning } from './editor/types'
 import { InitialData } from './initialData'
 import { PubViewData } from './viewData'
+import { DefinitelyHas } from './type-helpers'
 
 export type Chapter = {
   chapter: number
   id: string
   data: Pub
 }
-
-// export type Pub = {
-//   id: string
-//   licenseSlug: string
-//   citationStyle: string
-//   citationInlineStyle: string
-//   pubEdgeListingDefaultsToCarousel: boolean
-//   pubEdgeDescriptionVisible: boolean
-//   title: string
-//   slug: string
-//   communityId: string
-//   headerBackgroundColor: string
-//   headerStyle: string
-//   viewHash: string
-//   editHash: string
-//   reviewHash: string
-//   commentHash: string
-//   draftId: string
-//   updatedAt: string
-//   createdAt: string
-//   description?: string
-//   avatar?: string
-//   useHeaderImage?: boolean
-//   firstPublishedAt?: string
-//   lastPublishedAt?: string
-//   draftEditHash?: string
-//   draftViewHash?: string
-//   doi?: string
-//   labels?: any
-//   isCommunityAdminManaged?: boolean
-//   communityAdminDraftPermissions: string
-//   draftPermissions: string
-//   review?: any
-//   downloads?: Downloads[]
-//   headerBackgroundType: string
-//   headerBackgroundImage?: any
-//   customPublishedAt?: string
-//   metadata?: any
-//   crossrefDepositRecordId?: string
-//   nodeLabels: NodeLabels
-//   scopeSummaryId?: any
-//   htmlTitle?: string
-//   facetsMigratedAt?: any
-//   htmlDescription?: string
-// }
 
 export type PubAttributionsPostPayload = {
   name: string
@@ -452,7 +408,7 @@ type CollectionPub = {
   collection: Collection
 }
 
-type Metadata = {
+export type Metadata = {
   doi?: string
   url?: string
   issue?: string
@@ -462,7 +418,7 @@ type Metadata = {
   printPublicationDate?: string
 }
 
-type Attribution = {
+export type Attribution = {
   id: string
   name: string
   avatar?: any
@@ -479,7 +435,7 @@ type Attribution = {
   user: User
 }
 
-type Release = {
+export type Release = {
   id: string
   noteContent?: NoteContent
   noteText?: string
@@ -683,4 +639,175 @@ export type GetPageDataOverload = {
   (page: string, data: 'view-data' | 'initial-data'):
     | Promise<PubViewData>
     | Promise<InitialData>
+}
+
+export type ReleaseResponse = {
+  id: string
+  historyKeyMissing: boolean
+  noteContent: string | null
+  noteText: string | null
+  historyKey: number
+  userId: string
+  pubId: string
+  docId: string
+  updatedAt: string
+  createdAt: string
+}
+
+export type PubAttribution = {
+  id: string
+  name: string
+  avatar?: string
+  title?: string
+  order: number
+  isAuthor?: boolean
+  roles?: string[]
+  affiliation?: string
+  orcid?: string
+  userId?: string
+  user?: MinimalUser
+  createdAt: string
+  pubId: string
+}
+
+export type MinimalUser = {
+  id: string
+  slug?: string
+  initials: string
+  fullName: string
+  firstName: string
+  lastName: string
+  avatar?: string
+  title?: string
+  orcid?: string
+  isShadowUser?: boolean
+  publicEmail?: string
+  feedback?: string
+}
+
+export type DiscussionAnchor = {
+  id: string
+  discussionId: string
+  historyKey: number
+  selection: null | { type: 'text'; anchor: number; head: number }
+  originalText: string
+  originalTextPrefix: string
+  originalTextSuffix: string
+  isOriginal: boolean
+}
+
+export type VisibilityAccess = 'private' | 'members' | 'public'
+
+export type VisibilityUser = {
+  id: string
+  visibilityId: string
+  userId: string
+}
+
+export type Visibility = {
+  id: string
+  access: VisibilityAccess
+  users: VisibilityUser[]
+}
+
+export type TaggedVisibilityParent =
+  | { type: 'discussion'; value: Discussion }
+  | { type: 'review'; value: Review }
+
+export type Review = {
+  id: string
+  author: User
+  createdAt: string
+  updatedAt: string
+  title: string
+  number: number
+  status: 'open' | 'closed' | 'completed'
+  releaseRequested: boolean
+  threadId: string
+  thread: Thread
+  visibilityId: string
+  visibility?: Visibility
+  userId: string
+  pubId: string
+  pub?: Pub
+  reviewContent?: DocJson
+  reviewers?: Reviewer[]
+}
+
+export type Reviewer = {
+  id: string
+  name: string
+}
+
+export type Discussion = {
+  id: string
+  title: string
+  number: number
+  isClosed: boolean
+  labels: string[]
+  threadId: string
+  visibilityId: string
+  userId: string
+  pubId: string
+  anchors?: DiscussionAnchor[]
+  visibility: Visibility
+  thread?: Thread
+  pub?: Pub
+}
+
+export type Commenter = {
+  id: string
+  name: string
+}
+
+export type ThreadEvent = {
+  id: string
+  type?: string
+  data?: {}
+  userId: string
+  threadId: string
+}
+
+export type ThreadComment = {
+  id: string
+  createdAt: string
+  updatedAt: string
+  text: string
+  content: DocJson
+  userId: null | string
+  threadId: string
+  commenterId: null | string
+  author?: null | User
+  commenter?: null | Commenter
+}
+
+export type Thread = {
+  id: string
+  createdAt: string
+  updatedAt: string
+  locked?: boolean
+  comments: ThreadComment[]
+  events: ThreadEvent[]
+}
+
+export type DocJson = { type: 'doc'; attrs: any; content: any[] }
+
+export type CollectionPubWithAttributions = CollectionPub & {
+  collection: DefinitelyHas<Collection, 'attributions'>
+}
+
+export type Doc = {
+  id: string
+  createdAt: string
+  updatedAt: string
+  content: DocJson
+}
+
+export type UserScopeVisit = {
+  id: string
+  communityId: string
+  updatedAt: string
+  collectionId: null | string
+  pubId: null | string
+  userId: string
 }
