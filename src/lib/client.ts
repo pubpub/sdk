@@ -1059,7 +1059,7 @@ export class PubPub {
       parseInt(process.version.slice(1).split('.')[0]) < 18
     ) {
       throw new Error(
-        'Node version must be 18 or higher to use uploadFile, as it depends on native FormData and Blob support'
+        'Node version must be 18 or higher to use uploadFile, as it depends on native fetch, FormData and Blob support'
       )
     }
 
