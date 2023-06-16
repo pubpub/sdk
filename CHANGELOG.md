@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.8.0
+
+### Minor Changes
+
+- Switch to using native fetch and formdata, add better types
+
 ## 0.7.0
 
 ### Minor Changes
