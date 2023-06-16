@@ -2,7 +2,7 @@ import { Collection } from './collectionData'
 import { ProposedMetadata } from './editor/firebase'
 import { ResourceWarning } from './editor/types'
 import { InitialData } from './initialData'
-import { PubViewData } from './viewData'
+import { PubViewDataPub } from './viewData'
 import { DefinitelyHas } from './type-helpers'
 
 export type Chapter = {
@@ -634,10 +634,10 @@ export type FacetsProps = {
 
 export type GetPageDataOverload = {
   (page: string, data: 'initial-data'): Promise<InitialData>
-  (page: string, data: 'view-data'): Promise<PubViewData>
+  (page: string, data: 'view-data'): Promise<PubViewDataPub>
 
   (page: string, data: 'view-data' | 'initial-data'):
-    | Promise<PubViewData>
+    | Promise<PubViewDataPub>
     | Promise<InitialData>
 }
 
