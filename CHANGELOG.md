@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.8.1
+
+### Patch Changes
+
+- Add .cts files so moduleResolution: node16/nodenext works in typescript
+
 ## 0.8.0
 
 ### Minor Changes
