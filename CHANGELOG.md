@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.8.2
+
+### Patch Changes
+
+- Actually fix the node16 issue
+
 ## 0.8.1
 
 ### Patch Changes
