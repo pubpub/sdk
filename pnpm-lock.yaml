@@ -60,6 +60,9 @@ devDependencies:
   prettier-plugin-tailwindcss:
     specifier: ^0.2.5
     version: 0.2.5(prettier-plugin-svelte@2.9.0)(prettier@2.8.4)
+  readdirp:
+    specifier: ^3.6.0
+    version: 3.6.0
   svelte:
     specifier: ^3.57.0
     version: 3.57.0
