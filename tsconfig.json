@@ -1,4 +1,5 @@
 {
+  //  "extends": "../tsconfig.json",
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -100,9 +101,18 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "noEmit": true /* Disable emitting files from a compilation. */,
-    "noImplicitAny": true
+    //   "noEmit": true /* Disable emitting files from a compilation. */,
+    //    "noImplicitAny": true,
+    "paths": {
+      "utils/api/client": ["../utils/api/client.ts"],
+      "facets": ["../facets"]
+    }
   },
-  "include": ["src/**.ts", "src/lib/client.ts", "src/lib/initialData.ts"],
+  "include": [
+    "src/**.ts",
+    "src/lib/client.ts",
+    "src/lib/initialData.ts",
+    "../contract/**.ts"
+  ],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }

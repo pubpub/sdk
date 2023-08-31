@@ -48,6 +48,8 @@ import { Fragment } from 'prosemirror-model'
 import { buildSchema } from './editor/schema'
 import { readFile } from 'fs/promises'
 
+import { createClient } from 'utils/api/client'
+
 /**
  * Small test to see if a string looks like a pub slug,
  * such that we have better type inference for the result
@@ -83,9 +85,18 @@ export class PubPub {
 
   private AWS_S3 = 'https://s3-external-1.amazonaws.com'
 
+  client: ReturnType<typeof createClient>
+
   constructor(communityId: string, communityUrl: string) {
     this.communityId = communityId
     this.communityUrl = communityUrl
+
+    this.client = createClient({
+      baseUrl: communityUrl,
+      baseHeaders: {
+        Cookie: this.cookie || '',
+      },
+    })
   }
 
   /**
@@ -115,6 +126,14 @@ export class PubPub {
     }
 
     this.cookie = cookie //.join('; ')
+
+    this.client = createClient({
+      baseUrl: this.communityUrl,
+      baseHeaders: {
+        Cookie: cookie || '',
+      },
+    })
+
     this.loggedIn = true
   }
 

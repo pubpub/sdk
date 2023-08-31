@@ -6,8 +6,9 @@ const config = defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  bundle: false,
+  bundle: true,
   entry: ['src'],
+  minify: true,
 })
 
 export default config

@@ -7,11 +7,11 @@ export const buildSchema = () =>
   //   customMarks = {},
   //   nodeOptions = {}
   {
-    const schemaNodes = {
+    let schemaNodes = {
       ...defaultNodes,
       // ...customNodes,
     }
-    const schemaMarks = {
+    let schemaMarks = {
       ...defaultMarks,
       // ...customMarks,
     }
@@ -31,8 +31,8 @@ export const buildSchema = () =>
       (nodeKey) => {
         if (!(nodeKey in defaultNodes)) {
           const { [nodeKey]: _, ...rest } = defaultNodes
-          // @ts-expect-error types??
-          defaultNodes = rest
+          // // @ts-expect-error types??
+          //    defaultNodes = rest
           //   delete schemaNodes[nodeKey]
         }
       }
@@ -40,7 +40,7 @@ export const buildSchema = () =>
     Object.keys(schemaMarks).forEach((markKey) => {
       if (!schemaMarks[markKey]) {
         const { [markKey]: _, ...rest } = schemaMarks
-        // @ts-expect-error types??
+        // // @ts-expect-error types??
         schemaMarks = rest
         //   delete schemaMarks[markKey]
       }
