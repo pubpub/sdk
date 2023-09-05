@@ -12,7 +12,7 @@
     // "disableReferencedProjectLoad": true,             /* Reduce the number of projects loaded automatically by TypeScript. */
 
     /* Language and Environment */
-    "target": "ESNext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "target": "ES6" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     // "jsx": "preserve",                                /* Specify what JSX code is generated. */
     // "experimentalDecorators": true,                   /* Enable experimental support for TC39 stage 2 draft decorators. */
@@ -101,11 +101,22 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    //   "noEmit": true /* Disable emitting files from a compilation. */,
+    "noEmit": true /* Disable emitting files from a compilation. */,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictNullChecks": true,
+    "pretty": true,
+    "noImplicitAny": false,
+    "jsx": "react",
     //    "noImplicitAny": true,
     "paths": {
       "utils/api/client": ["../utils/api/client.ts"],
-      "facets": ["../facets"]
+      "utils/*": ["../utils/*"],
+      "facets": ["../facets/index.ts"],
+      "facets/*": ["../facets/*"],
+      "types": ["../types/index.ts"],
+      "types/*": ["../types/*"],
+      "server/*": ["../server/*"]
     }
   },
   "include": [

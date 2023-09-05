@@ -1,10 +1,9 @@
-import { describe, it, beforeAll, expect } from 'vitest'
+import { describe, it, beforeAll, expect, afterAll } from 'vitest'
 import { fileURLToPath } from 'url'
-import { PubPub } from '../src/lib/client'
-import { afterAll } from 'vitest'
-import { buildSchema } from '../src/lib/editor/schema'
-import { Node, Fragment, Slice } from 'prosemirror-model'
+import { Node } from 'prosemirror-model'
 import uuid from 'uuid'
+import { PubPub } from '../src/lib/client'
+import { buildSchema } from '../src/lib/editor/schema'
 
 let pubpub: PubPub
 
@@ -187,6 +186,8 @@ describe('PubPub', () => {
   }, 10000)
 
   afterAll(async () => {
-    pubpub && (await pubpub.logout())
+    if (pubpub) {
+      await pubpub.logout()
+    }
   })
 })

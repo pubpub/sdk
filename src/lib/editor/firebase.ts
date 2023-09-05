@@ -3,7 +3,6 @@ import { Step, ReplaceStep } from 'prosemirror-transform'
 import {
   compressStateJSON,
   compressStepJSON,
-  // @ts-expect-error pubpub no typey
 } from 'prosemirror-compress-pubpub'
 import uuid from 'uuid'
 import { DatabaseReference, child, set } from 'firebase/database'

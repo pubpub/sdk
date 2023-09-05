@@ -1,5 +1,9 @@
 import SHA3 from 'crypto-js/sha3'
 import encHex from 'crypto-js/enc-hex'
+import { Fragment } from 'prosemirror-model'
+import { readFile } from 'fs/promises'
+import { createClient } from 'utils/api/client'
+
 import {
   License,
   FacetsPayload,
@@ -20,18 +24,16 @@ import {
   AttributionsPayload,
   ExportPayload,
   FacetsProps,
-  GetManyOptions,
   PubsManyResponse,
   UpdateCollectionsMetaData,
   UploadPolicyResponse,
   WorkerTaskExportOutput,
   WorkerTaskImportOutput,
   WorkerTaskResponse,
-  Pub,
   ReleaseResponse,
 } from './types'
 import { InitialData } from './initialData'
-import { CollectionInitialData, CollectionScopeData } from './collectionData'
+import { CollectionInitialData } from './collectionData'
 import { generateFileNameForUpload } from './generateFileNameForUpload'
 import { generateHash } from './generateHash'
 import {
@@ -44,11 +46,7 @@ import { writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
 import { initFirebase } from './firebase/initFirebase'
 
-import { Fragment } from 'prosemirror-model'
 import { buildSchema } from './editor/schema'
-import { readFile } from 'fs/promises'
-
-import { createClient } from 'utils/api/client'
 
 /**
  * Small test to see if a string looks like a pub slug,
@@ -56,6 +54,55 @@ import { createClient } from 'utils/api/client'
  */
 const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
   /pub\/.*?$/.test(pub)
+
+type Client = ReturnType<typeof createClient>
+
+type ObjectPath<T extends object, D extends string = ''> = {
+  [K in keyof T]: `${D}${Exclude<K, symbol>}${
+    | ''
+    | (T[K] extends object ? ObjectPath<T[K], '.'> : '')}`
+}[keyof T]
+
+type DeepAccess<
+  O extends object,
+  T extends ObjectPath<O> = ObjectPath<O>
+> = T extends `${infer A extends Extract<keyof O, string>}.${infer B}`
+  ? B extends `${infer C}.${infer D}`
+    ? A extends keyof O
+      ? O[A] extends object
+        ? `${C}.${D}` extends ObjectPath<O[A]>
+          ? DeepAccess<O[A], `${C}.${D}`>
+          : never
+        : never
+      : never
+    : A extends keyof O
+    ? B extends keyof O[A]
+      ? O[A][B]
+      : never
+    : never
+  : T extends keyof O
+  ? O[T]
+  : never
+
+type DeepClient<
+  T extends ObjectPath<Client>,
+  I extends 'in' | 'out' = 'in'
+> = DeepAccess<Client, T> extends infer D
+  ? D extends (args: infer A) => infer R
+    ? I extends 'in'
+      ? A
+      : Awaited<R>
+    : D
+  : never
+
+type DeepInput<T extends ObjectPath<Client>> = DeepClient<T, 'in'>
+
+type DeepOutput<T extends ObjectPath<Client>> = DeepClient<T, 'out'>
+
+type DeepInputBody<T extends ObjectPath<Client>> =
+  'body' extends keyof DeepInput<T>
+    ? Omit<DeepInput<T>['body'], 'communityId'>
+    : never
 
 /**
  * PubPub API client
@@ -101,7 +148,7 @@ export class PubPub {
 
   /**
    * Login to the PubPub API. Needs to be called before any other method.
-   **/
+   * */
   async login(email: string, password: string) {
     const response = await fetch(`${this.communityUrl}/api/login`, {
       method: 'POST',
@@ -125,7 +172,7 @@ export class PubPub {
       ${data}`)
     }
 
-    this.cookie = cookie //.join('; ')
+    this.cookie = cookie // .join('; ')
 
     this.client = createClient({
       baseUrl: this.communityUrl,
@@ -152,6 +199,7 @@ export class PubPub {
       | Record<string, unknown>
       | string
   >(path: string, method: 'GET', options?: RequestInit): Promise<T>
+
   async authedRequest<
     T extends Record<string, any> | string | void =
       | Record<string, unknown>
@@ -162,6 +210,7 @@ export class PubPub {
     body?: Record<string, any>,
     options?: RequestInit
   ): Promise<T>
+
   async authedRequest<
     T extends Record<string, any> | string | void =
       | Record<string, unknown>
@@ -243,11 +292,7 @@ export class PubPub {
       title,
       slug,
       description,
-    }: {
-      title: string
-      slug: string
-      description?: string
-    }) => {
+    }: DeepInputBody<'page.create'>) => {
       const response = await this.authedRequest('pages', 'POST', {
         communityId: this.communityId,
         title,
@@ -258,7 +303,7 @@ export class PubPub {
     },
   }
 
-  getManyPubs = async (options?: GetManyOptions) => {
+  getManyPubs = async (options?: DeepInputBody<'pub.getMany'>['query']) => {
     const { limit, offset, ordering, collectionIds, pubIds } = options ?? {}
     const response = await this.authedRequest(`pubs/many`, 'POST', {
       alreadyFetchedPubIds: [],
@@ -292,13 +337,14 @@ export class PubPub {
      *
      * @param collectionId The id of the collection you want to add the pub to
      */
-    create: async (collectionId?: string) => {
-      const response = await this.authedRequest('pubs', 'POST', {
-        collectionId,
-        communityId: this.communityId,
+    create: async ({ collectionId }: DeepInputBody<'pub.create'>) => {
+      const response = await this.client.pub.create({
+        body: {
+          communityId: this.communityId,
+          collectionId,
+        },
       })
-
-      return response as Pub
+      return response
     },
 
     /**
@@ -404,7 +450,7 @@ export class PubPub {
           facetsPayload.facets
         )
         // facets does not return the facets, so we just set them if nothing went wrong
-        response.facets = facetsPayload.facets //facets as typeof facetsPayload.facets
+        response.facets = facetsPayload.facets // facets as typeof facetsPayload.facets
       }
       return response
     },
@@ -710,11 +756,10 @@ export class PubPub {
         )
 
         return communityData
-      } else {
-        return JSON.parse(unparsedCommunityData[1].replace(/&quot;/g, '"'))
       }
+      return JSON.parse(unparsedCommunityData[1].replace(/&quot;/g, '"'))
     },
-    //as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
+    // as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
     //      ((page: string, data?: 'view-data') => Promise<PubViewData>),
 
     getCommunityData: async () => {
@@ -864,7 +909,7 @@ export class PubPub {
         )
 
         // facets does not return the facets, so we just set them if nothing went wrong
-        response.facets = facetsPayload.facets //facetsResponse as typeof facetsPayload.facets
+        response.facets = facetsPayload.facets // facetsResponse as typeof facetsPayload.facets
       }
 
       return response
@@ -1219,7 +1264,7 @@ export class PubPub {
         )) as { facets: (typeof facetsPayload)['facets'] }
 
         // facets does not return the facets, so we just set them if nothing went wrong
-        response = { ...response, facets: facetsPayload.facets } //facetsResponse.facets }
+        response = { ...response, facets: facetsPayload.facets } // facetsResponse.facets }
       }
 
       return response
