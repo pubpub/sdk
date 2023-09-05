@@ -1,48 +1,13 @@
 import { Node, Fragment, Slice } from 'prosemirror-model'
 import { Step, ReplaceStep } from 'prosemirror-transform'
-import {
-  compressStateJSON,
-  compressStepJSON,
-} from 'prosemirror-compress-pubpub'
+import { compressStepJSON } from 'prosemirror-compress-pubpub'
 import uuid from 'uuid'
-import { DatabaseReference, child, set } from 'firebase/database'
-import { buildSchema } from './schema'
 
-import { CompressedChange, CompressedKeyable, ResourceWarning } from './types'
+import { buildSchema } from '../../editor/schema'
+import { CompressedChange, ResourceWarning } from '../../editor/types'
+import { getFirebaseChild, writeFirebase } from './utils'
 
-export const firebaseTimestamp = { '.sv': 'timestamp' }
-
-export const storeCheckpoint = async (
-  firebaseRef: DatabaseReference,
-  doc: Node,
-  keyNumber: number
-) => {
-  const checkpoint = {
-    d: compressStateJSON({ doc: doc.toJSON() }).d,
-    k: keyNumber,
-    t: firebaseTimestamp,
-  }
-  await Promise.all([
-    set(child(firebaseRef, `checkpoints/${keyNumber}`), checkpoint),
-    set(child(firebaseRef, 'checkpoint'), checkpoint),
-    set(child(firebaseRef, `checkpointMap/${keyNumber}`), firebaseTimestamp),
-  ])
-}
-
-export const flattenKeyables = (
-  keyables: Record<string, CompressedKeyable>
-): CompressedChange[] => {
-  const orderedKeys = Object.keys(keyables).sort(
-    (a, b) => parseInt(a, 10) - parseInt(b, 10)
-  )
-  return orderedKeys.reduce((changes: CompressedChange[], key: string) => {
-    const entry = keyables[key]
-    if (Array.isArray(entry)) {
-      return [...changes, ...entry]
-    }
-    return [...changes, entry]
-  }, [])
-}
+export const firebaseTimestamp = { '.sv': 'timestamp' } as const
 
 export const createFirebaseChange = (
   steps: readonly Step[],
@@ -54,10 +19,6 @@ export const createFirebaseChange = (
     s: steps.map((step) => compressStepJSON(step.toJSON())),
     t: firebaseTimestamp,
   }
-}
-
-export const getFirebaseConnectionMonitorRef = (ref: DatabaseReference) => {
-  return child(ref.root, '.info/connected')
 }
 
 export type Doc = {
@@ -90,15 +51,23 @@ export type ProposedMetadata = {
 }
 
 export const writeDocumentToPubDraft = async (
-  draftRef: DatabaseReference,
+  draftRoot: string,
   document: Doc,
+  token: string,
   {
     schema,
     initialDocKey,
+    overwrite = false,
     postProcessor,
   }: {
     schema?: ReturnType<typeof buildSchema>
     initialDocKey?: number
+    /**
+     * Whether to overwrite the document at the given key or to just add to it.
+     *
+     * @default false
+     */
+    overwrite?: boolean
     /**
      * A function that takes the document and returns a new document.
      *
@@ -136,5 +105,20 @@ export const writeDocumentToPubDraft = async (
   )
   const replaceStep = new ReplaceStep(0, 0, documentSlice)
   const change = createFirebaseChange([replaceStep], 'bulk-importer')
-  await set(child(child(draftRef, 'changes'), key.toString()), change)
+
+  if (overwrite) {
+    return await writeFirebase(
+      getFirebaseChild(draftRoot.toString(), 'changes'),
+      token,
+      {
+        0: change,
+      }
+    )
+  }
+
+  return await writeFirebase(
+    getFirebaseChild(draftRoot.toString(), 'changes', key.toString()),
+    token,
+    change
+  )
 }

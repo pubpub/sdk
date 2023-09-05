@@ -42,9 +42,9 @@ import {
   PubViewDataDash,
   PubViewDataPub,
 } from './viewData'
-import { writeDocumentToPubDraft } from './editor/firebase'
 import { labelFiles } from './formats'
-import { initFirebase } from './firebase/initFirebase'
+import { signInWithCustomToken } from './firebase/rest/signInWithCustomToken'
+import { writeDocumentToPubDraft } from './firebase/rest/firebase'
 
 import { buildSchema } from './editor/schema'
 
@@ -606,9 +606,13 @@ export class PubPub {
 
       const firebaseToken = pageData.pubData.firebaseToken
       const firebasePath = pageData.pubData.draft.firebasePath
-      const firebaseRef = await initFirebase(firebasePath, firebaseToken)
 
-      if (!firebaseRef) {
+      const firebaseRoot = `https://pubpub-v6-prod.firebaseio.com/${firebasePath}`
+
+      const { idToken: token } = await signInWithCustomToken(firebaseToken)
+      // const firebaseRef = await initFirebase(firebasePath, firebaseToken)
+
+      if (!token) {
         throw new Error('Could not connect to firebase')
       }
 
@@ -626,15 +630,17 @@ export class PubPub {
         : await this.importFull(filesToImport as FileImportPayload[])
 
       const docImport = await writeDocumentToPubDraft(
-        firebaseRef,
+        firebaseRoot,
         importedFiles.doc,
+        token,
         {
           initialDocKey,
           postProcessor,
         }
       )
       console.log(
-        `Succesfully imported ${filesToImport.length} files to ${pubSlug}`
+        `Succesfully imported ${filesToImport.length} files to ${pubSlug}`,
+        docImport
       )
 
       return { importedFiles }

@@ -1,9 +1,9 @@
 import { Collection } from './collectionData'
-import { ProposedMetadata } from './editor/firebase'
 import { ResourceWarning } from './editor/types'
 import { InitialData } from './initialData'
 import { PubViewDataPub } from './viewData'
 import { DefinitelyHas } from './type-helpers'
+import { ProposedMetadata } from './firebase/rest/firebase'
 
 export type Chapter = {
   chapter: number
