@@ -5,6 +5,7 @@ const config = defineConfig({
   dts: true,
   clean: true,
   bundle: true,
+  metafile: true,
   entry: ['src'],
   minify: false,
 })

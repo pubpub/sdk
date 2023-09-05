@@ -40,7 +40,7 @@
     // "noResolve": true,                                /* Disallow 'import's, 'require's or '<reference>'s from expanding the number of files TypeScript should add to a project. */
 
     /* JavaScript Support */
-    // "allowJs": true,                                  /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */
+    "allowJs": true /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */,
     // "checkJs": true,                                  /* Enable error reporting in type-checked JavaScript files. */
     // "maxNodeModuleJsDepth": 1,                        /* Specify the maximum folder depth used for checking JavaScript files from 'node_modules'. Only applicable with 'allowJs'. */
 
@@ -102,6 +102,7 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "noEmit": true /* Disable emitting files from a compilation. */,
+    "disableSizeLimit": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictNullChecks": true,
@@ -116,7 +117,13 @@
       "facets/*": ["../facets/*"],
       "types": ["../types/index.ts"],
       "types/*": ["../types/*"],
-      "server/*": ["../server/*"]
+      "server/*": ["../server/*"],
+      "client/*": ["../client/*"],
+      "components": ["../client/components/index.ts"],
+      "components/*": ["../client/components/*"],
+      "containers": ["../client/containers/index.ts"],
+      "containers/*": ["../client/containers/*"],
+      "deposit/*": ["../deposit/*"]
     }
   },
   "include": [
@@ -125,5 +132,5 @@
     "src/lib/initialData.ts",
     "../contract/**.ts"
   ],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "web"]
 }
