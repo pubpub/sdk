@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup'
+import { build, defineConfig } from 'tsup'
 
 const config = defineConfig({
   format: ['cjs', 'esm'],
@@ -8,6 +8,11 @@ const config = defineConfig({
   metafile: true,
   entry: ['src'],
   minify: false,
+  sourcemap: true,
+  treeshake: {
+    preset: 'smallest',
+  },
+  splitting: true,
 })
 
 export default config
