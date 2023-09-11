@@ -7,7 +7,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup && npm run fix-zod",
+    "build": "tsup",
     "lint": "tsc",
     "ci": "rm -rf dist && pnpm run lint && pnpm run test && pnpm run build ",
     "prepublish": "npm run ci",
@@ -21,7 +21,7 @@
   "keywords": [
     "pubpub",
     "api",
-    "client",
+    "sdk",
     "client",
     "publishing"
   ],
@@ -87,5 +87,8 @@
     "vite": "^4.1.4",
     "vite-tsconfig-paths": "^4.2.0",
     "vitest": "^0.29.2"
-  }
+  },
+  "workspaces": [
+    "core"
+  ]
 }
