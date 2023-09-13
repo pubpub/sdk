@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 0.9.0
+
+### Minor Changes
+
+- 7ea7d22: Use pubpub core to make client
+
 ## 0.8.2
 
 ### Patch Changes
