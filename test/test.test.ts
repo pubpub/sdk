@@ -1,126 +1,80 @@
-import { describe, it, beforeAll, expect, afterAll } from 'vitest'
-import { fileURLToPath } from 'url'
-import { Node } from 'prosemirror-model'
-import uuid from 'uuid'
+// import { describe, it, beforeAll, expect, afterAll } from 'vitest'
 import { PubPub } from '../src/lib/client'
-import { buildSchema } from '../src/lib/editor/schema'
+import { setupSDK } from './utils/setup'
+import dotenv from 'dotenv'
+dotenv.config()
 
-let pubpub: PubPub
+import app from '../core/server/server'
 
-const basicImport = {
-  doc: {
-    type: 'doc',
-    content: [
-      {
-        type: 'heading',
-        attrs: { id: 'abstract', level: 1, fixedId: 'abstract' },
-        content: [{ text: 'Abstract', type: 'text' }],
-      },
-      {
-        type: 'paragraph',
-        content: [{ text: 'This is a test abstract.', type: 'text' }],
-      },
-    ],
-  },
-  warnings: [],
-  proposedMetadata: {},
-  pandocErrorOutput: '',
-}
+const TEST_PORT = 7357 as const
 
-describe('ProseMirror', () => {
-  it('should be able to define a schema', () => {
-    const schema = buildSchema()
-    expect(schema).toBeDefined()
-  })
+const TEST_URL = process.env.COMMUNITY_URL ?? `http://localhost:${TEST_PORT}`
 
-  it('should be able to Node.fromJSON with basic docx', async () => {
-    const documentSchema = buildSchema()
-    try {
-      const hydratedDocument = Node.fromJSON(documentSchema, basicImport.doc)
+let server: ReturnType<typeof app.listen>
 
-      console.log(hydratedDocument)
-      expect(hydratedDocument).toBeDefined()
-    } catch (e) {
-      console.log(e)
-      throw e
-    }
-  })
+beforeAll(async () => {
+  // don't run app locally if you're testing against a remote community
+  if (process.env.COMMUNITY_URL) {
+    return
+  }
+  server = app.listen(TEST_PORT)
+  console.log('✅ Server started')
+})
 
-  it('should be able to create a uuid', () => {
-    const id = uuid.v4()
-    expect(id).toBeDefined()
-  })
+afterAll(async () => {
+  server.close()
 })
 
 describe('PubPub', () => {
+  let pubpub: PubPub
+  let removed = false
+  let draftPath = ''
+
+  let pub: Awaited<ReturnType<typeof pubpub.pub.create>>['body']
   beforeAll(async () => {
-    if (!process.env.COMMUNITY_ID) throw new Error('Missing community id')
-    if (!process.env.COMMUNITY_URL) throw new Error('Missing community url')
-    if (!process.env.EMAIL) throw new Error('Missing email')
-    if (!process.env.PASSWORD) throw new Error('Missing password')
-
-    pubpub = new PubPub(process.env.COMMUNITY_ID!, process.env.COMMUNITY_URL)
-
-    await pubpub.login(process.env.EMAIL ?? '', process.env.PASSWORD ?? '')
-
-    expect(pubpub.loggedIn).toBeTruthy()
+    ;({ pub, pubpub, draftPath } = await setupSDK({
+      url: TEST_URL,
+      communityId: process.env.COMMUNITY_ID!,
+      email: process.env.EMAIL,
+      password: process.env.PASSWORD,
+    }))
   })
 
-  const testUrl = 'pub/25f1ymdq/draft'
-  const testId = '10a6ef16-4d19-4e9f-93bf-0ae1a5e247bc'
-  // const testUrl = 'pub/9kvcb438/draft'
+  it('should be able to return something ', async () => {
+    const res = await fetch(`${TEST_URL}/api/pubs/many`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        alreadyFetchedPubIds: [],
+        pubOptions: {},
+        query: {
+          limit: 2,
+        },
+      }),
+    })
 
-  it('should be able to import a docx file to a pub', async () => {
-    // const file = await readFile(
-    //   fileURLToPath(new URL('./basic.docx', import.meta.url))
-    // )
+    const json = await res.json()
 
-    try {
-      const imported = await pubpub.pub.import(
-        testUrl,
-        [
-          {
-            file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
-            fileName: 'basic.docx',
-            mimeType:
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          },
-        ],
-        (doc, schema) => {
-          console.dir(doc, { depth: 5 })
-          const newDoc = doc.addToEnd(
-            schema.nodes.paragraph.create(
-              { id: 'test-id' },
-              schema.text('manually insterted text')
-            )
-          )
-          console.dir(newDoc, { depth: 5 })
-          return newDoc
-        }
-      )
+    console.log(json)
+  })
 
-      expect(imported).toBeDefined()
-    } catch (e) {
-      console.log(e)
-      throw e
-    }
-  }, 60000)
-  it('should be able to export a file, and that file should include the manually added test text', async () => {
-    try {
-      const exported = await pubpub.pub.export({
-        slug: testUrl,
-        format: 'markdown',
-      })
+  it('should be able to get pubs', async () => {
+    const { body, status } = await pubpub.client.pub.getMany({
+      body: {
+        alreadyFetchedPubIds: [],
+        pubOptions: {},
+        query: {
+          limit: 2,
+        },
+      },
+    })
 
-      expect(
-        typeof exported === 'string' &&
-          exported.startsWith('https://assets.pubpub.org')
-      ).toBeTruthy()
-    } catch (e) {
-      console.log(e)
-      throw e
-    }
-  }, 60000)
+    const firstPubId = body.pubIds[0]
+
+    expect(body.pubsById[firstPubId]).toHaveProperty('title')
+  }, 10000)
 
   it('should be able to get pubs', async () => {
     const pubs = await pubpub.pub.getMany({
@@ -173,7 +127,7 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to modify a pub', async () => {
-    const modded = await pubpub.pub.update(testId, {
+    const modded = await pubpub.pub.update(pub.id, {
       citationStyle: {
         citationStyle: 'apa-7',
         inlineCitationStyle: 'author',
@@ -185,7 +139,17 @@ describe('PubPub', () => {
     expect(modded).toHaveProperty('description')
   }, 10000)
 
+  it('should remove a pub', async () => {
+    const remove = await pubpub.pub.remove(pub.id)
+
+    removed = true
+    expect(remove).toEqual({})
+  })
+
   afterAll(async () => {
+    if (!removed) {
+      await pubpub.pub.remove(pub.id)
+    }
     if (pubpub) {
       await pubpub.logout()
     }

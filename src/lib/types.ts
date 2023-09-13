@@ -94,7 +94,7 @@ export type ExportFormats =
   | 'markdown'
   | 'odt'
   | 'tex'
-  | 'txt'
+  | 'plain'
   | 'epub'
   | 'jats'
   | 'formatted'
@@ -125,7 +125,7 @@ export type PubPutPayload = {
          * You are required to pass the mimeType to double check that you are uploading a pdf file
          */
         mimeType: 'application/pdf'
-        fileOrPath: string | Buffer | Blob | File
+        fileOrPath: Buffer | Blob | File
         fileName: string
       }
   )[]

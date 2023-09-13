@@ -9,7 +9,6 @@ export const writeFirebase = async (
   data: Record<string, any>
 ) => {
   const url = `${getFirebaseChild(path)}?auth=${token}`
-  console.log('writeFirebase', url, data)
   const res = await fetch(url, {
     method: 'PATCH',
     body: JSON.stringify(data),

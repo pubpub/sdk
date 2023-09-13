@@ -1,4 +1,5 @@
 import { build, defineConfig } from 'tsup'
+import size from '@size-limit/esbuild'
 
 const config = defineConfig({
   format: ['cjs', 'esm'],

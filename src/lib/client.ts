@@ -1,7 +1,7 @@
 import SHA3 from 'crypto-js/sha3'
 import encHex from 'crypto-js/enc-hex'
 import { Fragment } from 'prosemirror-model'
-import { readFile } from 'fs/promises'
+// import { readFile } from 'fs/promises'
 import { createClient } from 'utils/api/client'
 
 import {
@@ -236,7 +236,8 @@ export class PubPub {
       },
     })
 
-    if (!response.status || response.status < 200 || response.status >= 300) {
+    if (!response.ok || response.status < 200 || response.status >= 300) {
+      console.log(response)
       throw new Error(
         `Request failed with status ${response.status}: ${response.statusText}`
       )
@@ -337,7 +338,7 @@ export class PubPub {
      *
      * @param collectionId The id of the collection you want to add the pub to
      */
-    create: async ({ collectionId }: DeepInputBody<'pub.create'>) => {
+    create: async ({ collectionId }: DeepInputBody<'pub.create'> = {}) => {
       const response = await this.client.pub.create({
         body: {
           communityId: this.communityId,
@@ -600,6 +601,7 @@ export class PubPub {
         throw new Error('Invalid pub slug, should be of the form pub/slug')
       }
 
+      console.log({ testUrl })
       const pageData = await this.hacks.getPageData(testUrl, 'view-data')
 
       const initialDocKey = pageData.pubData.initialDocKey
@@ -650,11 +652,13 @@ export class PubPub {
       slug,
       pubId,
       format,
+      historyKey,
     }: (
       | { slug: string; pubId?: undefined }
       | { slug?: undefined; pubId: string }
     ) & {
       format: ExportFormats
+      historyKey?: number
     }) => {
       if (!slug && pubId) {
         const pub = await this.pub.get(pubId)
@@ -685,9 +689,9 @@ export class PubPub {
       }
 
       const { url } = await this.exportPub({
-        historyKey: initialDocKey,
-        format,
+        format: format === 'formatted' ? 'pdf' : format,
         pubId: pubId ?? id,
+        historyKey: historyKey ?? initialDocKey,
       })
 
       return url
@@ -765,12 +769,9 @@ export class PubPub {
       }
       return JSON.parse(unparsedCommunityData[1].replace(/&quot;/g, '"'))
     },
-    // as ((page: string, data?: 'initial-data') => Promise<InitialData>) &
-    //      ((page: string, data?: 'view-data') => Promise<PubViewData>),
 
     getCommunityData: async () => {
       const communityData = await this.hacks.getPageData('dash/overview')
-      console.log(communityData)
       return communityData?.communityData
     },
 
@@ -1133,7 +1134,8 @@ export class PubPub {
       )
     }
 
-    const fileOrStream = typeof file === 'string' ? await readFile(file) : file
+    const fileOrStream = // typeof file === 'string' ? await readFile(file) :
+      file
 
     const res =
       fileOrStream instanceof Buffer ? new Blob([fileOrStream]) : fileOrStream
@@ -1340,34 +1342,32 @@ export class PubPub {
     pubId,
     format,
     historyKey,
-  }: {
-    pubId: string
-    format: ExportFormats
-    historyKey: number
-  }) => {
-    const payload: ExportPayload = {
-      communityId: this.communityId,
-      pubId,
-      format,
-      historyKey,
-    }
+  }: DeepInputBody<'export'>) => {
+    let { body } = await this.client.export({
+      body: {
+        communityId: this.communityId,
+        pubId,
+        format,
+        historyKey,
+      },
+    }) // await this.authedRequest(`export`, 'POST', payload)
 
-    let workerTaskId = await this.authedRequest(`export`, 'POST', payload)
+    let workerTaskId: string | null = null
 
     if (typeof workerTaskId !== 'string') {
       /**
        * If its cached, pubpub just immediately returns the url
        */
-      if ('url' in workerTaskId) {
+      if ('url' in body) {
         // throw new Error('Worker task id is not a string')
-        return workerTaskId as WorkerTaskExportOutput
+        return body
       }
 
-      if (!('taskId' in workerTaskId)) {
+      if (!('taskId' in body)) {
         throw new Error('Worker task id is not a string')
       }
 
-      workerTaskId = workerTaskId.taskId as string
+      workerTaskId = body.taskId as string
     }
 
     return (await this.waitForWorkerTask(
@@ -1426,7 +1426,7 @@ export class PubPub {
 }
 
 interface FileImportPayload {
-  file: Blob | Buffer | File | string
+  file: Blob | Buffer | File //| string
   fileName: string
   mimeType: (typeof allowedMimeTypes)[number]
 }
