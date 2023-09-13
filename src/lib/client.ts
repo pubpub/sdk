@@ -22,7 +22,6 @@ import {
   ExportFormats,
   allowedMimeTypes,
   AttributionsPayload,
-  ExportPayload,
   FacetsProps,
   PubsManyResponse,
   UpdateCollectionsMetaData,

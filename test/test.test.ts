@@ -28,11 +28,10 @@ afterAll(async () => {
 describe('PubPub', () => {
   let pubpub: PubPub
   let removed = false
-  let draftPath = ''
 
   let pub: Awaited<ReturnType<typeof pubpub.pub.create>>['body']
   beforeAll(async () => {
-    ;({ pub, pubpub, draftPath } = await setupSDK({
+    ;({ pub, pubpub } = await setupSDK({
       url: TEST_URL,
       communityId: process.env.COMMUNITY_ID!,
       email: process.env.EMAIL,
@@ -61,7 +60,7 @@ describe('PubPub', () => {
   })
 
   it('should be able to get pubs', async () => {
-    const { body, status } = await pubpub.client.pub.getMany({
+    const { body } = await pubpub.client.pub.getMany({
       body: {
         alreadyFetchedPubIds: [],
         pubOptions: {},

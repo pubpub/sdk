@@ -144,11 +144,11 @@ export type FacetsPayload = {
 }
 
 export type Facets = {
-  CitationStyle: CitationStyle | {}
-  License: License | {}
-  NodeLabels: NodeLabels | {}
-  PubEdgeDisplay: PubEdgeDisplay | {}
-  PubHeaderTheme: PubHeaderTheme | {}
+  CitationStyle: CitationStyle | Record<string, never>
+  License: License | Record<string, never>
+  NodeLabels: NodeLabels | Record<string, never>
+  PubEdgeDisplay: PubEdgeDisplay | Record<string, never>
+  PubHeaderTheme: PubHeaderTheme | Record<string, never>
 }
 
 const textStyles = ['dark', 'light', 'black-blocks', 'white-blocks'] as const
@@ -158,7 +158,7 @@ export type PubHeaderTheme = {
   textStyle: (typeof textStyles)[number]
 }
 
-export type PubEdgeDisplay = {}
+export type PubEdgeDisplay = Record<string, never>
 
 export type NodeLabels = {
   image: Label
@@ -312,7 +312,7 @@ export type ImportPayload = {
   useNewImporter: boolean
 }
 
-type ImporterFlags = {}
+type ImporterFlags = Record<string, never>
 
 export type SourceFile = {
   id: number
@@ -476,7 +476,7 @@ type Attrs = {
   meta: Meta
 }
 
-type Meta = {}
+type Meta = Record<string, never>
 
 type ScopeSummary = {
   id: string
@@ -763,7 +763,7 @@ export type Commenter = {
 export type ThreadEvent = {
   id: string
   type?: string
-  data?: {}
+  data?: Record<string, never>
   userId: string
   threadId: string
 }
