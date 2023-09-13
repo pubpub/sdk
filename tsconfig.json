@@ -26,6 +26,7 @@
     // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
     // "noUnusedLocals": true,                           /* Enable error reporting when local variables aren't read. */
     "types": ["node", "jest"],
+    "typeRoots": ["core/types", "node_modules/@types"],
     // "noUnusedParameters": true,                       /* Raise an error when a function parameter isn't read. */
     // "exactOptionalPropertyTypes": true,               /* Interpret optional property types as written, rather than adding 'undefined'. */
     // "noImplicitReturns": true,                        /* Enable error reporting for codepaths that do not explicitly return in a function. */
@@ -69,13 +70,9 @@
     "src/lib/client.ts",
     "test/**.ts",
     "src/lib/initialData.ts",
-    "core/utils/api/client.ts"
+    "core/types/sequelize-actorid-override.d.ts"
+    //    "core/utils/api/client.ts"
   ],
 
   "exclude": ["node_modules", "dist", "web"]
-  // "references": [
-  //   {
-  //     "path": "./tsconfig.test.json"
-  //   }
-  // ]
 }
