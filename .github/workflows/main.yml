@@ -8,22 +8,18 @@ on:
       - '**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    environment: ci
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 8
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
           cache: 'pnpm'
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm run ci
-        env:
-          EMAIL: ${{ secrets.EMAIL }}
-          COMMUNITY_ID: ${{ secrets.COMMUNITY_ID }}
-          COMMUNITY_URL: ${{ secrets.COMMUNITY_URL }}
-          PASSWORD: ${{ secrets.PASSWORD }}
