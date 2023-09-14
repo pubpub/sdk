@@ -1,4 +1,4 @@
 [submodule "core"]
 	path = core
 	url = https://github.com/pubpub/pubpub
-	branch = tfk/merge-sdk
+	branch = tfk/derive-sdk
