@@ -1,0 +1,4 @@
+core
+prettier.config.cjs
+node_modules
+dist
