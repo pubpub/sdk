@@ -13,6 +13,8 @@ jobs:
     environment: ci
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: pnpm/action-setup@v2
         with:
           version: 8
