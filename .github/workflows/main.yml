@@ -20,5 +20,7 @@ jobs:
           node-version: 18.x
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
+      - name: Setup XMLLint bc otherwise break
+        run: sudo apt-get install libxml2-utils -y
       - run: npm install --no-frozen-lockfile
       - run: npm run ci
