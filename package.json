@@ -10,9 +10,9 @@
     "build": "tsup",
     "postbuild": "pnpm attw --pack . && size-limit",
     "lint": "tsc",
-    "ci": "rm -rf dist && pnpm run lint && pnpm run test && pnpm run build",
-    "prepublish": "npm run ci",
-    "release": "npm run ci && changeset publish",
+    "ci": "rm -rf dist && npm run lint && pnpm run test && pnpm run build",
+    "prepublish": "pnpm run ci",
+    "release": "pnpm run ci && changeset publish",
     "prepare": "husky install",
     "size": "banal ./dist/index.js",
     "pretest": "pnpm run -C=core build-client-dev",
@@ -92,9 +92,6 @@
     "vite": "^4.1.4",
     "vite-tsconfig-paths": "^4.2.0"
   },
-  "workspaces": [
-    "core"
-  ],
   "size-limit": [
     {
       "path": "dist/index.js",

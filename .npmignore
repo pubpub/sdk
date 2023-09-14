@@ -1,6 +1,8 @@
 src
 node_modules
 pnpm-lock.yaml
+package-lock.json
+core
 tsconfig.json
 tsup.config.ts
 test
