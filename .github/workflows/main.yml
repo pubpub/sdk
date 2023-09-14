@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
-          cache: 'pnpm'
+
       - name: Setup XMLLint bc otherwise break
         run: sudo apt-get install libxml2-utils -y
 
