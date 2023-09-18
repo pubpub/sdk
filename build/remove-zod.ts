@@ -137,7 +137,6 @@ export async function cleanZod(filePath: string) {
           // if (path.parentPath.node === null) {
           //   return
           // }
-          console.log('AAAAA')
           console.log({ type: path.parentPath.type, path: path.parentPath })
           path.parentPath.replaceWith(babelParser.parseExpression('undefined'))
         }

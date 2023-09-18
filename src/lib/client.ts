@@ -600,7 +600,6 @@ export class PubPub {
         throw new Error('Invalid pub slug, should be of the form pub/slug')
       }
 
-      console.log({ testUrl })
       const pageData = await this.hacks.getPageData(testUrl, 'view-data')
 
       const initialDocKey = pageData.pubData.initialDocKey

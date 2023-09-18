@@ -11,13 +11,6 @@ export async function setupSDK({
   email?: string
   password?: string
 }) {
-  console.log({
-    url,
-    communityId,
-    email,
-    password,
-  })
-
   const pubpub = new PubPub(communityId, url)
 
   await pubpub.login(email, password)
@@ -25,7 +18,6 @@ export async function setupSDK({
   expect(pubpub.loggedIn).toBeTruthy()
 
   const { body } = await pubpub.pub.create()
-  console.log(body)
 
   return {
     pubpub,

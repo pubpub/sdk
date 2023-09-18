@@ -22,7 +22,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  server.close()
+  server?.close()
 })
 
 describe('PubPub', () => {
@@ -39,7 +39,7 @@ describe('PubPub', () => {
     }))
   })
 
-  it('should be able to return something ', async () => {
+  it('should be able to return something through normal api calls', async () => {
     const res = await fetch(`${TEST_URL}/api/pubs/many`, {
       method: 'POST',
       headers: {
@@ -56,7 +56,7 @@ describe('PubPub', () => {
 
     const json = await res.json()
 
-    console.log(json)
+    expect(json).toBeDefined()
   })
 
   it('should be able to get pubs', async () => {
@@ -134,7 +134,6 @@ describe('PubPub', () => {
       description: 'This is a test description',
     })
 
-    console.log(modded)
     expect(modded).toHaveProperty('description')
   }, 10000)
 
