@@ -1,4 +1,4 @@
-import { generateHash } from './generateHash'
+import { generateHash } from './generateHash.js'
 
 export const generateFileNameForUpload = (file: string) => {
   const folderName = generateHash(8)

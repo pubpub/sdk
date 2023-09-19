@@ -1,4 +1,4 @@
-import { firebaseConfig } from '../firebaseConfig'
+import { firebaseConfig } from '../firebaseConfig.js'
 
 export interface FirebaseResponse {
   kind: string

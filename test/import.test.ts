@@ -1,7 +1,8 @@
 import path from 'path'
-import { PubPub } from '../src/lib/client'
-import { setupSDK } from './utils/setup'
+import { PubPub } from '../src/lib/client.js'
+import { setupSDK } from './utils/setup.js'
 import { readFile } from 'fs/promises'
+import { sleep } from './utils/sleep.js'
 
 // we need to test imports somewhere else, bc they don't work locally
 const IMPORT_TEST_COMMUNITY_URL =
@@ -77,8 +78,9 @@ describe('imports', () => {
   }, 60000)
 
   afterAll(async () => {
+    await sleep(1000)
     if (!removed) {
-      await pubpub.pub.remove(pub.id)
+      await pubpub.pub.remove({ pub: pub.id })
       removed = true
     }
 

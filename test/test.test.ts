@@ -1,10 +1,11 @@
 // import { describe, it, beforeAll, expect, afterAll } from 'vitest'
-import { PubPub } from '../src/lib/client'
-import { setupSDK } from './utils/setup'
+import { PubPubSDK } from '../src/lib/client.js'
+import { setupSDK } from './utils/setup.js'
 import dotenv from 'dotenv'
 dotenv.config()
 
-import app from '../core/server/server'
+import app from '../core/server/server.js'
+import { sleep } from './utils/sleep.js'
 
 const TEST_PORT = 7357 as const
 
@@ -26,17 +27,20 @@ afterAll(async () => {
 })
 
 describe('PubPub', () => {
-  let pubpub: PubPub
+  let pubpub: PubPubSDK
   let removed = false
 
   let pub: Awaited<ReturnType<typeof pubpub.pub.create>>['body']
   beforeAll(async () => {
+    // eslint-disable-next-line no-extra-semi
     ;({ pub, pubpub } = await setupSDK({
       url: TEST_URL,
       communityId: process.env.COMMUNITY_ID!,
       email: process.env.EMAIL,
       password: process.env.PASSWORD,
     }))
+
+    expect(pub).toBeTruthy()
   })
 
   it('should be able to return something through normal api calls', async () => {
@@ -59,14 +63,12 @@ describe('PubPub', () => {
     expect(json).toBeDefined()
   })
 
-  it('should be able to get pubs', async () => {
+  it('should be able to get pubs explicitly through the client', async () => {
     const { body } = await pubpub.client.pub.getMany({
-      body: {
-        alreadyFetchedPubIds: [],
-        pubOptions: {},
-        query: {
-          limit: 2,
-        },
+      alreadyFetchedPubIds: [],
+      pubOptions: {},
+      query: {
+        limit: 2,
       },
     })
 
@@ -80,9 +82,22 @@ describe('PubPub', () => {
       limit: 1,
     })
 
-    const firstPubId = pubs.pubIds[0]
-    expect(pubs.pubsById[firstPubId]).toHaveProperty('title')
+    const firstPubId = pubs.body.pubIds[0]
+    expect(pubs.body.pubsById[firstPubId]).toHaveProperty('title')
   }, 10000)
+
+  let collectionId: string
+  it('should be able to creae a collectoin', async () => {
+    const collection = await pubpub.collection.create({
+      title: 'Test collection',
+      kind: 'book',
+      isPublic: true,
+    })
+
+    collectionId = collection.body.id
+    expect(collection.status).toBe(200)
+    expect(collection.body).toHaveProperty('title')
+  })
 
   it('should be able to get collections', async () => {
     const collections = await pubpub.collection.hacks.getMany()
@@ -90,6 +105,38 @@ describe('PubPub', () => {
     expect(collections).toBeInstanceOf(Array)
     expect(collections[0]).toHaveProperty('title')
   }, 10000)
+
+  let collectionPubId: string
+  it('should be able to add a pub to a collection', async () => {
+    const added = await pubpub.collection.addPub({
+      collectionId,
+      pubId: pub.id,
+    })
+
+    collectionPubId = added.body.id
+    expect(added.status).toBe(200)
+    expect(added.body).toHaveProperty('title')
+  })
+
+  it('should be able to change the type of a collectionPub', async () => {
+    const changed = await pubpub.collection.changePubType({
+      collectionPubId,
+      type: 'chapter',
+    })
+
+    expect(changed.status).toBe(200)
+    expect(changed.body).toHaveProperty('type')
+  })
+
+  it('should be able to modify a colection', async () => {
+    const modded = await pubpub.collection.update({
+      collectionId,
+      title: 'New title',
+    })
+
+    expect(modded.status).toBe(200)
+    expect(modded.body.title).toBe('New title')
+  })
 
   it('should be able to find the attributions of a collection through annoying means', async () => {
     const collections = await pubpub.collection.hacks.getMany()
@@ -126,27 +173,31 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to modify a pub', async () => {
-    const modded = await pubpub.pub.update(pub.id, {
-      citationStyle: {
+    const modded = await pubpub.pub.update({
+      pubId: pub.id,
+      CitationStyle: {
         citationStyle: 'apa-7',
         inlineCitationStyle: 'author',
       },
       description: 'This is a test description',
     })
 
-    expect(modded).toHaveProperty('description')
+    expect(modded.status).toBe(200)
+    expect(modded.body).toHaveProperty('description')
   }, 10000)
 
   it('should remove a pub', async () => {
-    const remove = await pubpub.pub.remove(pub.id)
+    const remove = await pubpub.pub.remove({ pubId: pub.id })
 
     removed = true
-    expect(remove).toEqual({})
+    expect(remove.status).toBe(200)
+    expect(remove.body).toEqual({})
   })
 
   afterAll(async () => {
+    sleep(1000)
     if (!removed) {
-      await pubpub.pub.remove(pub.id)
+      await pubpub.pub.remove({ pubId: pub.id })
     }
     if (pubpub) {
       await pubpub.logout()

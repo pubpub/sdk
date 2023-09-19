@@ -1,23 +1,8 @@
-import { Collection } from './collectionData'
-import { ResourceWarning } from './editor/types'
-import { InitialData } from './initialData'
-import { PubViewDataPub } from './viewData'
-import { DefinitelyHas } from './type-helpers'
-import { ProposedMetadata } from './firebase/rest/firebase'
-
-export type Chapter = {
-  chapter: number
-  id: string
-  data: Pub
-}
-
-export type PubAttributionsPostPayload = {
-  name: string
-  order: number
-  isAuthor: boolean
-  communityId: string
-  pubId: string
-}
+import { Collection } from './collectionData.js'
+import { ResourceWarning } from './editor/types.js'
+import { DefinitelyHas } from './type-helpers.js'
+import { ProposedMetadata } from './firebase/rest/firebase.js'
+import { DeepInput } from './client-types.js'
 
 const DEFAULT_ROLES = [
   'Conceptualization',
@@ -44,22 +29,6 @@ const DEFAULT_ROLES = [
 
 export type Roles = (typeof DEFAULT_ROLES)[number]
 
-export type PubAttributionsPostResponse = {
-  id: string
-  name: string
-  avatar?: string
-  title?: string
-  order: number
-  isAuthor: boolean
-  roles?: Roles
-  affiliation?: string
-  orcid?: string
-  userId?: string
-  pubId: string
-  createdAt: string
-  user: User
-}
-
 export type User = {
   isShadowUser: boolean
   id: string
@@ -79,12 +48,6 @@ export type PubAttributionsPutPayload = {
   roles?: string[]
   communityId: string
   pubId: string
-}
-export type Downloads = {
-  url: string
-  type: ExportFormats
-  branchId?: string
-  createdAt: string
 }
 
 export type ExportFormats =
@@ -138,87 +101,7 @@ type FilePut = {
   createdAt?: string
 }
 
-export type FacetsPayload = {
-  scope: Scope
-  facets: Facets
-}
-
-export type Facets = {
-  CitationStyle: CitationStyle | Record<string, never>
-  License: License | Record<string, never>
-  NodeLabels: NodeLabels | Record<string, never>
-  PubEdgeDisplay: PubEdgeDisplay | Record<string, never>
-  PubHeaderTheme: PubHeaderTheme | Record<string, never>
-}
-
-const textStyles = ['dark', 'light', 'black-blocks', 'white-blocks'] as const
-export type PubHeaderTheme = {
-  backgroundImage: string
-  backgroundColor: string
-  textStyle: (typeof textStyles)[number]
-}
-
-export type PubEdgeDisplay = Record<string, never>
-
-export type NodeLabels = {
-  image: Label
-  video: Label
-  audio: Label
-  table: Label
-  math: Label
-}
-
-export type Label = {
-  enabled: boolean
-  text: string
-}
-
-const licenses = [
-  'cc-by',
-  'cc-0',
-  'cc-by-nc',
-  'cc-by-nd',
-  'cc-by-nc-nd',
-  'cc-by-nc-sa',
-  'cc-by-sa',
-  'copyright',
-] as const
-export type License = {
-  kind: (typeof licenses)[number]
-}
-
-const citationStyles = [
-  'acm-siggraph',
-  'american-anthro',
-  'apa',
-  'apa-7',
-  'arcadia-science',
-  'cell',
-  'chicago',
-  'harvard',
-  'elife',
-  'frontiers',
-  'mla',
-  'vancouver',
-  'ama',
-] as const
-
-export const inlineCitationStyles = [
-  'count',
-  'authorYear',
-  'author',
-  'label',
-] as const
-
-export type CitationStyle = {
-  citationStyle: (typeof citationStyles)[number]
-  inlineCitationStyle: (typeof inlineCitationStyles)[number]
-}
-
-export type Scope = {
-  kind: 'pub' | 'community' | 'collection'
-  id: string
-}
+export type FacetsPayload = DeepInput<'facets.update'>
 
 const collectionKinds = ['issue', 'book', 'journal', 'tag'] as const
 
@@ -306,30 +189,7 @@ type ExternalLink = {
 
 type Child = PageOrCollectionLink | ExternalLink
 
-export type ImportPayload = {
-  sourceFiles: SourceFile[]
-  importerFlags: ImporterFlags
-  useNewImporter: boolean
-}
-
-type ImporterFlags = Record<string, never>
-
-export type SourceFile = {
-  id: number
-  state: string
-  clientPath: string
-  loaded: number
-  total: number
-  label?: string
-  assetKey: string
-}
-
-export type ExportPayload = {
-  communityId: string
-  format: ExportFormats
-  historyKey: number
-  pubId: string
-}
+export type SourceFile = DeepInput<'import'>['sourceFiles'][number]
 
 export type WorkerTaskResponse = {
   id: string
@@ -624,36 +484,6 @@ export const allowedMimeTypes = [
   'text/plain',
 ] as const
 
-export type FacetsProps = {
-  license?: License
-  nodeLabels?: NodeLabels
-  pubEdgeDisplay?: PubEdgeDisplay
-  pubHeaderTheme?: PubHeaderTheme
-  citationStyle?: CitationStyle
-}
-
-export type GetPageDataOverload = {
-  (page: string, data: 'initial-data'): Promise<InitialData>
-  (page: string, data: 'view-data'): Promise<PubViewDataPub>
-
-  (page: string, data: 'view-data' | 'initial-data'):
-    | Promise<PubViewDataPub>
-    | Promise<InitialData>
-}
-
-export type ReleaseResponse = {
-  id: string
-  historyKeyMissing: boolean
-  noteContent: string | null
-  noteText: string | null
-  historyKey: number
-  userId: string
-  pubId: string
-  docId: string
-  updatedAt: string
-  createdAt: string
-}
-
 export type PubAttribution = {
   id: string
   name: string
@@ -794,13 +624,6 @@ export type DocJson = { type: 'doc'; attrs: any; content: any[] }
 
 export type CollectionPubWithAttributions = CollectionPub & {
   collection: DefinitelyHas<Collection, 'attributions'>
-}
-
-export type Doc = {
-  id: string
-  createdAt: string
-  updatedAt: string
-  content: DocJson
 }
 
 export type UserScopeVisit = {

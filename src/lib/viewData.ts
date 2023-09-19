@@ -1,4 +1,4 @@
-import { Collection } from './collectionData'
+import { Collection } from './collectionData.js'
 import {
   CollectionPubWithAttributions,
   Discussion,
@@ -6,7 +6,7 @@ import {
   PubAttribution,
   Release,
   UserScopeVisit,
-} from './types'
+} from './types.js'
 
 export interface PubViewDataDash {
   pubData: SanitizedPubData

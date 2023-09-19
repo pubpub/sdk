@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Node, Fragment, Slice } from 'prosemirror-model'
 import { Step, ReplaceStep } from 'prosemirror-transform'
 import { compressStepJSON } from 'prosemirror-compress-pubpub'
 import uuid from 'uuid'
 
-import { buildSchema } from '../../editor/schema'
-import { CompressedChange, ResourceWarning } from '../../editor/types'
-import { getFirebaseChild, writeFirebase } from './utils'
+import { buildSchema } from '../../editor/schema.js'
+import { CompressedChange, ResourceWarning } from '../../editor/types.js'
+import { getFirebaseChild, writeFirebase } from './utils.js'
 
 export const firebaseTimestamp = { '.sv': 'timestamp' } as const
 

@@ -1,4 +1,4 @@
-import { PubPub } from '../../src/lib/client'
+import { PubPub } from '../../src/lib/client.js'
 
 export async function setupSDK({
   url,
@@ -11,13 +11,18 @@ export async function setupSDK({
   email?: string
   password?: string
 }) {
-  const pubpub = new PubPub(communityId, url)
-
-  await pubpub.login(email, password)
+  const pubpub = await PubPub.createSDK({
+    communityId,
+    communityUrl: url,
+    email,
+    password,
+  })
 
   expect(pubpub.loggedIn).toBeTruthy()
 
   const { body } = await pubpub.pub.create()
+
+  console.log(body)
 
   return {
     pubpub,

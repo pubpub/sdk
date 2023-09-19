@@ -1,7 +1,7 @@
 import { Selection } from 'prosemirror-state'
 import { Node, Slice } from 'prosemirror-model'
 import type { EditorView } from 'prosemirror-view'
-import type { DocJson } from './types'
+import type { DocJson } from './types.js'
 
 export const getJSON = (editorView: EditorView) => {
   if (!editorView) {

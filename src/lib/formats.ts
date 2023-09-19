@@ -1,4 +1,4 @@
-import { SourceFile } from './types'
+import { SourceFile } from './types.js'
 
 export const extensionToPandocFormat = {
   docx: 'docx+citations',
@@ -55,10 +55,10 @@ export const labelFiles = (files: SourceFile[]) => {
   const doc = files.find((file) => fileIsValidDocument(file) && !file.label)
   return files.map((file) => {
     if (file === doc) {
-      return { ...file, label: 'document' }
+      return { ...file, label: 'document' as const }
     }
     if (file === bibliography) {
-      return { ...file, label: 'bibliography' }
+      return { ...file, label: 'bibliography' as const }
     }
     return file
   })

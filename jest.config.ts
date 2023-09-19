@@ -9,12 +9,17 @@ const config: Config.InitialOptions = {
   transformIgnorePatterns: [`/node_modules/(?!${esModules})`],
   moduleNameMapper: {
     '\\.[s]?css$': '<rootDir>/core/utils/storybook/styleMock.js',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
     '^.+\\.(t|j)sx?$': [
       '@swc/jest',
       {
         jsc: {
+          // transform: {
+          //   legacyDecorator: true,
+          //   decoratorMetadata: true,
+          // },
           parser: {
             syntax: 'typescript',
             decorators: true,
@@ -54,6 +59,7 @@ const config: Config.InitialOptions = {
   logHeapUsage: true,
   forceExit: true,
   silent: false,
+  verbose: true,
 }
 
 export default config

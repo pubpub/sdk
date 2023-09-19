@@ -1,51 +1,48 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import SHA3 from 'crypto-js/sha3'
 import encHex from 'crypto-js/enc-hex'
 import { Fragment } from 'prosemirror-model'
 // import { readFile } from 'fs/promises'
-import { createClient } from 'utils/api/client'
+import { createClient } from 'utils/api/client.js'
 
 import {
-  License,
   FacetsPayload,
   PubPutPayload,
-  PubEdgeDisplay,
-  PubHeaderTheme,
-  NodeLabels,
-  CitationStyle,
-  Scope,
-  Facets,
-  CollectionKind,
   CommunityPutPayload,
   CommunityPutResponse,
   SourceFile,
-  ImportPayload,
   ExportFormats,
   allowedMimeTypes,
   AttributionsPayload,
-  FacetsProps,
-  PubsManyResponse,
   UpdateCollectionsMetaData,
-  UploadPolicyResponse,
   WorkerTaskExportOutput,
   WorkerTaskImportOutput,
   WorkerTaskResponse,
-  ReleaseResponse,
-} from './types'
-import { InitialData } from './initialData'
-import { CollectionInitialData } from './collectionData'
-import { generateFileNameForUpload } from './generateFileNameForUpload'
-import { generateHash } from './generateHash'
+} from './types.js'
+import { InitialData } from './initialData.js'
+import { CollectionInitialData } from './collectionData.js'
+import { generateFileNameForUpload } from './generateFileNameForUpload.js'
+import { generateHash } from './generateHash.js'
 import {
   CollectionViewData,
   CommunityViewData,
   PubViewDataDash,
   PubViewDataPub,
-} from './viewData'
-import { labelFiles } from './formats'
-import { signInWithCustomToken } from './firebase/rest/signInWithCustomToken'
-import { writeDocumentToPubDraft } from './firebase/rest/firebase'
+} from './viewData.js'
+import { labelFiles } from './formats.js'
+import { signInWithCustomToken } from './firebase/rest/signInWithCustomToken.js'
+import { writeDocumentToPubDraft } from './firebase/rest/firebase.js'
 
-import { buildSchema } from './editor/schema'
+import { buildSchema } from './editor/schema.js'
+
+import { proxyClient, proxySDKWithClient } from './proxies.js'
+import {
+  PClient,
+  DeepInput,
+  DeepMerge,
+  Prettify,
+  DeepOutput,
+} from './client-types.js'
 
 /**
  * Small test to see if a string looks like a pub slug,
@@ -54,54 +51,18 @@ import { buildSchema } from './editor/schema'
 const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
   /pub\/.*?$/.test(pub)
 
-type Client = ReturnType<typeof createClient>
+/**
+ * Map of GET requests, used to correctly proxy the client
+ *
+ * There is no way of knowing from inspecting the client which requests are GET requests, so we have to manually specify them here
+ */
+const getRequestsMap = {
+  get: true,
+  logout: true,
+  uploadPolicy: true,
+} as const
 
-type ObjectPath<T extends object, D extends string = ''> = {
-  [K in keyof T]: `${D}${Exclude<K, symbol>}${
-    | ''
-    | (T[K] extends object ? ObjectPath<T[K], '.'> : '')}`
-}[keyof T]
-
-type DeepAccess<
-  O extends object,
-  T extends ObjectPath<O> = ObjectPath<O>
-> = T extends `${infer A extends Extract<keyof O, string>}.${infer B}`
-  ? B extends `${infer C}.${infer D}`
-    ? A extends keyof O
-      ? O[A] extends object
-        ? `${C}.${D}` extends ObjectPath<O[A]>
-          ? DeepAccess<O[A], `${C}.${D}`>
-          : never
-        : never
-      : never
-    : A extends keyof O
-    ? B extends keyof O[A]
-      ? O[A][B]
-      : never
-    : never
-  : T extends keyof O
-  ? O[T]
-  : never
-
-type DeepClient<
-  T extends ObjectPath<Client>,
-  I extends 'in' | 'out' = 'in'
-> = DeepAccess<Client, T> extends infer D
-  ? D extends (args: infer A) => infer R
-    ? I extends 'in'
-      ? A
-      : Awaited<R>
-    : D
-  : never
-
-type DeepInput<T extends ObjectPath<Client>> = DeepClient<T, 'in'>
-
-type DeepOutput<T extends ObjectPath<Client>> = DeepClient<T, 'out'>
-
-type DeepInputBody<T extends ObjectPath<Client>> =
-  'body' extends keyof DeepInput<T>
-    ? Omit<DeepInput<T>['body'], 'communityId'>
-    : never
+export type PubPubSDK = DeepMerge<PClient, PubPub>
 
 /**
  * PubPub API client
@@ -124,31 +85,27 @@ type DeepInputBody<T extends ObjectPath<Client>> =
  */
 export class PubPub {
   private cookie?: string
-  communityId: string
-  communityUrl: string
-
   loggedIn = false
 
-  private AWS_S3 = 'https://s3-external-1.amazonaws.com'
+  #AWS_S3 = 'https://s3-external-1.amazonaws.com'
+  #BUCKET = 'assets.pubpub.org'
 
-  client: ReturnType<typeof createClient>
+  public client!: PClient
 
-  constructor(communityId: string, communityUrl: string) {
-    this.communityId = communityId
-    this.communityUrl = communityUrl
-
-    this.client = createClient({
-      baseUrl: communityUrl,
-      baseHeaders: {
-        Cookie: this.cookie || '',
-      },
-    })
-  }
+  /**
+   * DO NOT CREATE THIS MANUALLY
+   *
+   * Use `PubPub.createSDK` instead
+   */
+  constructor(public communityId: string, public communityUrl: string) {}
 
   /**
    * Login to the PubPub API. Needs to be called before any other method.
+   *
+   * Automatically called when using `PubPub.createSDK`
    * */
   async login(email: string, password: string) {
+    // don't use the client for this
     const response = await fetch(`${this.communityUrl}/api/login`, {
       method: 'POST',
       keepalive: false,
@@ -164,7 +121,7 @@ export class PubPub {
     const cookie = response.headers
       .get('set-cookie')
       ?.replace(/.*(connect.sid=.*?);.*/ms, '$1')
-    const data = await response.json()
+    const data = response.body
 
     if (!cookie) {
       throw new Error(`Login failed
@@ -172,19 +129,25 @@ export class PubPub {
     }
 
     this.cookie = cookie // .join('; ')
+    const authenticatedClient = proxyClient(
+      createClient({
+        baseUrl: this.communityUrl,
+        baseHeaders: {
+          Cookie: cookie || '',
+        },
+      }),
+      this.communityId,
+      getRequestsMap
+    )
 
-    this.client = createClient({
-      baseUrl: this.communityUrl,
-      baseHeaders: {
-        Cookie: cookie || '',
-      },
-    })
+    this.client = authenticatedClient
+    proxySDKWithClient(this, authenticatedClient)
 
     this.loggedIn = true
   }
 
   async logout() {
-    const response = await this.authedRequest('logout', 'GET')
+    const response = await this.client.logout()
 
     this.cookie = undefined
     this.loggedIn = false
@@ -194,30 +157,28 @@ export class PubPub {
   }
 
   async authedRequest<
-    T extends Record<string, any> | string | void =
+    T extends Record<string, unknown> | string | void =
       | Record<string, unknown>
       | string
   >(path: string, method: 'GET', options?: RequestInit): Promise<T>
-
   async authedRequest<
-    T extends Record<string, any> | string | void =
+    T extends Record<string, unknown> | string | void =
       | Record<string, unknown>
       | string
   >(
     path: string,
     method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    body?: Record<string, any>,
+    body?: Record<string, unknown>,
     options?: RequestInit
   ): Promise<T>
-
   async authedRequest<
-    T extends Record<string, any> | string | void =
+    T extends Record<string, unknown> | string | void =
       | Record<string, unknown>
       | string
   >(
     path: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    bodyOrOptions: Record<string, any> | RequestInit,
+    bodyOrOptions: Record<string, unknown> | RequestInit,
     optionsMabye?: RequestInit
   ): Promise<T> {
     const options = method === 'GET' ? bodyOrOptions : optionsMabye
@@ -247,7 +208,10 @@ export class PubPub {
     return data
   }
 
-  getPage = async (slug: string) => {
+  /**
+   * Get the HTML content of a page
+   */
+  getPage = async ({ slug }: { slug: string }) => {
     const bareSlug = slug.replace(this.communityUrl, '')?.replace(/^\//, '')
     const response = await fetch(`${this.communityUrl}/${bareSlug}`, {
       method: 'GET',
@@ -270,48 +234,28 @@ export class PubPub {
 
   /**
    * Helper method to update the facets of a pub or collection
+   *
+   * @since v1.0.0
    */
-  private async updateFacets(scope: Scope, facets: Facets) {
-    const response = await this.authedRequest(`facets`, 'POST', {
-      scope,
-      facets,
-    })
-    return response
-  }
+  declare facets: typeof this.client.facets
 
   /**
    * Methods for interacting with pages
    *
    * Very limited for now
+   *
+   * @since v1.0.0
    */
-  page = {
-    /**
-     * Create a new page
-     */
-    create: async ({
-      title,
-      slug,
-      description,
-    }: DeepInputBody<'page.create'>) => {
-      const response = await this.authedRequest('pages', 'POST', {
-        communityId: this.communityId,
-        title,
-        slug,
-        description,
-      })
-      return response
-    },
-  }
+  declare page: typeof this.client.page
 
-  getManyPubs = async (options?: DeepInputBody<'pub.getMany'>['query']) => {
+  getManyPubs = async (options?: DeepInput<'pub.getMany'>['query']) => {
     const { limit, offset, ordering, collectionIds, pubIds } = options ?? {}
-    const response = await this.authedRequest(`pubs/many`, 'POST', {
+    const response = await this.client.pub.getMany({
       alreadyFetchedPubIds: [],
       pubOptions: {
         getCollections: true,
       },
       query: {
-        communityId: this.communityId,
         ...(collectionIds
           ? { collectionIds }
           : pubIds
@@ -323,7 +267,7 @@ export class PubPub {
       },
     })
 
-    return response as PubsManyResponse
+    return response
   }
 
   /**
@@ -337,15 +281,12 @@ export class PubPub {
      *
      * @param collectionId The id of the collection you want to add the pub to
      */
-    create: async ({ collectionId }: DeepInputBody<'pub.create'> = {}) => {
-      const response = await this.client.pub.create({
-        body: {
-          communityId: this.communityId,
-          collectionId,
-        },
-      })
-      return response
-    },
+    // create: async ({ collectionId }: DeepInput<'pub.create'> = {}) => {
+    //   const response = await this.client.pub.create({
+    //     collectionId,
+    //   })
+    //   return response
+    // },
 
     /**
      * Update a pub
@@ -355,30 +296,24 @@ export class PubPub {
      * @param pubId The id of the pub you want to update
      * @param props The properties you want to update
      */
-    update: async (
-      pubId: string,
-      {
-        title,
-        description,
-        avatar,
-        slug,
-        customPublishedAt,
-        downloads,
-        htmlTitle,
-        license,
-        doi,
-        nodeLabels,
-        pubEdgeDisplay,
-        pubHeaderTheme,
-        citationStyle,
-      }: Omit<PubPutPayload, 'communityId' | 'pubId'> & {
-        license?: License
-        nodeLabels?: NodeLabels
-        pubEdgeDisplay?: PubEdgeDisplay
-        pubHeaderTheme?: PubHeaderTheme
-        citationStyle?: CitationStyle
-      }
-    ) => {
+    update: async ({
+      pubId,
+      title,
+      description,
+      avatar,
+      slug,
+      customPublishedAt,
+      downloads,
+      htmlTitle,
+      doi,
+      License,
+      NodeLabels,
+      PubEdgeDisplay,
+      PubHeaderTheme,
+      CitationStyle,
+    }: Prettify<
+      Omit<PubPutPayload, 'communityId'> & FacetsPayload['facets']
+    >) => {
       const uploadedDownloads = await Promise.all(
         (downloads ?? ([] as NonNullable<PubPutPayload['downloads']>)).map(
           async (download) => {
@@ -405,11 +340,11 @@ export class PubPub {
 
       const facetsPayload: FacetsPayload = {
         facets: {
-          License: license ?? {},
-          NodeLabels: nodeLabels ?? {},
-          PubEdgeDisplay: pubEdgeDisplay ?? {},
-          PubHeaderTheme: pubHeaderTheme ?? {},
-          CitationStyle: citationStyle ?? {},
+          License,
+          NodeLabels,
+          PubEdgeDisplay,
+          PubHeaderTheme,
+          CitationStyle,
         },
         scope: {
           id: pubId,
@@ -417,7 +352,7 @@ export class PubPub {
         },
       }
 
-      const putPayload = {
+      const putPayload: DeepInput<'pub.update'> = {
         pubId,
         communityId: this.communityId,
         title,
@@ -435,22 +370,29 @@ export class PubPub {
       const shouldPutPub =
         Object.values(putPayload).filter((x) => !!x).length > 1
 
-      let response: Partial<
-        typeof putPayload & { facets: (typeof facetsPayload)['facets'] }
-      > = {}
+      let response = {} as {
+        status: 200
+        body: Partial<DeepOutput<'pub.update'>['body']> & {
+          facets?: (typeof facetsPayload)['facets']
+        }
+      }
 
       if (shouldPutPub) {
-        const res = await this.authedRequest('pubs', 'PUT', putPayload)
-        response = res as typeof putPayload
+        const res = await this.client.pub.update(putPayload)
+        response = res
       }
 
       if (shouldPostFacets) {
-        const facets = await this.updateFacets(
-          facetsPayload.scope,
-          facetsPayload.facets
-        )
+        const { body, status } = await this.facets.update({
+          scope: facetsPayload.scope,
+          facets: facetsPayload.facets,
+        })
         // facets does not return the facets, so we just set them if nothing went wrong
-        response.facets = facetsPayload.facets // facets as typeof facetsPayload.facets
+        response.body.facets = facetsPayload.facets // facets as typeof facetsPayload.facets
+        response.status =
+          response.status === 200 || response.status === undefined
+            ? status
+            : response.status
       }
       return response
     },
@@ -460,52 +402,22 @@ export class PubPub {
      *
      * @param pubId The id of the pub you want to remove
      */
-    remove: async (pubId: string) => {
-      const response = await this.authedRequest(`pubs`, 'DELETE', {
-        pubId,
-        communityId: this.communityId,
-      })
-      return response
-    },
+    // remove: async (pubId: string) => {
+    //   const response = await this.authedRequest(`pubs`, 'DELETE', {
+    //     pubId,
+    //     communityId: this.communityId,
+    //   })
+    //   return response
+    // },
 
     /**
      * Get a pub by its id
-     *
-     * @param pubId The id of the pub you want to get
      */
-    get: async (pubId: string) => {
+    get: async ({ pubId }: { pubId: string }) => {
       const response = await this.getManyPubs({
         pubIds: [pubId],
       })
-      return response.pubsById[pubId]
-    },
-
-    /**
-     * Create a release for a pub
-     *
-     * @param pubId The id of the pub you want to create a release for
-     */
-    createRelease: async (
-      pubId: string,
-      {
-        noteText,
-        noteContent,
-      }: {
-        noteText?: string
-        noteContent?: string
-      } = {}
-    ) => {
-      const response = await this.authedRequest<ReleaseResponse>(
-        `releases`,
-        'POST',
-        {
-          pubId,
-          communityId: this.communityId,
-          noteText,
-          noteContent,
-        }
-      )
-      return response
+      return response.body.pubsById[pubId]
     },
 
     /**
@@ -659,8 +571,11 @@ export class PubPub {
       historyKey?: number
     }) => {
       if (!slug && pubId) {
-        const pub = await this.pub.get(pubId)
-        if (format === 'formatted' && pub.downloads[0]?.type === 'formatted') {
+        const pub = await this.pub.get({ pubId })
+        if (
+          format === 'formatted' &&
+          pub.downloads?.[0]?.type === 'formatted'
+        ) {
           return pub.downloads[0].url
         }
         slug = pub.slug
@@ -686,7 +601,7 @@ export class PubPub {
         return downloads[0].url
       }
 
-      const { url } = await this.exportPub({
+      const { url } = await this.export({
         format: format === 'formatted' ? 'pdf' : format,
         pubId: pubId ?? id,
         historyKey: historyKey ?? initialDocKey,
@@ -748,7 +663,7 @@ export class PubPub {
         ? PubViewDataPub
         : Record<string, unknown>
     > => {
-      const response = await this.getPage(slug)
+      const response = await this.getPage({ slug })
 
       const unparsedCommunityData = response.match(
         new RegExp(`<script id="${data}" type="text\\/plain" data-json="(.*?)"`)
@@ -818,20 +733,7 @@ export class PubPub {
     /**
      * Create a new collection
      */
-    create: async ({
-      title,
-      kind,
-    }: {
-      title: string
-      kind: CollectionKind
-    }) => {
-      const response = await this.authedRequest<void>(`collections`, 'POST', {
-        communityId: this.communityId,
-        title,
-        kind,
-      })
-      return response
-    },
+    // create
 
     /**
      * Update a collection
@@ -841,37 +743,35 @@ export class PubPub {
      * @param collectionId The id of the collection you want to update
      * @param props The properties you want to update
      */
-    update: async (
-      collectionId: string,
-      {
-        citationStyle,
-        license,
-        nodeLabels,
-        doi,
-        slug,
-        copyrightYear,
-        edition,
-        isbn,
-        publicationDate,
-        title,
-        issue,
-        pubEdgeDisplay,
-        pubHeaderTheme,
-        url,
-        volume,
-      }: UpdateCollectionsMetaData & FacetsProps
-    ) => {
+    update: async ({
+      collectionId,
+      doi,
+      slug,
+      copyrightYear,
+      edition,
+      isbn,
+      publicationDate,
+      title,
+      issue,
+      url,
+      volume,
+      CitationStyle,
+      License,
+      NodeLabels,
+      PubEdgeDisplay,
+      PubHeaderTheme,
+    }: DeepInput<'collection.update'> & FacetsPayload['facets']) => {
       const facetsPayload: FacetsPayload = {
         scope: {
           id: collectionId,
           kind: 'collection',
         },
         facets: {
-          CitationStyle: citationStyle ?? {},
-          License: license ?? {},
-          NodeLabels: nodeLabels ?? {},
-          PubEdgeDisplay: pubEdgeDisplay ?? {},
-          PubHeaderTheme: pubHeaderTheme ?? {},
+          CitationStyle,
+          License,
+          NodeLabels,
+          PubEdgeDisplay,
+          PubHeaderTheme,
         },
       }
 
@@ -908,10 +808,10 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        const facetsResponse = await this.updateFacets(
-          facetsPayload.scope,
-          facetsPayload.facets
-        )
+        await this.facets.update({
+          scope: facetsPayload.scope,
+          facets: facetsPayload.facets,
+        })
 
         // facets does not return the facets, so we just set them if nothing went wrong
         response.facets = facetsPayload.facets // facetsResponse as typeof facetsPayload.facets
@@ -922,15 +822,8 @@ export class PubPub {
 
     /**
      * Remove a collection
-     * @param collectionId The id of the collection you want to remove
      */
-    remove: async (collectionId: string) => {
-      const response = await this.authedRequest<void>(`collections`, 'DELETE', {
-        id: collectionId,
-        communityId: this.communityId,
-      })
-      return { success: true }
-    },
+    // declare remove: PClient['collection']['remove'],
 
     /**
      * Add a pub to a collection
@@ -939,21 +832,25 @@ export class PubPub {
      * @param pubId The id of the pub you want to add to the collection
      *
      */
-    addPub: async (collectionPubId: string) => {
-      const response = await this.authedRequest<{
-        id: string
-        collectionId: string
-        pubId: string
-        rank: string
-        pubRank: string
-        updatedAt: string
-        createdAt: string
-        contextHint: null
-        isPrimary: boolean
-      }>(`collectionPubs`, 'POST', {
-        collectionPubId,
-        communityId: this.communityId,
+    addPub: async ({
+      collectionId,
+      pubId,
+    }: {
+      collectionId: string
+      pubId: string
+    }) => {
+      const response = await this.client.collectionPub.create({
+        collectionId,
+        pubId,
       })
+      return response
+    },
+
+    /**
+     * Change the order of a pub in a collection, or change it's status within the collection
+     */
+    updatePub: async (payload: DeepInput<'collectionPub.update'>) => {
+      const response = await this.client.collectionPub.update(payload)
       return response
     },
 
@@ -964,15 +861,11 @@ export class PubPub {
      *
      * @returns The id of the removed pub
      */
-    removePub: async (collectinPubId: string) => {
-      const response = await this.authedRequest<string>(
-        `collectionPubs`,
-        'DELETE',
-        {
-          id: collectinPubId,
-          communityId: this.communityId,
-        }
-      )
+    removePub: async ({ id }: DeepInput<'collectionPub.remove'>) => {
+      const response = await this.client.collectionPub.remove({
+        id,
+      })
+
       return response
     },
 
@@ -1008,7 +901,8 @@ export class PubPub {
           : async (id: string) => {
               const manyPubs = await this.getManyPubs({ pubIds: [id] })
 
-              const attributions = manyPubs?.pubsById[id]?.attributions ?? []
+              const attributions =
+                manyPubs?.body?.pubsById[id]?.attributions ?? []
               return attributions
             },
 
@@ -1036,7 +930,8 @@ export class PubPub {
 
         const manyPubs = await this.getManyPubs({ pubIds: [props.pubId] })
 
-        const attributions = manyPubs?.pubsById[props.pubId]?.attributions ?? []
+        const attributions =
+          manyPubs?.body?.pubsById[props.pubId]?.attributions ?? []
 
         // check if name in attributions
         const existingAttribution = attributions.find(
@@ -1067,7 +962,8 @@ export class PubPub {
 
         const manyPubs = await this.getManyPubs({ pubIds: [props.pubId] })
 
-        const attributions = manyPubs?.pubsById[props.pubId]?.attributions ?? []
+        const attributions =
+          manyPubs?.body?.pubsById[props.pubId]?.attributions ?? []
 
         // check if name in attributions
         const existingAttribution = attributions.find(
@@ -1138,23 +1034,25 @@ export class PubPub {
     const res =
       fileOrStream instanceof Buffer ? new Blob([fileOrStream]) : fileOrStream
 
-    const policy = await this.uploadPolicy(mimeType)
+    const {
+      body: { acl, awsAccessKeyId, policy, signature, bucket },
+    } = await this.uploadPolicy({ query: { contentType: mimeType } })
 
     const formData = new FormData()
 
     const key = generateFileNameForUpload(fileName)
 
     formData.append('key', key)
-    formData.append('AWSAccessKeyId', policy.awsAccessKeyId)
-    formData.append('acl', policy.acl)
-    formData.append('policy', policy.policy)
-    formData.append('signature', policy.signature)
+    formData.append('AWSAccessKeyId', awsAccessKeyId)
+    formData.append('acl', acl)
+    formData.append('policy', policy)
+    formData.append('signature', signature)
     formData.append('Content-Type', mimeType)
     formData.append('success_action_status', '200')
     formData.append('file', res, fileName)
 
     try {
-      const response = await fetch(`${this.AWS_S3}/${policy.bucket}`, {
+      await fetch(`${this.#AWS_S3}/${bucket ?? this.#BUCKET}`, {
         method: 'POST',
         body: formData,
       })
@@ -1174,20 +1072,7 @@ export class PubPub {
   /**
    * Returns a signed policy for uploading a file to PubPub.
    */
-  private uploadPolicy = async (
-    mimeType: (typeof allowedMimeTypes)[number]
-  ): Promise<UploadPolicyResponse> => {
-    // mimettypes for pdf, docx, json, png, jpg, gif
-    const queryParam = new URLSearchParams({
-      contentType: mimeType,
-    }).toString()
-
-    const response = await this.authedRequest(
-      `uploadPolicy?${queryParam}`,
-      'GET'
-    )
-    return response as UploadPolicyResponse
-  }
+  private declare uploadPolicy: typeof this.client.uploadPolicy
 
   /**
    * Methods for interacting with PubPub on the community level, e.g. changing the community name, adding CSS etc.
@@ -1197,20 +1082,20 @@ export class PubPub {
      * Update the community settings
      */
     update: async ({
-      pubHeaderTheme,
-      license,
-      citationStyle,
-      nodeLabels,
-      pubEdgeDisplay,
+      PubHeaderTheme,
+      License,
+      CitationStyle,
+      NodeLabels,
+      PubEdgeDisplay,
       ...putPayload
-    }: CommunityPutPayload & FacetsProps) => {
+    }: CommunityPutPayload & FacetsPayload['facets']) => {
       const facetsPayload: FacetsPayload = {
         facets: {
-          PubHeaderTheme: pubHeaderTheme ?? {},
-          License: license ?? {},
-          CitationStyle: citationStyle ?? {},
-          NodeLabels: nodeLabels ?? {},
-          PubEdgeDisplay: pubEdgeDisplay ?? {},
+          PubHeaderTheme,
+          License,
+          CitationStyle,
+          NodeLabels,
+          PubEdgeDisplay,
         },
         scope: {
           id: this.communityId,
@@ -1264,10 +1149,10 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        const facetsResponse = (await this.updateFacets(
-          facetsPayload.scope,
-          facetsPayload.facets
-        )) as { facets: (typeof facetsPayload)['facets'] }
+        await this.facets.update({
+          scope: facetsPayload.scope,
+          facets: facetsPayload.facets,
+        })
 
         // facets does not return the facets, so we just set them if nothing went wrong
         response = { ...response, facets: facetsPayload.facets } // facetsResponse.facets }
@@ -1280,11 +1165,15 @@ export class PubPub {
      * Update the global community CSS
      */
     css: async (css: string) => {
-      const response = await this.authedRequest<{}>('customScripts', 'POST', {
-        communityId: this.communityId,
-        type: 'css',
-        content: css,
-      })
+      const response = await this.authedRequest<Record<string, never>>(
+        'customScripts',
+        'POST',
+        {
+          communityId: this.communityId,
+          type: 'css',
+          content: css,
+        }
+      )
 
       return response
     },
@@ -1318,7 +1207,7 @@ export class PubPub {
     )
 
     const sourceFiles: SourceFile[] = importedFiles.map(
-      ({ url, size, key, fileName, mimeType }, idx) => ({
+      ({ size, key, fileName }, idx) => ({
         assetKey: key,
         clientPath: fileName,
         id: idx + 1,
@@ -1330,24 +1219,21 @@ export class PubPub {
 
     const labeledFiles = labelFiles(sourceFiles)
 
-    return await this.importFiles(labeledFiles)
+    return await this.import(labeledFiles)
   }
 
   /**
    * Basic export function, equivalent to the `/api/export` endpoint
    */
-  private exportPub = async ({
+  private export = async ({
     pubId,
     format,
     historyKey,
-  }: DeepInputBody<'export'>) => {
-    let { body } = await this.client.export({
-      body: {
-        communityId: this.communityId,
-        pubId,
-        format,
-        historyKey,
-      },
+  }: DeepInput<'export'>) => {
+    const { body } = await this.client.export({
+      pubId,
+      format,
+      historyKey,
     }) // await this.authedRequest(`export`, 'POST', payload)
 
     let workerTaskId: string | null = null
@@ -1376,13 +1262,12 @@ export class PubPub {
   /**
    * Basic import function, equivalent to the `/api/import` endpoint
    */
-  private importFiles = async (sourceFiles: SourceFile[]) => {
-    const payload: ImportPayload = {
+  private import = async (sourceFiles: DeepInput<'import'>['sourceFiles']) => {
+    const payload: DeepInput<'import'> = {
       importerFlags: {},
       sourceFiles,
-      useNewImporter: true,
     }
-    const workerTaskId = await this.authedRequest(`import`, 'POST', payload)
+    const { body: workerTaskId } = await this.client.import(payload)
 
     if (typeof workerTaskId !== 'string') {
       console.error(workerTaskId)
@@ -1397,21 +1282,21 @@ export class PubPub {
   /**
    * Pings workertask endpoint until every second until the task is complete
    */
-  private waitForWorkerTask = async (workerTaskId: string) => {
-    const poll = async (): Promise<any> => {
+  waitForWorkerTask = async (workerTaskId: string) => {
+    const poll = async (): Promise<unknown> => {
       console.log(`Polling for ${workerTaskId}`)
       const task = (await this.authedRequest(
         `workerTasks?workerTaskId=${workerTaskId}`,
         'GET'
       )) as WorkerTaskResponse
 
-      if (!task.isProcessing && task.output) {
-        return task.output
-      }
-
       if (task.error) {
         console.error(task.error)
         throw new Error(task.error)
+      }
+
+      if (!task.isProcessing && task.output) {
+        return task.output
       }
 
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -1420,6 +1305,22 @@ export class PubPub {
     }
 
     return poll()
+  }
+
+  static async createSDK({
+    communityId,
+    communityUrl,
+    email,
+    password,
+  }: {
+    communityId: string
+    communityUrl: string
+    email: string
+    password: string
+  }) {
+    const sdk = new PubPub(communityId, communityUrl)
+    await sdk.login(email, password)
+    return sdk as unknown as PubPubSDK
   }
 }
 
