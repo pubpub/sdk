@@ -1,5 +1,5 @@
 import path from 'path'
-import { PubPub } from '../src/lib/client.js'
+import { PubPubSDK } from '../src/lib/client.js'
 import { setupSDK } from './utils/setup.js'
 import { readFile } from 'fs/promises'
 import { sleep } from './utils/sleep.js'
@@ -14,13 +14,14 @@ const IMPORT_TEST_COMMUNITY_ID =
   ('94873d35-f9ca-4e2d-9c33-681dc893d302' as const)
 
 describe('imports', () => {
-  let pubpub: PubPub
+  let pubpub: PubPubSDK
   let pub = {} as Awaited<ReturnType<typeof pubpub.pub.create>>['body']
 
   let removed = false
   let draftPath = ''
 
   beforeAll(async () => {
+    // eslint-disable-next-line no-extra-semi
     ;({ pub, pubpub, draftPath } = await setupSDK({
       url: IMPORT_TEST_COMMUNITY_URL,
       communityId: IMPORT_TEST_COMMUNITY_ID,
@@ -80,7 +81,7 @@ describe('imports', () => {
   afterAll(async () => {
     await sleep(1000)
     if (!removed) {
-      await pubpub.pub.remove({ pub: pub.id })
+      await pubpub.pub.remove({ pubId: pub.id })
       removed = true
     }
 

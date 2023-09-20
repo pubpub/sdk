@@ -303,6 +303,9 @@ importers:
       '@types/node':
         specifier: ^18.11.4
         version: 18.17.15
+      '@types/react-dom':
+        specifier: ^17.0.9
+        version: 17.0.20
       '@types/styled-components':
         specifier: ^5.1.12
         version: 5.1.27
@@ -560,7 +563,7 @@ importers:
         version: 1.4.3
       prosemirror-suggest:
         specifier: ^0.7.6
-        version: 0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+        version: 0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
       prosemirror-tables:
         specifier: ^1.1.1
         version: 1.3.4
@@ -835,9 +838,6 @@ importers:
       '@types/react-beautiful-dnd':
         specifier: ^13.0.0
         version: 13.1.4
-      '@types/react-dom':
-        specifier: ^16.8.5
-        version: 16.9.19
       '@types/request-promise':
         specifier: ^4.1.48
         version: 4.1.48
@@ -5934,12 +5934,12 @@ packages:
       '@babel/runtime': 7.22.15
     dev: false
 
-  /@remirror/core-helpers@0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
+  /@remirror/core-helpers@0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
     resolution: {integrity: sha512-GK4tDYTnn2XKFqKvnh7kPD8lmdLvkbtOFNQZVRlKYSs8nDWl55p6TzsC9qjtTQPBWjjhe/UW+mSftcCcsucfcg==}
     dependencies:
       '@babel/runtime': 7.22.15
       '@remirror/core-constants': 0.7.4
-      '@remirror/core-types': 0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/core-types': 0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
       '@types/object.omit': 3.0.1
       '@types/object.pick': 1.3.2
       '@types/throttle-debounce': 2.1.0
@@ -5960,7 +5960,7 @@ packages:
       - react-dom
     dev: false
 
-  /@remirror/core-types@0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
+  /@remirror/core-types@0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
     resolution: {integrity: sha512-IrmD+k68Zz/PrewjM0SBofH13kCaxA+WddmiuRI1KoLiJKi8yK6zHniXEHEV3JDbFpzAhdjLaTBvxPDA2OnJgQ==}
     peerDependencies:
       '@emotion/core': ^10
@@ -5972,7 +5972,7 @@ packages:
       '@babel/runtime': 7.22.15
       '@emotion/core': 10.3.1(react@16.14.0)
       '@remirror/core-constants': 0.7.4
-      '@remirror/react-portals': 0.7.4(@emotion/core@10.3.1)(@types/react-dom@16.9.19)(@types/react@16.14.46)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/react-portals': 0.7.4(@emotion/core@10.3.1)(@types/react-dom@17.0.20)(@types/react@16.14.46)(react-dom@16.14.0)(react@16.14.0)
       '@styled-system/css': 5.1.5
       '@types/prosemirror-commands': 1.3.0
       '@types/prosemirror-inputrules': 1.2.0
@@ -6000,13 +6000,13 @@ packages:
       - react-dom
     dev: false
 
-  /@remirror/core-utils@0.8.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
+  /@remirror/core-utils@0.8.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
     resolution: {integrity: sha512-PAKFNJQPDDgQVyo7KMSJotrcODyOml2pQgFq55GXA4tXnFS22Nbr1TIvXf5zRHi4OPrv+1uBR5IBtLMtnYQt+w==}
     dependencies:
       '@babel/runtime': 7.22.15
       '@remirror/core-constants': 0.7.4
-      '@remirror/core-helpers': 0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
-      '@remirror/core-types': 0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/core-helpers': 0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/core-types': 0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
       '@types/min-document': 2.19.0
       '@types/node': 18.17.15
       '@types/prosemirror-commands': 1.3.0
@@ -6030,7 +6030,7 @@ packages:
       - react-dom
     dev: false
 
-  /@remirror/react-portals@0.7.4(@emotion/core@10.3.1)(@types/react-dom@16.9.19)(@types/react@16.14.46)(react-dom@16.14.0)(react@16.14.0):
+  /@remirror/react-portals@0.7.4(@emotion/core@10.3.1)(@types/react-dom@17.0.20)(@types/react@16.14.46)(react-dom@16.14.0)(react@16.14.0):
     resolution: {integrity: sha512-OgbvbXaQbxCWTKRTzjtxDZZL5CK0ceAFVWh2WxfA/edtVlrPk0SQbxX1Ily3Dr6b75hHQgh5hhEKzaLh/ZVZFA==}
     peerDependencies:
       '@emotion/core': ^10
@@ -6044,7 +6044,7 @@ packages:
       '@types/nanoevents': 1.0.0
       '@types/nanoid': 2.1.0
       '@types/react': 16.14.46
-      '@types/react-dom': 16.9.19
+      '@types/react-dom': 17.0.20
       nanoevents: 2.0.0
       nanoid: 2.1.11
       react: 16.14.0
@@ -8505,10 +8505,11 @@ packages:
       '@types/react': 16.14.46
     dev: true
 
-  /@types/react-dom@16.9.19:
-    resolution: {integrity: sha512-xC8D280Bf6p0zguJ8g62jcEOKZiUbx9sIe6O3tT/lKfR87A7A6g65q13z6D5QUMIa/6yFPkNhqjF5z/VVZEYqQ==}
+  /@types/react-dom@17.0.20:
+    resolution: {integrity: sha512-4pzIjSxDueZZ90F52mU3aPoogkHIoSIDG+oQ+wQK7Cy2B9S+MvOqY0uEA/qawKz381qrEDkvpwyt8Bm31I8sbA==}
     dependencies:
-      '@types/react': 16.14.46
+      '@types/react': 17.0.65
+    dev: false
 
   /@types/react-redux@7.1.26:
     resolution: {integrity: sha512-UKPo7Cm7rswYU6PH6CmTNCRv5NYF3HrgKuHEYTK8g/3czYLrUux50gQ2pkxc9c7ZpQZi+PNhgmI8oNIRoiVIxg==}
@@ -8525,6 +8526,14 @@ packages:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.3
       csstype: 3.1.2
+
+  /@types/react@17.0.65:
+    resolution: {integrity: sha512-oxur785xZYHvnI7TRS61dXbkIhDPnGfsXKv0cNXR/0ml4SipRIFpSMzA7HMEfOywFwJ5AOnPrXYTEiTRUQeGlQ==}
+    dependencies:
+      '@types/prop-types': 15.7.5
+      '@types/scheduler': 0.16.3
+      csstype: 3.1.2
+    dev: false
 
   /@types/relateurl@0.2.29:
     resolution: {integrity: sha512-QSvevZ+IRww2ldtfv1QskYsqVVVwCKQf1XbwtcyyoRvLIQzfyPhj/C+3+PKzSDRdiyejaiLgnq//XTkleorpLg==}
@@ -20756,7 +20765,7 @@ packages:
       prosemirror-transform: 1.7.5
       prosemirror-view: 1.31.8
 
-  /prosemirror-suggest@0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
+  /prosemirror-suggest@0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0):
     resolution: {integrity: sha512-byzffTO/uk8v0JRGIOO2H8h97u5fS01KcxmPXzuc0IDgxvcmrP55XsXerVORAoqJlJFlN0DGAPojQENkDLSXsA==}
     peerDependencies:
       '@types/prosemirror-view': ^1.11.0
@@ -20764,9 +20773,9 @@ packages:
     dependencies:
       '@babel/runtime': 7.22.15
       '@remirror/core-constants': 0.7.4
-      '@remirror/core-helpers': 0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
-      '@remirror/core-types': 0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
-      '@remirror/core-utils': 0.8.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@16.9.19)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/core-helpers': 0.7.6(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/core-types': 0.9.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
+      '@remirror/core-utils': 0.8.0(@emotion/core@10.3.1)(@types/prosemirror-view@1.24.0)(@types/react-dom@17.0.20)(@types/react@16.14.46)(prosemirror-view@1.31.8)(react-dom@16.14.0)(react@16.14.0)
       '@types/prosemirror-keymap': 1.2.0
       '@types/prosemirror-state': 1.4.0
       '@types/prosemirror-view': 1.24.0

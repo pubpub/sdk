@@ -13,8 +13,6 @@ import {
   SourceFile,
   ExportFormats,
   allowedMimeTypes,
-  AttributionsPayload,
-  UpdateCollectionsMetaData,
   WorkerTaskExportOutput,
   WorkerTaskImportOutput,
   WorkerTaskResponse,
@@ -42,6 +40,7 @@ import {
   DeepMerge,
   Prettify,
   DeepOutput,
+  DeepClient,
 } from './client-types.js'
 
 /**
@@ -157,28 +156,22 @@ export class PubPub {
   }
 
   async authedRequest<
-    T extends Record<string, unknown> | string | void =
-      | Record<string, unknown>
-      | string
+    T extends Record<string, any> | string | void = Record<string, any> | string
   >(path: string, method: 'GET', options?: RequestInit): Promise<T>
   async authedRequest<
-    T extends Record<string, unknown> | string | void =
-      | Record<string, unknown>
-      | string
+    T extends Record<string, any> | string | void = Record<string, any> | string
   >(
     path: string,
     method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    body?: Record<string, unknown>,
+    body?: Record<string, any>,
     options?: RequestInit
   ): Promise<T>
   async authedRequest<
-    T extends Record<string, unknown> | string | void =
-      | Record<string, unknown>
-      | string
+    T extends Record<string, any> | string | void = Record<string, any> | string
   >(
     path: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    bodyOrOptions: Record<string, unknown> | RequestInit,
+    bodyOrOptions: Record<string, any> | RequestInit,
     optionsMabye?: RequestInit
   ): Promise<T> {
     const options = method === 'GET' ? bodyOrOptions : optionsMabye
@@ -331,7 +324,7 @@ export class PubPub {
 
             return {
               url: uploadedFile.url,
-              type: 'formatted',
+              type: 'formatted' as const,
               createdAt: new Date().toISOString(),
             }
           }
@@ -354,7 +347,6 @@ export class PubPub {
 
       const putPayload: DeepInput<'pub.update'> = {
         pubId,
-        communityId: this.communityId,
         title,
         description,
         doi,
@@ -383,7 +375,7 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        const { body, status } = await this.facets.update({
+        const { status } = await this.facets.update({
           scope: facetsPayload.scope,
           facets: facetsPayload.facets,
         })
@@ -740,30 +732,22 @@ export class PubPub {
      *
      * This is a helper method that calls `/api/facets` and `PUT /api/collections` under the hood
      *
-     * @param collectionId The id of the collection you want to update
-     * @param props The properties you want to update
      */
     update: async ({
-      collectionId,
+      id,
       doi,
       slug,
-      copyrightYear,
-      edition,
-      isbn,
-      publicationDate,
       title,
-      issue,
-      url,
-      volume,
       CitationStyle,
       License,
       NodeLabels,
       PubEdgeDisplay,
       PubHeaderTheme,
+      metadata,
     }: DeepInput<'collection.update'> & FacetsPayload['facets']) => {
       const facetsPayload: FacetsPayload = {
         scope: {
-          id: collectionId,
+          id,
           kind: 'collection',
         },
         facets: {
@@ -777,44 +761,41 @@ export class PubPub {
 
       const putPayload = {
         communityId: this.communityId,
-        collectionId,
+        id,
         doi,
         slug,
-        copyrightYear,
-        edition,
-        isbn,
-        publicationDate,
         title,
-        issue,
-        url,
-        volume,
+        metadata,
       }
 
       const shouldPostFacets = Object.keys(facetsPayload.facets).length > 0
       const shouldPutCollection = Object.keys(putPayload).length > 0
 
-      let response: Partial<
-        typeof putPayload & { facets: (typeof facetsPayload)['facets'] }
-      > = {}
+      let response = {} as {
+        status: 200
+        body: Partial<DeepOutput<'collection.update'>['body']> & {
+          facets?: (typeof facetsPayload)['facets']
+        }
+      }
 
       if (shouldPutCollection) {
-        const putResponse = (await this.authedRequest(
-          `collections`,
-          'PUT',
-          putPayload
-        )) as typeof putPayload
+        const putResponse = await this.client.collection.update(putPayload)
 
         response = putResponse
       }
 
       if (shouldPostFacets) {
-        await this.facets.update({
+        const { status } = await this.facets.update({
           scope: facetsPayload.scope,
           facets: facetsPayload.facets,
         })
 
         // facets does not return the facets, so we just set them if nothing went wrong
-        response.facets = facetsPayload.facets // facetsResponse as typeof facetsPayload.facets
+        response.body.facets = facetsPayload.facets // facetsResponse as typeof facetsPayload.facets
+        response.status =
+          response.status === 200 || response.status === undefined
+            ? status
+            : response.status
       }
 
       return response
@@ -891,8 +872,26 @@ export class PubPub {
     },
   }
 
-  private makeAttributionsOperations<T extends 'pub' | 'collection'>(type: T) {
-    const path = type === 'pub' ? 'pubAttributions' : 'collectionAttributions'
+  private makeAttributionsOperations<
+    T extends 'pub' | 'collection',
+    F extends T extends 'pub'
+      ? DeepClient<'pubAttribution', 'func'>
+      : DeepClient<'collectionAttribution', 'func'>,
+    C extends T extends 'pub'
+      ? DeepInput<'pubAttribution.create'>
+      : DeepInput<'collectionAttribution.create'>,
+    U extends T extends 'pub'
+      ? DeepInput<'pubAttribution.update'> & { name?: string }
+      : DeepInput<'collectionAttribution.update'>,
+    R extends T extends 'pub'
+      ? DeepInput<'pubAttribution.remove'> & { name?: string }
+      : Omit<DeepInput<'collectionAttribution.remove'>, 'name'>
+  >(type: T) {
+    const func = (
+      type === 'pub'
+        ? this.client.pubAttribution
+        : this.client.collectionAttribution
+    ) as F
 
     return {
       get:
@@ -906,8 +905,9 @@ export class PubPub {
               return attributions
             },
 
-      create: async (props: AttributionsPayload) => {
-        const response = await this.authedRequest(path, 'POST', props)
+      create: async (props: C) => {
+        // @ts-expect-error FIXME: This should work
+        const response = await func.create(props)
 
         return response
       },
@@ -919,12 +919,14 @@ export class PubPub {
        * If you pass a name, it will find the attribution with that name and update it
        */
       update: async (
-        props: T extends 'pub'
-          ? AttributionsPayload
-          : Omit<AttributionsPayload, 'name'>
+        props: U
+        // props: T extends 'pub'
+        //   ? AttributionsPayload
+        //   : Omit<AttributionsPayload, 'name'>
       ) => {
-        if (!('name' in props) || !props.name) {
-          const response = await this.authedRequest(path, 'PUT', props)
+        if ('collectionId' in props || !('name' in props) || !props.name) {
+          // @ts-expect-error FIXME: This should work
+          const response = await func.update(props)
           return response
         }
 
@@ -942,21 +944,17 @@ export class PubPub {
           throw new Error('Attribution not found')
         }
 
-        const response = await this.authedRequest(path, 'PUT', {
+        const response = await this.client.pubAttribution.update({
           ...props,
           userId: existingAttribution.userId,
         })
-
         return response
       },
 
-      remove: async (
-        props: T extends 'pub'
-          ? AttributionsPayload
-          : Omit<AttributionsPayload, 'name'>
-      ) => {
-        if (!('name' in props) || !props.name) {
-          const response = await this.authedRequest(path, 'DELETE', props)
+      remove: async (props: R) => {
+        if ('collectionId' in props || !('name' in props) || !props.name) {
+          // @ts-expect-error FIXME: This should work
+          const response = await func.remove(props)
           return response
         }
 
@@ -970,13 +968,13 @@ export class PubPub {
           (x) => x.name === props.name
         )
 
-        if (!existingAttribution) {
+        if (!existingAttribution || !existingAttribution.userId) {
           throw new Error('Attribution not found')
         }
 
-        const response = await this.authedRequest(path, 'DELETE', {
+        const response = await this.client.pubAttribution.remove({
           ...props,
-          userId: existingAttribution.userId,
+          id: existingAttribution.userId,
         })
 
         return response

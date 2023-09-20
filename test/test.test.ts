@@ -87,7 +87,7 @@ describe('PubPub', () => {
   }, 10000)
 
   let collectionId: string
-  it('should be able to creae a collectoin', async () => {
+  it('should be able to create a collection', async () => {
     const collection = await pubpub.collection.create({
       title: 'Test collection',
       kind: 'book',
@@ -95,7 +95,7 @@ describe('PubPub', () => {
     })
 
     collectionId = collection.body.id
-    expect(collection.status).toBe(200)
+    expect(collection.status).toBe(201)
     expect(collection.body).toHaveProperty('title')
   })
 
@@ -114,23 +114,23 @@ describe('PubPub', () => {
     })
 
     collectionPubId = added.body.id
-    expect(added.status).toBe(200)
-    expect(added.body).toHaveProperty('title')
+    expect(added.status).toBe(201)
+    expect(added.body).toHaveProperty('rank')
   })
 
-  it('should be able to change the type of a collectionPub', async () => {
-    const changed = await pubpub.collection.changePubType({
-      collectionPubId,
-      type: 'chapter',
+  it('should be able to change the contextHint of a collectionPub', async () => {
+    const changed = await pubpub.collectionPub.update({
+      id: collectionPubId,
+      contextHint: 'chapter',
     })
 
     expect(changed.status).toBe(200)
-    expect(changed.body).toHaveProperty('type')
+    expect(changed.body).toEqual({ contextHint: 'chapter' })
   })
 
   it('should be able to modify a colection', async () => {
     const modded = await pubpub.collection.update({
-      collectionId,
+      id: collectionId,
       title: 'New title',
     })
 

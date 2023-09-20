@@ -21,10 +21,16 @@ export type ProxiedFunction<F> = F extends (
   ? A[0] extends { body: infer B }
     ? // if only the body is required, make the second argument optional
       Partial<Omit<A[0], 'body'>> extends Omit<A[0], 'body'>
-      ? (
-          body: Prettify<Omit<B, 'communityId'>>,
-          rest?: Prettify<Omit<A[0], 'body'>>
-        ) => R
+      ? Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
+        ? // if there are no required arguments, you don't need to pass the body
+          (
+            body?: Prettify<Omit<B, 'communityId'>>,
+            rest?: Prettify<Omit<A[0], 'body'>>
+          ) => R
+        : (
+            body: Prettify<Omit<B, 'communityId'>>,
+            rest?: Prettify<Omit<A[0], 'body'>>
+          ) => R
       : (
           body: Prettify<Omit<B, 'communityId'>>,
           rest: Prettify<Omit<A[0], 'body'>>
@@ -68,12 +74,14 @@ export type DeepAccess<
 
 export type DeepClient<
   T extends ObjectPath<PClient>,
-  I extends 'in' | 'out' = 'in'
+  I extends 'in' | 'out' | 'func' = 'in'
 > = DeepAccess<PClient, T> extends infer D
   ? D extends (args: infer A) => infer R
     ? I extends 'in'
       ? A
-      : Awaited<R>
+      : I extends 'out'
+      ? Awaited<R>
+      : D
     : D
   : never
 

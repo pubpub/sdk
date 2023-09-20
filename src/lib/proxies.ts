@@ -21,7 +21,7 @@ export function proxyClient(
   getRequestsMap = {}
 ): PClient {
   // Recursive function to traverse and proxy the client object
-  function proxyObject<T extends Record<string, unknown>>(obj: T) {
+  function proxyObject<T extends Record<string, any>>(obj: T) {
     const newObj = {}
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'function') {
@@ -35,11 +35,17 @@ export function proxyClient(
           } else {
             // For non-GET requests, split the first argument into body and the rest
             // and include the communityId in the body, as it is often needed and annoying to have to pass all the time
-            const [body, rest] = args
-            return value.call(this, { body: { ...body, communityId }, ...rest })
+            const [body, rest] = args as [
+              body: Record<string, unknown> | undefined,
+              rest: Record<string, unknown> | undefined
+            ]
+            return value.call(this, {
+              body: { ...body, communityId },
+              ...rest,
+            })
           }
         }
-      } else if (typeof value === 'object') {
+      } else if (typeof value === 'object' && value !== null) {
         // Recursively proxy nested objects
         newObj[key] = proxyObject(value)
       } else {
@@ -49,7 +55,7 @@ export function proxyClient(
     return newObj
   }
 
-  return proxyObject(client)
+  return proxyObject(client) as PClient
 }
 
 export function proxySDKWithClient(
