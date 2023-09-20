@@ -22,8 +22,6 @@ export async function setupSDK({
 
   const { body } = await pubpub.pub.create()
 
-  console.log(body)
-
   return {
     pubpub,
     pub: body,
