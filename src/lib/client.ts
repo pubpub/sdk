@@ -132,7 +132,7 @@ export class PubPub {
       createClient({
         baseUrl: this.communityUrl,
         baseHeaders: {
-          Cookie: cookie || '',
+          Cookie: this.cookie || '',
         },
       }),
       this.communityId,
@@ -887,12 +887,6 @@ export class PubPub {
       ? DeepInput<'pubAttribution.remove'> & { name?: string }
       : Omit<DeepInput<'collectionAttribution.remove'>, 'name'>
   >(type: T) {
-    const func = (
-      type === 'pub'
-        ? this.client.pubAttribution
-        : this.client.collectionAttribution
-    ) as F
-
     return {
       get:
         type === 'collection'
@@ -906,6 +900,11 @@ export class PubPub {
             },
 
       create: async (props: C) => {
+        const func = (
+          type === 'pub'
+            ? this.client.pubAttribution
+            : this.client.collectionAttribution
+        ) as F
         // @ts-expect-error FIXME: This should work
         const response = await func.create(props)
 
@@ -924,6 +923,11 @@ export class PubPub {
         //   ? AttributionsPayload
         //   : Omit<AttributionsPayload, 'name'>
       ) => {
+        const func = (
+          type === 'pub'
+            ? this.client.pubAttribution
+            : this.client.collectionAttribution
+        ) as F
         if ('collectionId' in props || !('name' in props) || !props.name) {
           // @ts-expect-error FIXME: This should work
           const response = await func.update(props)
@@ -952,6 +956,11 @@ export class PubPub {
       },
 
       remove: async (props: R) => {
+        const func = (
+          type === 'pub'
+            ? this.client.pubAttribution
+            : this.client.collectionAttribution
+        ) as F
         if ('collectionId' in props || !('name' in props) || !props.name) {
           // @ts-expect-error FIXME: This should work
           const response = await func.remove(props)
@@ -1318,12 +1327,13 @@ export class PubPub {
   }) {
     const sdk = new PubPub(communityId, communityUrl)
     await sdk.login(email, password)
+    console.log(sdk.client)
     return sdk as unknown as PubPubSDK
   }
 }
 
 interface FileImportPayload {
-  file: Blob | Buffer | File //| string
+  file: Blob | Buffer | File
   fileName: string
   mimeType: (typeof allowedMimeTypes)[number]
 }
