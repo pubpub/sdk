@@ -154,52 +154,6 @@ export class PubPub {
     return response
   }
 
-  async authedRequest<
-    T extends Record<string, any> | string | void = Record<string, any> | string
-  >(path: string, method: 'GET', options?: RequestInit): Promise<T>
-  async authedRequest<
-    T extends Record<string, any> | string | void = Record<string, any> | string
-  >(
-    path: string,
-    method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    body?: Record<string, any>,
-    options?: RequestInit
-  ): Promise<T>
-  async authedRequest<
-    T extends Record<string, any> | string | void = Record<string, any> | string
-  >(
-    path: string,
-    method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    bodyOrOptions: Record<string, any> | RequestInit,
-    optionsMabye?: RequestInit
-  ): Promise<T> {
-    const options = method === 'GET' ? bodyOrOptions : optionsMabye
-    const body = method !== 'GET' ? JSON.stringify(bodyOrOptions) : undefined
-
-    const response = await fetch(`${this.communityUrl}/api/${path}`, {
-      body,
-      // body,
-      method,
-      ...options,
-      headers: {
-        ...options?.headers,
-        'Content-Type': 'application/json',
-        Cookie: this.#cookie || '',
-      },
-    })
-
-    if (!response.ok || response.status < 200 || response.status >= 300) {
-      console.log(response)
-      throw new Error(
-        `Request failed with status ${response.status}: ${response.statusText}`
-      )
-    }
-
-    const data = await response.json()
-
-    return data
-  }
-
   /**
    * Get the HTML content of a page
    */
@@ -1121,7 +1075,9 @@ export class PubPub {
         }
       })
 
-      putPayload.navigation &&= putPayload.navigation.map((link) => {
+      function fixLinks(
+        link: NonNullable<CommunityPutPayload['navigation']>[0]
+      ) {
         if ('id' in link) {
           return link
         }
@@ -1130,21 +1086,27 @@ export class PubPub {
 
         return {
           id,
-
           ...link,
         }
-      })
+      }
 
       let response: Partial<
         CommunityPutResponse & { facets: (typeof facetsPayload)['facets'] }
       > = {}
 
+      const { navigation, footerLinks, ...rest } = putPayload
+
       if (shouldPutCommunity) {
-        const communityResponse = (await this.authedRequest(
-          `community/${this.communityId}`,
-          'PUT',
-          putPayload
-        )) as CommunityPutResponse
+        const communityResponse = await this.client.community.update({
+          ...rest,
+          id: this.communityId,
+          ...(navigation && {
+            navigation: navigation.map(fixLinks),
+          }),
+          ...(footerLinks && {
+            footerLinks: footerLinks.map(fixLinks),
+          }),
+        })
         response = { ...response, ...communityResponse }
       }
 
@@ -1165,15 +1127,10 @@ export class PubPub {
      * Update the global community CSS
      */
     css: async (css: string) => {
-      const response = await this.authedRequest<Record<string, never>>(
-        'customScripts',
-        'POST',
-        {
-          communityId: this.communityId,
-          type: 'css',
-          content: css,
-        }
-      )
+      const response = await this.client.customScript.set({
+        type: 'css',
+        content: css,
+      })
 
       return response
     },

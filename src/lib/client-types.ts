@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { createClient } from '../../core/utils/api/client.js'
+import type { createClient } from '../../core/utils/api/client.js'
 
 export type Client = ReturnType<typeof createClient>
 

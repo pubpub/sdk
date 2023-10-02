@@ -1,8 +1,8 @@
-import { Collection } from './collectionData.js'
-import { ResourceWarning } from './editor/types.js'
-import { DefinitelyHas } from './type-helpers.js'
-import { ProposedMetadata } from './firebase/rest/firebase.js'
-import { DeepInput } from './client-types.js'
+import type { Collection } from './collectionData.js'
+import type { ResourceWarning } from './editor/types.js'
+import type { DefinitelyHas } from './type-helpers.js'
+import type { ProposedMetadata } from './firebase/rest/firebase.js'
+import type { DeepInput } from './client-types.js'
 
 const DEFAULT_ROLES = [
   'Conceptualization',
@@ -153,12 +153,35 @@ export type CommunityPutResponse = {
 }
 
 export type CommunityPutPayload = Omit<
-  CommunityPutResponse,
+  DeepInput<'community.update'>,
   'navigation' | 'footerLinks'
 > & {
-  navigation?: NavigationLink<'request'>[]
-  footerLinks?: FooterLink<'request'>[]
+  /**
+   * Navigation links.
+   *
+   * These can either take an id, which will be used to update an existing link,
+   * or omit an id, which will create a new link.
+   *
+   * Options:
+   * - DropDownMenu
+   * - PageOrCollectionLink
+   * - ExternalLink
+   */
+  navigation?: (NavigationLink<'request'> | NavigationLink<'response'>)[]
+  /**
+   * Footer links. These can either take an id, which will be used to update an existing link,
+   * or omit an id, which will create a new link.
+   */
+  footerLinks?: (FooterLink<'request'> | FooterLink<'response'>)[]
 }
+
+// export type CommunityPutPayload = Omit<
+//   CommunityPutResponse,
+//   'navigation' | 'footerLinks'
+// > & {
+//   navigation?: NavigationLink<'request'>[]
+//   footerLinks?: FooterLink<'request'>[]
+// }
 
 type NavigationLink<T extends 'request' | 'response' = 'response'> =
   | (T extends 'request' ? Omit<DropDownMenu, 'id'> : DropDownMenu)
@@ -191,13 +214,6 @@ type Child = PageOrCollectionLink | ExternalLink
 
 export type SourceFile = DeepInput<'import'>['sourceFiles'][number]
 
-export type WorkerTaskResponse = {
-  id: string
-  isProcessing: boolean
-  error?: any
-  output?: unknown
-}
-
 export type WorkerTaskExportOutput = {
   url: string
 }
@@ -207,12 +223,6 @@ export type WorkerTaskImportOutput = {
   warnings: ResourceWarning[]
   proposedMetadata: ProposedMetadata
   pandocErrorOutput: string
-}
-
-export type PubsManyResponse = {
-  pubIds: string[]
-  pubsById: PubsById
-  loadedAllPubs: boolean
 }
 
 export type PubsById = {
@@ -538,30 +548,6 @@ export type Visibility = {
   id: string
   access: VisibilityAccess
   users: VisibilityUser[]
-}
-
-export type TaggedVisibilityParent =
-  | { type: 'discussion'; value: Discussion }
-  | { type: 'review'; value: Review }
-
-export type Review = {
-  id: string
-  author: User
-  createdAt: string
-  updatedAt: string
-  title: string
-  number: number
-  status: 'open' | 'closed' | 'completed'
-  releaseRequested: boolean
-  threadId: string
-  thread: Thread
-  visibilityId: string
-  visibility?: Visibility
-  userId: string
-  pubId: string
-  pub?: Pub
-  reviewContent?: DocJson
-  reviewers?: Reviewer[]
 }
 
 export type Reviewer = {

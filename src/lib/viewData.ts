@@ -1,5 +1,5 @@
-import { Collection } from './collectionData.js'
-import {
+import type { Collection } from './collectionData.js'
+import type {
   CollectionPubWithAttributions,
   Discussion,
   Pub,

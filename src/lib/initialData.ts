@@ -1,4 +1,4 @@
-import { CollectionKind } from './types.js'
+import type { CollectionKind } from './types.js'
 
 export type InitialData = {
   communityData: CommunityData

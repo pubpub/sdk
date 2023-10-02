@@ -1,5 +1,5 @@
 // import { describe, it, beforeAll, expect, afterAll } from 'vitest'
-import { PubPubSDK } from '../src/lib/client.js'
+import type { PubPubSDK } from '../src/lib/client.js'
 import { setupSDK } from './utils/setup.js'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -185,6 +185,8 @@ describe('PubPub', () => {
     expect(modded.status).toBe(200)
     expect(modded.body).toHaveProperty('description')
   }, 10000)
+
+  it('should be able to update a community', async () => {})
 
   it('should remove a pub', async () => {
     const remove = await pubpub.pub.remove({ pubId: pub.id })
