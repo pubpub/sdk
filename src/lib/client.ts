@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SHA3 from 'crypto-js/sha3'
 import encHex from 'crypto-js/enc-hex'
-import { Fragment } from 'prosemirror-model'
+import type { Fragment } from 'prosemirror-model'
 // import { readFile } from 'fs/promises'
 import { createClient } from 'utils/api/client.js'
 
-import {
+import type {
   FacetsPayload,
   PubPutPayload,
   CommunityPutPayload,
@@ -15,13 +15,12 @@ import {
   allowedMimeTypes,
   WorkerTaskExportOutput,
   WorkerTaskImportOutput,
-  WorkerTaskResponse,
 } from './types.js'
-import { InitialData } from './initialData.js'
-import { CollectionInitialData } from './collectionData.js'
+import type { InitialData } from './initialData.js'
+import type { CollectionInitialData } from './collectionData.js'
 import { generateFileNameForUpload } from './generateFileNameForUpload.js'
 import { generateHash } from './generateHash.js'
-import {
+import type {
   CollectionViewData,
   CommunityViewData,
   PubViewDataDash,
@@ -31,10 +30,10 @@ import { labelFiles } from './formats.js'
 import { signInWithCustomToken } from './firebase/rest/signInWithCustomToken.js'
 import { writeDocumentToPubDraft } from './firebase/rest/firebase.js'
 
-import { buildSchema } from './editor/schema.js'
+import type { buildSchema } from './editor/schema.js'
 
 import { proxyClient, proxySDKWithClient } from './proxies.js'
-import {
+import type {
   PClient,
   DeepInput,
   DeepMerge,
@@ -234,8 +233,6 @@ export class PubPub {
 
   /**
    * Methods for interacting with pages
-   *
-   * Very limited for now
    *
    * @since v1.0.0
    */
@@ -1292,17 +1289,18 @@ export class PubPub {
   waitForWorkerTask = async (workerTaskId: string) => {
     const poll = async (): Promise<unknown> => {
       console.log(`Polling for ${workerTaskId}`)
-      const task = (await this.authedRequest(
-        `workerTasks?workerTaskId=${workerTaskId}`,
-        'GET'
-      )) as WorkerTaskResponse
+      const { body: task } = await this.client.workerTask.get({
+        query: {
+          workerTaskId,
+        },
+      })
 
-      if (task.error) {
+      if ('error' in task && task.error) {
         console.error(task.error)
         throw new Error(task.error)
       }
 
-      if (!task.isProcessing && task.output) {
+      if ('output' in task && !task.isProcessing && task.output) {
         return task.output
       }
 
