@@ -1190,8 +1190,8 @@ export class PubPub {
     const { body } = await this.client.export({
       pubId,
       format,
-      historyKey,
-    }) // await this.authedRequest(`export`, 'POST', payload)
+      historyKey: historyKey! < 0 ? undefined : historyKey,
+    })
 
     let workerTaskId: string | null = null
 

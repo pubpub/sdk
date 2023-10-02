@@ -1,5 +1,5 @@
 import path from 'path'
-import { PubPubSDK } from '../src/lib/client.js'
+import type { PubPubSDK } from '../src/lib/client.js'
 import { setupSDK } from './utils/setup.js'
 import { readFile } from 'fs/promises'
 import { sleep } from './utils/sleep.js'
