@@ -82,7 +82,7 @@ export type PubPubSDK = DeepMerge<PClient, PubPub>
  * ```
  */
 export class PubPub {
-  private cookie?: string
+  #cookie?: string
   loggedIn = false
 
   #AWS_S3 = 'https://s3-external-1.amazonaws.com'
@@ -126,12 +126,12 @@ export class PubPub {
       ${data}`)
     }
 
-    this.cookie = cookie // .join('; ')
+    this.#cookie = cookie // .join('; ')
     const authenticatedClient = proxyClient(
       createClient({
         baseUrl: this.communityUrl,
         baseHeaders: {
-          Cookie: this.cookie || '',
+          Cookie: this.#cookie || '',
         },
       }),
       this.communityId,
@@ -147,7 +147,7 @@ export class PubPub {
   async logout() {
     const response = await this.client.logout()
 
-    this.cookie = undefined
+    this.#cookie = undefined
     this.loggedIn = false
     console.log('Succesfully logged out!')
 
@@ -184,7 +184,7 @@ export class PubPub {
       headers: {
         ...options?.headers,
         'Content-Type': 'application/json',
-        Cookie: this.cookie || '',
+        Cookie: this.#cookie || '',
       },
     })
 
@@ -209,7 +209,7 @@ export class PubPub {
       method: 'GET',
       keepalive: false,
       headers: {
-        Cookie: this.cookie || '',
+        Cookie: this.#cookie || '',
       },
     })
 
@@ -313,7 +313,7 @@ export class PubPub {
 
             const { fileOrPath, fileName, mimeType } = download
 
-            const uploadedFile = await this.uploadFile({
+            const uploadedFile = await this.#uploadFile({
               file: fileOrPath,
               fileName,
               mimeType,
@@ -521,14 +521,14 @@ export class PubPub {
         ? (
             await Promise.all(
               (filesToImport as FileImportPayload[][]).map((file) =>
-                this.importFull(file)
+                this.#importFull(file)
               )
             )
           )?.reduce((acc, curr) => {
             acc.doc.content = [...acc.doc.content, ...curr.doc.content]
             return acc
           })
-        : await this.importFull(filesToImport as FileImportPayload[])
+        : await this.#importFull(filesToImport as FileImportPayload[])
 
       const docImport = await writeDocumentToPubDraft(
         firebaseRoot,
@@ -590,7 +590,7 @@ export class PubPub {
         return downloads[0].url
       }
 
-      const { url } = await this.export({
+      const { url } = await this.#export({
         format: format === 'formatted' ? 'pdf' : format,
         pubId: pubId ?? id,
         historyKey: historyKey ?? initialDocKey,
@@ -850,7 +850,7 @@ export class PubPub {
     /**
      * Methods for interacting with attributions
      */
-    attributions: this.makeAttributionsOperations('collection'),
+    attributions: this.#makeAttributionsOperations('collection'),
     hacks: {
       /**
        * HACK: Get a list of all collections. Currently done by scraping the dashboard.
@@ -869,7 +869,7 @@ export class PubPub {
     },
   }
 
-  private makeAttributionsOperations<
+  #makeAttributionsOperations<
     T extends 'pub' | 'collection',
     F extends T extends 'pub'
       ? DeepClient<'pubAttribution', 'func'>
@@ -1017,11 +1017,7 @@ export class PubPub {
    *
    * This method has been made private to avoid abuse of the upload feature.
    */
-  private uploadFile = async ({
-    file,
-    fileName,
-    mimeType,
-  }: FileImportPayload) => {
+  #uploadFile = async ({ file, fileName, mimeType }: FileImportPayload) => {
     if (
       typeof window === 'undefined' &&
       process.version &&
@@ -1190,11 +1186,13 @@ export class PubPub {
 
   /**
    * More complete import function thta also takes care of properly uploading and labeling all files.
+   *
+   * @private
    */
-  private importFull = async (files: FileImportPayload[]) => {
+  #importFull = async (files: FileImportPayload[]) => {
     const importedFiles = await Promise.all(
       files.map(async ({ file, fileName, mimeType }) => {
-        const { url, size, key } = await this.uploadFile({
+        const { url, size, key } = await this.#uploadFile({
           file,
           fileName,
           mimeType,
@@ -1223,17 +1221,15 @@ export class PubPub {
 
     const labeledFiles = labelFiles(sourceFiles)
 
-    return await this.import(labeledFiles)
+    return await this.#import(labeledFiles)
   }
 
   /**
    * Basic export function, equivalent to the `/api/export` endpoint
+   *
+   * @private
    */
-  private export = async ({
-    pubId,
-    format,
-    historyKey,
-  }: DeepInput<'export'>) => {
+  #export = async ({ pubId, format, historyKey }: DeepInput<'export'>) => {
     const { body } = await this.client.export({
       pubId,
       format,
@@ -1258,7 +1254,7 @@ export class PubPub {
       workerTaskId = body.taskId as string
     }
 
-    return (await this.waitForWorkerTask(
+    return (await this.#waitForWorkerTask(
       workerTaskId
     )) as WorkerTaskExportOutput
   }
@@ -1266,7 +1262,7 @@ export class PubPub {
   /**
    * Basic import function, equivalent to the `/api/import` endpoint
    */
-  private import = async (sourceFiles: DeepInput<'import'>['sourceFiles']) => {
+  #import = async (sourceFiles: DeepInput<'import'>['sourceFiles']) => {
     const payload: DeepInput<'import'> = {
       importerFlags: {},
       sourceFiles,
@@ -1278,7 +1274,7 @@ export class PubPub {
       throw new Error('Worker task id is not a string')
     }
 
-    return (await this.waitForWorkerTask(
+    return (await this.#waitForWorkerTask(
       workerTaskId
     )) as WorkerTaskImportOutput
   }
@@ -1286,7 +1282,7 @@ export class PubPub {
   /**
    * Pings workertask endpoint until every second until the task is complete
    */
-  waitForWorkerTask = async (workerTaskId: string) => {
+  #waitForWorkerTask = async (workerTaskId: string) => {
     const poll = async (): Promise<unknown> => {
       console.log(`Polling for ${workerTaskId}`)
       const { body: task } = await this.client.workerTask.get({
