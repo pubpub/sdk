@@ -71,6 +71,7 @@ describe('PubPub', () => {
         limit: 2,
       },
     })
+    console.log('why no work', body)
 
     const firstPubId = body.pubIds[0]
 
