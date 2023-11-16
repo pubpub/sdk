@@ -2,6 +2,21 @@
 import type { Client, PClient } from './client-types'
 
 /**
+ * Map of GET requests, used to correctly proxy the client
+ *
+ * There is no way of knowing from inspecting the client at runtime which requests are GET requests, so we have to manually specify them here
+ */
+export const getRequestsMap = {
+  get: true,
+  getMany: true,
+  logout: true,
+  uploadPolicy: true,
+} as const
+
+export type GetRequestMap = typeof getRequestsMap
+export type GetRequests = keyof GetRequestMap
+
+/**
  * This makes the client a bit nicer to use. The body is flattened and becomes the first arg, IF its not a get request,
  * and you don't need to pass the communityId.
  *
@@ -30,7 +45,16 @@ export function proxyClient(
           const isGetRequest = getRequestsMap[key] || false
 
           if (isGetRequest) {
-            // For GET requests, just pass the first argument as-is
+            // For GET requests, split the arguments into query and rest
+
+            const [query, rest] = args as [
+              query: Record<string, unknown> | undefined,
+              rest: Record<string, unknown> | undefined
+            ]
+            return value.call(this, {
+              query,
+              ...rest,
+            })
             return value.call(this, args[0])
           } else {
             // For non-GET requests, split the first argument into body and the rest

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { createClient } from '../../core/utils/api/client.js'
+import type { GetRequests } from './proxies.js'
 
 export type Client = ReturnType<typeof createClient>
 
@@ -15,34 +16,41 @@ export type Prettify<T> = {
   // eslint-disable-next-line @typescript-eslint/ban-types
 } & {}
 
-export type ProxiedFunction<F> = F extends (
-  ...args: infer A extends any[]
-) => infer R
-  ? A[0] extends { body: infer B }
+export type ProxiedFunction<
+  F,
+  IsGetRoute extends boolean = false,
+  Property extends 'body' | 'query' = IsGetRoute extends false
+    ? 'body'
+    : 'query'
+> = F extends (...args: infer A extends any[]) => infer R
+  ? A[0] extends { [K in Property]: infer B }
     ? // if only the body is required, make the second argument optional
-      Partial<Omit<A[0], 'body'>> extends Omit<A[0], 'body'>
+      Partial<Omit<A[0], Property>> extends Omit<A[0], Property>
       ? FormData extends B
-        ? (body: Exclude<B, FormData>, rest?: Prettify<Omit<A[0], 'body'>>) => R
+        ? (
+            input: Exclude<B, FormData>,
+            rest?: Prettify<Omit<A[0], Property>>
+          ) => R
         : Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
         ? // if there are no required arguments, you don't need to pass the body
           (
-            body?: B, //Prettify<Omit<B, 'communityId'>>,
-            rest?: Prettify<Omit<A[0], 'body'>>
+            input?: B, //Prettify<Omit<B, 'communityId'>>,
+            rest?: Prettify<Omit<A[0], Property>>
           ) => R
         : (
-            body: Prettify<Omit<B, 'communityId'>>,
-            rest?: Prettify<Omit<A[0], 'body'>>
+            input: Prettify<Omit<B, 'communityId'>>,
+            rest?: Prettify<Omit<A[0], Property>>
           ) => R
       : (
-          body: Prettify<Omit<B, 'communityId'>>,
-          rest: Prettify<Omit<A[0], 'body'>>
+          input: Prettify<Omit<B, 'communityId'>>,
+          rest: Prettify<Omit<A[0], Property>>
         ) => R
     : (...args: A) => R
   : never
 
 export type ProxiedClient<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
-    ? ProxiedFunction<T[K]>
+    ? ProxiedFunction<T[K], K extends GetRequests ? true : false>
     : T[K] extends object
     ? ProxiedClient<T[K]>
     : T[K]

@@ -21,7 +21,7 @@ import type {
   PubViewDataPub,
 } from './viewData.js'
 
-import { proxyClient, proxySDKWithClient } from './proxies.js'
+import { proxyClient, proxySDKWithClient, getRequestsMap } from './proxies.js'
 import type {
   PClient,
   DeepInput,
@@ -36,18 +36,6 @@ import type {
  */
 const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
   /pub\/.*?$/.test(pub)
-
-/**
- * Map of GET requests, used to correctly proxy the client
- *
- * There is no way of knowing from inspecting the client at runtime which requests are GET requests, so we have to manually specify them here
- */
-const getRequestsMap = {
-  get: true,
-  getMany: true,
-  logout: true,
-  uploadPolicy: true,
-} as const
 
 export type PubPubSDK = DeepMerge<PClient, PubPub>
 
@@ -877,9 +865,7 @@ export class PubPub {
     const poll = async (): Promise<unknown> => {
       console.log(`Polling for ${workerTaskId}`)
       const { body: task } = await this.client.workerTask.get({
-        query: {
-          workerTaskId,
-        },
+        workerTaskId,
       })
 
       if ('error' in task && task.error) {

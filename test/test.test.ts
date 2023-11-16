@@ -80,9 +80,7 @@ describe('PubPub', () => {
 
   it('should be able to get pubs', async () => {
     const { body: pubs } = await pubpub.pub.getMany({
-      query: {
-        limit: 1,
-      },
+      limit: 1,
     })
 
     const first = pubs[0]
@@ -103,9 +101,7 @@ describe('PubPub', () => {
   })
 
   it('should be able to get collections', async () => {
-    const collections = await pubpub.collection.getMany({
-      query: {},
-    })
+    const collections = await pubpub.collection.getMany()
 
     expect(collections).toBeInstanceOf(Array)
     expect(collections[0]).toHaveProperty('title')
@@ -144,7 +140,7 @@ describe('PubPub', () => {
   })
 
   it('should be able to find the attributions of a collection through annoying means', async () => {
-    const collections = await pubpub.collection.hacks.getMany()
+    const collections = await pubpub.collection.getMany()
 
     const collection = collections[0]
     expect(collections).toBeInstanceOf(Array)
@@ -152,7 +148,7 @@ describe('PubPub', () => {
     expect(collection).not.toHaveProperty('attributions')
     expect(collection).toHaveProperty('slug')
 
-    const collectionWithAttributions = await pubpub.collection.hacks.get(
+    const collectionWithAttributions = await pubpub.collection.get(
       collection.slug
     )
 
