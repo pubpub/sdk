@@ -40,10 +40,11 @@ const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
 /**
  * Map of GET requests, used to correctly proxy the client
  *
- * There is no way of knowing from inspecting the client which requests are GET requests, so we have to manually specify them here
+ * There is no way of knowing from inspecting the client at runtime which requests are GET requests, so we have to manually specify them here
  */
 const getRequestsMap = {
   get: true,
+  getMany: true,
   logout: true,
   uploadPolicy: true,
 } as const

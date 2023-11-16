@@ -79,12 +79,14 @@ describe('PubPub', () => {
   // }, 10000)
 
   it('should be able to get pubs', async () => {
-    const pubs = await pubpub.pub.getMany({
-      limit: 1,
+    const { body: pubs } = await pubpub.pub.getMany({
+      query: {
+        limit: 1,
+      },
     })
 
-    const firstPubId = pubs.body.pubIds[0]
-    expect(pubs.body.pubsById[firstPubId]).toHaveProperty('title')
+    const first = pubs[0]
+    expect(first).toHaveProperty('title')
   }, 10000)
 
   let collectionId: string
@@ -101,7 +103,9 @@ describe('PubPub', () => {
   })
 
   it('should be able to get collections', async () => {
-    const collections = await pubpub.collection.hacks.getMany()
+    const collections = await pubpub.collection.getMany({
+      query: {},
+    })
 
     expect(collections).toBeInstanceOf(Array)
     expect(collections[0]).toHaveProperty('title')
