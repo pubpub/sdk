@@ -88,7 +88,7 @@ export type PubPutPayload = {
          * You are required to pass the mimeType to double check that you are uploading a pdf file
          */
         mimeType: 'application/pdf'
-        fileOrPath: Buffer | Blob | File
+        fileOrPath: [Blob, string] | File
         fileName: string
       }
   )[]

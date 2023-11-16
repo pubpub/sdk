@@ -21,10 +21,12 @@ export type ProxiedFunction<F> = F extends (
   ? A[0] extends { body: infer B }
     ? // if only the body is required, make the second argument optional
       Partial<Omit<A[0], 'body'>> extends Omit<A[0], 'body'>
-      ? Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
+      ? FormData extends B
+        ? (body: Exclude<B, FormData>, rest?: Prettify<Omit<A[0], 'body'>>) => R
+        : Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
         ? // if there are no required arguments, you don't need to pass the body
           (
-            body?: Prettify<Omit<B, 'communityId'>>,
+            body?: B, //Prettify<Omit<B, 'communityId'>>,
             rest?: Prettify<Omit<A[0], 'body'>>
           ) => R
         : (
@@ -42,14 +44,17 @@ export type ProxiedClient<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? ProxiedFunction<T[K]>
     : T[K] extends object
-    ? Prettify<ProxiedClient<T[K]>>
+    ? ProxiedClient<T[K]>
     : T[K]
 }
 
 /**
  * The raw client inferred from `ts-rest`.
  */
-export type PClient = Prettify<ProxiedClient<Client>>
+export type PClient = ProxiedClient<Client>
+
+declare const x: PClient
+x.pub.text.import
 
 export type DeepAccess<
   O extends object,
@@ -113,14 +118,16 @@ type AreBothReallyObjects<T, U> = T extends Record<string, any>
 export type DeepMerge<
   T extends Record<string, any>,
   U extends Record<string, any>
-> = Prettify<{
-  [P in keyof T | keyof U]: P extends keyof T
-    ? P extends keyof U
-      ? AreBothReallyObjects<T[P], U[P]> extends true
-        ? DeepMerge<T[P], U[P]>
-        : U[P]
-      : T[P]
-    : P extends keyof U
-    ? U[P]
+> = {
+  [K in keyof T]: K extends keyof T
+    ? K extends keyof U
+      ? AreBothReallyObjects<T[K], U[K]> extends true
+        ? DeepMerge<T[K], U[K]>
+        : U[K]
+      : T[K]
+    : K extends keyof U
+    ? U[K]
     : never
-}>
+} & {
+  [K in keyof U as K extends keyof T ? never : K]: U[K]
+}

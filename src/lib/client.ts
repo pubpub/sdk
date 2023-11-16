@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SHA3 from 'crypto-js/sha3'
 import encHex from 'crypto-js/enc-hex'
-import type { Fragment } from 'prosemirror-model'
-// import { readFile } from 'fs/promises'
 import { createClient } from 'utils/api/client.js'
 
 import type {
@@ -10,15 +8,11 @@ import type {
   PubPutPayload,
   CommunityPutPayload,
   CommunityPutResponse,
-  SourceFile,
   ExportFormats,
-  allowedMimeTypes,
   WorkerTaskExportOutput,
-  WorkerTaskImportOutput,
 } from './types.js'
 import type { InitialData } from './initialData.js'
 import type { CollectionInitialData } from './collectionData.js'
-import { generateFileNameForUpload } from './generateFileNameForUpload.js'
 import { generateHash } from './generateHash.js'
 import type {
   CollectionViewData,
@@ -26,11 +20,6 @@ import type {
   PubViewDataDash,
   PubViewDataPub,
 } from './viewData.js'
-import { labelFiles } from './formats.js'
-import { signInWithCustomToken } from './firebase/rest/signInWithCustomToken.js'
-import { writeDocumentToPubDraft } from './firebase/rest/firebase.js'
-
-import type { buildSchema } from './editor/schema.js'
 
 import { proxyClient, proxySDKWithClient } from './proxies.js'
 import type {
@@ -39,7 +28,6 @@ import type {
   DeepMerge,
   Prettify,
   DeepOutput,
-  DeepClient,
 } from './client-types.js'
 
 /**
@@ -84,9 +72,6 @@ export type PubPubSDK = DeepMerge<PClient, PubPub>
 export class PubPub {
   #cookie?: string
   loggedIn = false
-
-  #AWS_S3 = 'https://s3-external-1.amazonaws.com'
-  #BUCKET = 'assets.pubpub.org'
 
   public client!: PClient
 
@@ -192,9 +177,9 @@ export class PubPub {
    */
   declare page: typeof this.client.page
 
-  getManyPubs = async (options?: DeepInput<'pub.getMany'>['query']) => {
+  queryManyPubs = async (options?: DeepInput<'pub.queryMany'>['query']) => {
     const { limit, offset, ordering, collectionIds, pubIds } = options ?? {}
-    const response = await this.client.pub.getMany({
+    const response = await this.client.pub.queryMany({
       alreadyFetchedPubIds: [],
       pubOptions: {
         getCollections: true,
@@ -265,12 +250,10 @@ export class PubPub {
               return download
             }
 
-            const { fileOrPath, fileName, mimeType } = download
+            const { fileOrPath } = download
 
-            const uploadedFile = await this.#uploadFile({
+            const { body: uploadedFile } = await this.upload({
               file: fileOrPath,
-              fileName,
-              mimeType,
             })
 
             return {
@@ -353,159 +336,10 @@ export class PubPub {
     //   return response
     // },
 
-    /**
-     * Get a pub by its id
-     */
-    get: async ({ pubId }: { pubId: string }) => {
-      const response = await this.getManyPubs({
-        pubIds: [pubId],
-      })
-      return response.body.pubsById[pubId]
-    },
-
-    /**
-     * First connects to Firebase
-     * Imports the files
-     * Then sends the imported file to firebase
-     *
-     * @param pubSlug: The slug of the pub you want to import, including /draft. The slug is everything after the community url, e.g. /pub/my-pub-slug/draft
-     * @param filesToImport: The files you want to import
-     * @param postProcessor: A function that takes the document and returns a new document. This allows you to do custom post-processing on the document to do things that the PubPub importer does not allow yet, e.g. setting captions on Figures from an imported Word document.
-     */
-    import: async (
-      /**
-       * The slug of the pub you want to import, including /draft
-       */
-      pubSlug: string,
-      /**
-       * The files you want to import
-       *
-       * You can either pass an array of files, or an array of arrays of files
-       *
-       * If you pass a `FileImportPayload[]`, you can only have one "document" file, the rest must be supplemental files such as
-       * bibliography, images, etc.
-       *
-       * If you pass a `FileImportPayload[][]`, you can have multiple "document" files, and each document file can have its own supplemental files
-       *
-       * @example
-       * ```ts
-       * // import a single document file and a single supplemental file
-       * pubpub.pub.hacks.importPub('my-pub-slug/draft', [
-       *  {
-       *   fileOrPath: 'path/to/file.md',
-       *   fileName: 'file.md',
-       *   mimeType: 'text/markdown',
-       *  },
-       *  {
-       *   fileOrPath: 'path/to/file.bib',
-       *   fileName: 'file.bib',
-       *   mimeType: 'application/x-bibtex',
-       * },
-       * // here you could not specify say another Word, Markdown, or TeX file, as PubPub needs to treat one of these as the "document" file
-       * ])
-       * ```
-       *
-       * @example
-       * ```ts
-       * // import multiple document files and their supplemental files
-       * pubpub.pub.hacks.importPub('my-pub-slug/draft', [
-       * [
-       *  {
-       *   fileOrPath: 'path/to/file.md',
-       *   fileName: 'file.md',
-       *   mimeType: 'text/markdown',
-       *  },
-       *  {
-       *    fileOrPath: 'path/to/file.bib',
-       *    fileName: 'file.bib',
-       *    mimeType: 'application/x-bibtex',
-       *  },
-       * ],
-       * [
-       * // this file will be imported separately and appended to the end of the pub
-       *  {
-       *   fileOrPath: 'path/to/file.docx',
-       *   fileName: 'file.docx',
-       *   mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-       *   },
-       *  ]
-       * ])
-       *
-       */
-      filesToImport: FileImportPayload[] | FileImportPayload[][],
-      /**
-       * A function that takes the document and returns a new document.
-       *
-       * This allows you to do custom post-processing on the document to do things that the PubPub importer does not allow yet,
-       * e.g. setting captions on Figures from an imported Word document.
-       *
-       * @param doc The document that was imported
-       * @param schema The schema that was used to import the document. You can use this to create new nodes.
-       * @returns The new document
-       */
-      postProcessor?: (
-        doc: Fragment,
-        schema: ReturnType<typeof buildSchema>
-      ) => Fragment
-    ) => {
-      // if it doesnt end with /draft, add it
-
-      const testUrl = pubSlug.endsWith('/draft') ? pubSlug : `${pubSlug}/draft`
-      if (!looksLikePubSlug(testUrl)) {
-        throw new Error('Invalid pub slug, should be of the form pub/slug')
-      }
-
-      const pageData = await this.hacks.getPageData(testUrl, 'view-data')
-
-      const initialDocKey = pageData.pubData.initialDocKey
-
-      const firebaseToken = pageData.pubData.firebaseToken
-      const firebasePath = pageData.pubData.draft.firebasePath
-
-      const firebaseRoot = `https://pubpub-v6-prod.firebaseio.com/${firebasePath}`
-
-      const { idToken: token } = await signInWithCustomToken(firebaseToken)
-      // const firebaseRef = await initFirebase(firebasePath, firebaseToken)
-
-      if (!token) {
-        throw new Error('Could not connect to firebase')
-      }
-
-      const importedFiles = Array.isArray(filesToImport?.[0])
-        ? (
-            await Promise.all(
-              (filesToImport as FileImportPayload[][]).map((file) =>
-                this.#importFull(file)
-              )
-            )
-          )?.reduce((acc, curr) => {
-            acc.doc.content = [...acc.doc.content, ...curr.doc.content]
-            return acc
-          })
-        : await this.#importFull(filesToImport as FileImportPayload[])
-
-      const docImport = await writeDocumentToPubDraft(
-        firebaseRoot,
-        importedFiles.doc,
-        token,
-        {
-          initialDocKey,
-          postProcessor,
-        }
-      )
-      console.log(
-        `Succesfully imported ${filesToImport.length} files to ${pubSlug}`,
-        docImport
-      )
-
-      return { importedFiles }
-    },
-
     export: async ({
       slug,
       pubId,
       format,
-      historyKey,
     }: (
       | { slug: string; pubId?: undefined }
       | { slug?: undefined; pubId: string }
@@ -514,7 +348,9 @@ export class PubPub {
       historyKey?: number
     }) => {
       if (!slug && pubId) {
-        const pub = await this.pub.get({ pubId })
+        const { body: pub } = await this.client.pub.get({
+          params: { slugOrId: pubId },
+        })
         if (
           format === 'formatted' &&
           pub.downloads?.[0]?.type === 'formatted'
@@ -532,31 +368,13 @@ export class PubPub {
         throw new Error('Invalid slug, should be of the form pub/slug')
       }
 
-      const viewData = await this.hacks.getPageData(slug, 'view-data')
-
-      const { initialDocKey, downloads, id, initialDoc } = viewData.pubData
-
-      if (format === 'json') {
-        return initialDoc
-      }
-
-      if (format === 'formatted' && downloads?.[0]?.type === 'formatted') {
-        return downloads[0].url
-      }
-
       const { url } = await this.#export({
         format: format === 'formatted' ? 'pdf' : format,
-        pubId: pubId ?? id,
-        historyKey: historyKey ?? initialDocKey,
+        pubId: pubId!,
       })
 
       return url
     },
-
-    /**
-     * Get a list of pubs
-     */
-    getMany: this.getManyPubs,
   }
 
   /**
@@ -804,223 +622,7 @@ export class PubPub {
     /**
      * Methods for interacting with attributions
      */
-    attributions: this.#makeAttributionsOperations('collection'),
-    hacks: {
-      /**
-       * HACK: Get a list of all collections. Currently done by scraping the dashboard.
-       */
-      getMany: this.hacks.getCollections,
-      /**
-       * HACK: Gets the data from a specific collection, requires the slug.
-       * If you do not have the slug, use `getByIdSlow` instead.
-       */
-      get: this.hacks.getCollection,
-      /**
-       * HACK: Get a specific collection. Currently just runs getMany and finds the correct collection from the list,
-       * therefore is not faster than getMany.
-       */
-      getByIdSlow: this.hacks.getFullCollectionById_SLOW,
-    },
-  }
-
-  #makeAttributionsOperations<
-    T extends 'pub' | 'collection',
-    F extends T extends 'pub'
-      ? DeepClient<'pubAttribution', 'func'>
-      : DeepClient<'collectionAttribution', 'func'>,
-    C extends T extends 'pub'
-      ? DeepInput<'pubAttribution.create'>
-      : DeepInput<'collectionAttribution.create'>,
-    U extends T extends 'pub'
-      ? DeepInput<'pubAttribution.update'> & { name?: string }
-      : DeepInput<'collectionAttribution.update'>,
-    R extends T extends 'pub'
-      ? DeepInput<'pubAttribution.remove'> & { name?: string }
-      : Omit<DeepInput<'collectionAttribution.remove'>, 'name'>
-  >(type: T) {
-    return {
-      get:
-        type === 'collection'
-          ? undefined
-          : async (id: string) => {
-              const manyPubs = await this.getManyPubs({ pubIds: [id] })
-
-              const attributions =
-                manyPubs?.body?.pubsById[id]?.attributions ?? []
-              return attributions
-            },
-
-      create: async (props: C) => {
-        const func = (
-          type === 'pub'
-            ? this.client.pubAttribution
-            : this.client.collectionAttribution
-        ) as F
-        // @ts-expect-error FIXME: This should work
-        const response = await func.create(props)
-
-        return response
-      },
-
-      /**
-       * update an attribution
-       *
-       * You can either pass a name or a userId
-       * If you pass a name, it will find the attribution with that name and update it
-       */
-      update: async (
-        props: U
-        // props: T extends 'pub'
-        //   ? AttributionsPayload
-        //   : Omit<AttributionsPayload, 'name'>
-      ) => {
-        const func = (
-          type === 'pub'
-            ? this.client.pubAttribution
-            : this.client.collectionAttribution
-        ) as F
-        if ('collectionId' in props || !('name' in props) || !props.name) {
-          // @ts-expect-error FIXME: This should work
-          const response = await func.update(props)
-          return response
-        }
-
-        const manyPubs = await this.getManyPubs({ pubIds: [props.pubId] })
-
-        const attributions =
-          manyPubs?.body?.pubsById[props.pubId]?.attributions ?? []
-
-        // check if name in attributions
-        const existingAttribution = attributions.find(
-          (x) => x.name === props.name
-        )
-
-        if (!existingAttribution) {
-          throw new Error('Attribution not found')
-        }
-
-        const response = await this.client.pubAttribution.update({
-          ...props,
-          userId: existingAttribution.userId,
-        })
-        return response
-      },
-
-      remove: async (props: R) => {
-        const func = (
-          type === 'pub'
-            ? this.client.pubAttribution
-            : this.client.collectionAttribution
-        ) as F
-        if ('collectionId' in props || !('name' in props) || !props.name) {
-          // @ts-expect-error FIXME: This should work
-          const response = await func.remove(props)
-          return response
-        }
-
-        const manyPubs = await this.getManyPubs({ pubIds: [props.pubId] })
-
-        const attributions =
-          manyPubs?.body?.pubsById[props.pubId]?.attributions ?? []
-
-        // check if name in attributions
-        const existingAttribution = attributions.find(
-          (x) => x.name === props.name
-        )
-
-        if (!existingAttribution || !existingAttribution.userId) {
-          throw new Error('Attribution not found')
-        }
-
-        const response = await this.client.pubAttribution.remove({
-          ...props,
-          id: existingAttribution.userId,
-        })
-
-        return response
-      },
-    }
-  }
-
-  /**
-   * Upload a file to PubPub.
-   *
-   * @param file The file to upload. Can be a Blob (when using the browser or Node) or a Buffer (when using Node)
-   * @param fileName The name of the file
-   * @param mimeType The mime type of the file
-   *
-   * @returns The URL of the uploaded file on https://assets.pubpub.org
-   *
-   * @example
-   * ### Node
-   * ```ts
-   * const pdf = await fs.readFileSync('path/to/file.pdf')
-   *
-   * const { url } = await pubpub.uploadFile(pdf, 'file.pdf', 'application/pdf')
-   * ```
-   *
-   * ### Browser
-   * ```ts
-   * const pdf = await fetch('path/to/file.pdf')
-   * const pdfBlob = await pdf.blob()
-   *
-   * const { url } = await pubpub.uploadFile(pdfBlob, 'file.pdf', 'application/pdf')
-   * ```
-   *
-   * @since 0.3.0 private, allows for passing strings
-   *
-   * This method has been made private to avoid abuse of the upload feature.
-   */
-  #uploadFile = async ({ file, fileName, mimeType }: FileImportPayload) => {
-    if (
-      typeof window === 'undefined' &&
-      process.version &&
-      parseInt(process.version.slice(1).split('.')[0]) < 18
-    ) {
-      throw new Error(
-        'Node version must be 18 or higher to use uploadFile, as it depends on native fetch, FormData and Blob support'
-      )
-    }
-
-    const fileOrStream = // typeof file === 'string' ? await readFile(file) :
-      file
-
-    const res =
-      fileOrStream instanceof Buffer ? new Blob([fileOrStream]) : fileOrStream
-
-    const {
-      body: { acl, awsAccessKeyId, policy, signature, bucket },
-    } = await this.uploadPolicy({ query: { contentType: mimeType } })
-
-    const formData = new FormData()
-
-    const key = generateFileNameForUpload(fileName)
-
-    formData.append('key', key)
-    formData.append('AWSAccessKeyId', awsAccessKeyId)
-    formData.append('acl', acl)
-    formData.append('policy', policy)
-    formData.append('signature', signature)
-    formData.append('Content-Type', mimeType)
-    formData.append('success_action_status', '200')
-    formData.append('file', res, fileName)
-
-    try {
-      await fetch(`${this.#AWS_S3}/${bucket ?? this.#BUCKET}`, {
-        method: 'POST',
-        body: formData,
-      })
-
-      return {
-        url: `https://assets.pubpub.org/${key}`,
-        size: res.size,
-        key,
-        //      data,
-      }
-    } catch (error) {
-      console.error(error)
-      throw new Error('Upload failed')
-    }
+    attributions: this.client.collectionAttribution,
   }
 
   /**
@@ -1099,7 +701,7 @@ export class PubPub {
       if (shouldPutCommunity) {
         const communityResponse = await this.client.community.update({
           ...rest,
-          id: this.communityId,
+          communityId: this.communityId,
           ...(navigation && {
             navigation: navigation.map(fixLinks),
           }),
@@ -1141,44 +743,95 @@ export class PubPub {
     get: this.hacks.getCommunityData,
   }
 
-  /**
-   * More complete import function thta also takes care of properly uploading and labeling all files.
-   *
-   * @private
-   */
-  #importFull = async (files: FileImportPayload[]) => {
-    const importedFiles = await Promise.all(
-      files.map(async ({ file, fileName, mimeType }) => {
-        const { url, size, key } = await this.#uploadFile({
-          file,
-          fileName,
-          mimeType,
-        })
+  // TODO: Remove this if https://github.com/ts-rest/ts-rest/pull/413 is merged or fixed in some other way
+  #formUpload = async ({
+    route,
+    fieldName,
+    files,
+    rest,
+  }: {
+    route: `/${string}`
+    fieldName: 'file' | 'files'
+    files: ([Blob, string] | File)[]
+    rest?: Record<string, unknown>
+  }) => {
+    const formData = new FormData()
 
-        return {
-          url,
-          fileName,
-          mimeType,
-          size,
-          key,
-        }
+    if (rest) {
+      Object.entries(rest).forEach(([key, value]) => {
+        formData.set(key, JSON.stringify(value))
       })
-    )
+    }
 
-    const sourceFiles: SourceFile[] = importedFiles.map(
-      ({ size, key, fileName }, idx) => ({
-        assetKey: key,
-        clientPath: fileName,
-        id: idx + 1,
-        state: 'complete',
-        loaded: size,
-        total: size,
-      })
-    )
+    files.forEach((file) => {
+      if (Array.isArray(file)) {
+        const [blob, filename] = file
+        formData.set(fieldName, blob, filename)
+      } else {
+        formData.set(fieldName, file)
+      }
+    })
 
-    const labeledFiles = labelFiles(sourceFiles)
+    const response = await fetch(`${this.communityUrl}${route}`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Cookie: this.#cookie || '',
+        ContentType: 'multipart/form-data',
+      },
+    })
 
-    return await this.#import(labeledFiles)
+    const data = await response.json()
+
+    return {
+      status: response.status as any,
+      body: data as any,
+      headers: response.headers as any,
+    }
+  }
+
+  upload = async ({
+    file,
+  }: Exclude<DeepInput<'upload'>, FormData>): Promise<DeepOutput<'upload'>> =>
+    this.#formUpload({
+      route: '/api/upload',
+      fieldName: 'file',
+      files: [file],
+    })
+
+  text = {
+    import: async ({
+      files,
+      ...rest
+    }: DeepInput<'pub.text.import'>): Promise<DeepOutput<'pub.text.import'>> =>
+      this.#formUpload({
+        route: `/api/pubs/text/import`,
+        fieldName: 'files',
+        files,
+        rest,
+      }),
+
+    importToPub: async (
+      { files, ...rest }: Parameters<DeepInput<'pub.text.importToPub'>>[0],
+      { pubId }: Parameters<DeepInput<'pub.text.importToPub'>>[1]['params']
+    ): ReturnType<DeepInput<'pub.text.importToPub'>> =>
+      this.#formUpload({
+        route: `/api/pubs/${pubId}/text/import`,
+        fieldName: 'files',
+        files,
+        rest,
+      }),
+
+    convert: async ({
+      files,
+    }: DeepInput<'pub.text.convert'>): Promise<
+      DeepOutput<'pub.text.convert'>
+    > =>
+      this.#formUpload({
+        route: `/api/pubs/text/convert`,
+        fieldName: 'files',
+        files,
+      }),
   }
 
   /**
@@ -1214,26 +867,6 @@ export class PubPub {
     return (await this.#waitForWorkerTask(
       workerTaskId
     )) as WorkerTaskExportOutput
-  }
-
-  /**
-   * Basic import function, equivalent to the `/api/import` endpoint
-   */
-  #import = async (sourceFiles: DeepInput<'import'>['sourceFiles']) => {
-    const payload: DeepInput<'import'> = {
-      importerFlags: {},
-      sourceFiles,
-    }
-    const { body: workerTaskId } = await this.client.import(payload)
-
-    if (typeof workerTaskId !== 'string') {
-      console.error(workerTaskId)
-      throw new Error('Worker task id is not a string')
-    }
-
-    return (await this.#waitForWorkerTask(
-      workerTaskId
-    )) as WorkerTaskImportOutput
   }
 
   /**
@@ -1278,13 +911,6 @@ export class PubPub {
   }) {
     const sdk = new PubPub(communityId, communityUrl)
     await sdk.login(email, password)
-    console.log(sdk.client)
     return sdk as unknown as PubPubSDK
   }
-}
-
-interface FileImportPayload {
-  file: Blob | Buffer | File
-  fileName: string
-  mimeType: (typeof allowedMimeTypes)[number]
 }

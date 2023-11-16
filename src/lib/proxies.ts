@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Client, PClient } from './client-types'
+import type { Client, PClient } from './client-types'
 
 /**
  * This makes the client a bit nicer to use. The body is flattened and becomes the first arg, IF its not a get request,
