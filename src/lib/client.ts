@@ -11,15 +11,7 @@ import type {
   ExportFormats,
   WorkerTaskExportOutput,
 } from './types.js'
-import type { InitialData } from './initialData.js'
-import type { CollectionInitialData } from './collectionData.js'
 import { generateHash } from './generateHash.js'
-import type {
-  CollectionViewData,
-  CommunityViewData,
-  PubViewDataDash,
-  PubViewDataPub,
-} from './viewData.js'
 
 import { proxyClient, proxySDKWithClient, getRequestsMap } from './proxies.js'
 import type {
@@ -367,116 +359,6 @@ export class PubPub {
   }
 
   /**
-   * These are hacks that are not part of the (un)official API
-   *
-   * Basically, we're scraping the page and parsing the (initial) data from the page, usually in a script tag in JSON format
-   * Very unreliable, could break at any time.
-   */
-  hacks = {
-    /**
-     * Get the data from a page that's passed as JSON in a script tag to the page
-     *
-     * @param slug The slug of the page
-     * @param data The type of data you want to get, either `initial-data` or `view-data`
-     */
-    getPageData: async <
-      S extends string = string,
-      D extends 'initial-data' | 'view-data' = 'initial-data'
-    >(
-      /**
-       * The slug of the page
-       *
-       * This is the part after the community url
-       *
-       * @example /pub/pub-slug
-       *
-       * You can also use the full url, we will extract the slug
-       */
-      slug: S,
-      data: D = 'initial-data' as D
-    ): Promise<
-      D extends 'initial-data' | undefined
-        ? S extends `dash/${infer T}/${string}`
-          ? T extends 'collection'
-            ? CollectionInitialData
-            : InitialData
-          : InitialData
-        : S extends `dash/${infer T}/${string}`
-        ? T extends 'collection'
-          ? CollectionViewData
-          : T extends 'pub'
-          ? PubViewDataDash
-          : T extends 'overview'
-          ? CommunityViewData
-          : Record<string, unknown>
-        : S extends `pub/${string}`
-        ? PubViewDataPub
-        : Record<string, unknown>
-    > => {
-      const response = await this.getPage({ slug })
-
-      const unparsedCommunityData = response.match(
-        new RegExp(`<script id="${data}" type="text\\/plain" data-json="(.*?)"`)
-      )
-
-      if (!unparsedCommunityData) {
-        throw new Error(`Could not find ${data} data`)
-      }
-
-      if (data !== 'view-data') {
-        const communityData = JSON.parse(
-          unparsedCommunityData[1].replace(/&quot;/g, '"')
-        )
-
-        return communityData
-      }
-      return JSON.parse(unparsedCommunityData[1].replace(/&quot;/g, '"'))
-    },
-
-    getCommunityData: async () => {
-      const communityData = await this.hacks.getPageData('dash/overview')
-      return communityData?.communityData
-    },
-
-    /**
-     * The only way I currently know to get collections is to go to the dashboard and scrape the data from there
-     *
-     * Very unreliable, could break at any time, plus very slow.
-     */
-    getCollections: async () => {
-      const communityData = await this.hacks.getCommunityData()
-
-      return communityData?.collections
-    },
-
-    getCollection: async (slug: string) => {
-      const collectionData = await this.hacks.getPageData(
-        `dash/collection/${slug}/settings/details`
-      )
-
-      return collectionData.scopeData.elements.activeCollection
-    },
-
-    getFullCollectionById_SLOW: async (collectionId: string) => {
-      const collections = await this.hacks.getCollections()
-
-      const incompleteCollection = collections?.find(
-        (x) => x.id === collectionId
-      )
-
-      if (!incompleteCollection) {
-        throw new Error('Could not find collection')
-      }
-
-      const collection = await this.hacks.getCollection(
-        incompleteCollection.slug
-      )
-
-      return collection
-    },
-  }
-
-  /**
    * Methods for interacting with collections
    */
   collection = {
@@ -558,11 +440,6 @@ export class PubPub {
 
       return response
     },
-
-    /**
-     * Remove a collection
-     */
-    // declare remove: PClient['collection']['remove'],
 
     /**
      * Add a pub to a collection
@@ -725,11 +602,6 @@ export class PubPub {
 
       return response
     },
-
-    /**
-     * HACK: Get community data
-     */
-    get: this.hacks.getCommunityData,
   }
 
   // TODO: Remove this if https://github.com/ts-rest/ts-rest/pull/413 is merged or fixed in some other way
