@@ -32,28 +32,19 @@ describe('imports', () => {
 
   it('should be able to import a docx file to a pub', async () => {
     try {
-      const imported = await pubpub.pub.import(
-        draftPath,
-        [
-          {
-            file: await readFile(
-              path.join(__dirname, 'fixtures', 'basic.docx')
-            ), //fileURLToPath(new URL('./basic.docx', import.meta.url)),
-            fileName: 'basic.docx',
-            mimeType:
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          },
+      const imported = await pubpub.pub.text.import({
+        files: [
+          [
+            new Blob(
+              [await readFile(path.join(__dirname, 'fixtures', 'basic.docx'))],
+              {
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              }
+            ),
+            'basic.docx',
+          ],
         ],
-        (doc, schema) => {
-          const newDoc = doc.addToEnd(
-            schema.nodes.paragraph.create(
-              { id: 'test-id' },
-              schema.text('manually insterted text')
-            )
-          )
-          return newDoc
-        }
-      )
+      })
 
       expect(imported).toBeDefined()
     } catch (e) {

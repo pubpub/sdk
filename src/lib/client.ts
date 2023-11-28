@@ -32,6 +32,17 @@ const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
 export type PubPubSDK = DeepMerge<PClient, PubPub>
 
 /**
+ * @quickinfo
+ */
+export declare const Pub: Awaited<
+  ReturnType<(typeof PubPub)['createSDK']>
+>['pub']['get']
+Pub({
+  params: {
+    slugOrId: 'h',
+  },
+})
+/**
  * PubPub API client
  *
  * @example
@@ -55,6 +66,8 @@ export class PubPub {
   loggedIn = false
 
   public client!: PClient
+
+  declare facets: Client['facets']
 
   /**
    * DO NOT CREATE THIS MANUALLY
@@ -143,20 +156,6 @@ export class PubPub {
 
     return data
   }
-
-  /**
-   * Helper method to update the facets of a pub or collection
-   *
-   * @since v1.0.0
-   */
-  declare facets: typeof this.client.facets
-
-  /**
-   * Methods for interacting with pages
-   *
-   * @since v1.0.0
-   */
-  declare page: typeof this.client.page
 
   queryManyPubs = async (options?: DeepInput<'pub.queryMany'>['query']) => {
     const { limit, offset, ordering, collectionIds, pubIds } = options ?? {}
@@ -290,7 +289,7 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        const { status } = await this.facets.update({
+        const { status } = await this.client.facets.update({
           scope: facetsPayload.scope,
           facets: facetsPayload.facets,
         })
@@ -425,7 +424,7 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        const { status } = await this.facets.update({
+        const { status } = await this.client.facets.update({
           scope: facetsPayload.scope,
           facets: facetsPayload.facets,
         })
@@ -490,11 +489,6 @@ export class PubPub {
      */
     attributions: this.client.collectionAttribution,
   }
-
-  /**
-   * Returns a signed policy for uploading a file to PubPub.
-   */
-  private declare uploadPolicy: typeof this.client.uploadPolicy
 
   /**
    * Methods for interacting with PubPub on the community level, e.g. changing the community name, adding CSS etc.
@@ -579,7 +573,7 @@ export class PubPub {
       }
 
       if (shouldPostFacets) {
-        await this.facets.update({
+        await this.client.facets.update({
           scope: facetsPayload.scope,
           facets: facetsPayload.facets,
         })

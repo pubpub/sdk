@@ -5,7 +5,6 @@
     "module": "CommonJS" /* Specify what module code is generated. */,
     // "rootDir": "./",                                  /* Specify the root folder within your source files. */
     "moduleResolution": "node" /* Specify how TypeScript looks up a file from a given module specifier. */,
-    "outDir": "./dist",
 
     "resolveJsonModule": true /* Enable importing .json files. */,
     "allowJs": true /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */,
@@ -40,10 +39,7 @@
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    // "noEmit": true /* Disable emitting files from a compilation. */,
-    "declaration": true,
-    "removeComments": false,
+    "noEmit": true /* Disable emitting files from a compilation. */,
     "disableSizeLimit": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -51,6 +47,7 @@
     "pretty": true,
     "noImplicitAny": false,
     "jsx": "react",
+    "noErrorTruncation": true,
     //    "noImplicitAny": true,
     "paths": {
       "utils/api/client": ["./core/utils/api/client.ts"],
@@ -69,15 +66,7 @@
       "workers/*": ["./core/workers/*"]
     }
   },
-  "include": [
-    "expand-typedoc.js",
-    "src/**.ts",
-    "src/lib/client.ts",
-    "test/**.ts",
-    "src/lib/initialData.ts",
-    "core/types/sequelize-actorid-override.d.ts",
-    "test/utils/sleep.ts" //    "core/utils/api/client.ts"
-  ],
+  "include": ["dist/**/*.d.ts"],
 
-  "exclude": ["node_modules", "dist", "web"]
+  "exclude": ["node_modules", "web"]
 }

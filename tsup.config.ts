@@ -1,10 +1,11 @@
+// @ts-check
 import { defineConfig } from 'tsup'
 
 const config = defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  bundle: true,
+  bundle: false,
   metafile: true,
   entry: ['src'],
   minify: false,

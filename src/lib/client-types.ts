@@ -38,11 +38,11 @@ export type ProxiedFunction<
             rest?: Prettify<Omit<A[0], Property>>
           ) => R
         : (
-            input: Prettify<Omit<B, 'communityId'>>,
+            input: Omit<B, 'communityId'>,
             rest?: Prettify<Omit<A[0], Property>>
           ) => R
       : (
-          input: Prettify<Omit<B, 'communityId'>>,
+          input: Omit<B, 'communityId'>,
           rest: Prettify<Omit<A[0], Property>>
         ) => R
     : (...args: A) => R

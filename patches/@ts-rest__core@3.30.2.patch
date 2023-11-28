@@ -1,0 +1,30 @@
+diff --git a/src/lib/client.d.ts b/src/lib/client.d.ts
+index 0a0dd3e987630c231d5055952bbe93c0230f9408..670ed95306400f8761345f2cec759a0e4f05889f 100644
+--- a/src/lib/client.d.ts
++++ b/src/lib/client.d.ts
+@@ -1,7 +1,7 @@
+ import { AppRoute, AppRouteMutation, AppRouter } from './dsl';
+ import { AreAllPropertiesOptional, Prettify } from './type-utils';
+ import { ClientInferRequest, ClientInferResponses, PartialClientInferRequest, NextClientArgs, Frameworks } from './infer-types';
+-type RecursiveProxyObj<T extends AppRouter, TClientArgs extends ClientArgs> = {
++export type RecursiveProxyObj<T extends AppRouter, TClientArgs extends ClientArgs> = {
+     [TKey in keyof T]: T[TKey] extends AppRoute ? AppRouteFunction<T[TKey], TClientArgs> : T[TKey] extends AppRouter ? RecursiveProxyObj<T[TKey], TClientArgs> : never;
+ };
+ /**
+diff --git a/src/lib/dsl.d.ts b/src/lib/dsl.d.ts
+index ad43208c11f267fe7aaef373ed02d5451d33f8a6..aabe340c06d219efe245634a297591e9637fb256 100644
+--- a/src/lib/dsl.d.ts
++++ b/src/lib/dsl.d.ts
+@@ -55,10 +55,10 @@ type ValidatedHeaders<T extends AppRoute, TOptions extends RouterOptions, TOptio
+  *
+  * The main purpose of this is to convert all path strings into string constants so we can infer the path
+  */
+-type RecursivelyProcessAppRouter<T extends AppRouter, TOptions extends RouterOptions> = {
++export type RecursivelyProcessAppRouter<T extends AppRouter, TOptions extends RouterOptions> = {
+     [K in keyof T]: T[K] extends AppRoute ? ValidatedHeaders<T[K], TOptions> : T[K] extends AppRouter ? RecursivelyProcessAppRouter<T[K], TOptions> : T[K];
+ };
+-type RecursivelyApplyOptions<TRouter extends AppRouter, TOptions extends RouterOptions> = {
++export type RecursivelyApplyOptions<TRouter extends AppRouter, TOptions extends RouterOptions> = {
+     [TRouterKey in keyof TRouter]: TRouter[TRouterKey] extends AppRoute ? Prettify<ApplyOptions<TRouter[TRouterKey], TOptions>> : TRouter[TRouterKey] extends AppRouter ? RecursivelyApplyOptions<TRouter[TRouterKey], TOptions> : TRouter[TRouterKey];
+ };
+ type UniversalMerge<A, B> = A extends z.AnyZodObject ? B extends z.AnyZodObject ? z.ZodObject<z.objectUtil.MergeShapes<A['shape'], B['shape']>, B['_def']['unknownKeys'], B['_def']['catchall']> : unknown extends B ? A : MixedZodError<A, B> : unknown extends A ? B : B extends z.AnyZodObject ? MixedZodError<A, B> : unknown extends B ? A : Prettify<Merge<A, B>>;
