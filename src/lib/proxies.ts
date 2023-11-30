@@ -33,7 +33,7 @@ export type GetRequests = keyof GetRequestMap
 export function proxyClient(
   client: Client,
   communityId: string,
-  getRequestsMap = {}
+  getRequestsMap = {},
 ): PClient {
   // Recursive function to traverse and proxy the client object
   function proxyObject<T extends Record<string, any>>(obj: T) {
@@ -49,19 +49,32 @@ export function proxyClient(
 
             const [query, rest] = args as [
               query: Record<string, unknown> | undefined,
-              rest: Record<string, unknown> | undefined
+              rest: Record<string, unknown> | undefined,
             ]
+            /**
+             * if it contains any of the following keys, the query is not the first argument, instead just treat it as a normal request
+             * This happens when the query is optional
+             */
+            if (
+              query &&
+              ('params' in query ||
+                'query' in query ||
+                'cache' in query ||
+                'body' in query)
+            ) {
+              return value.call(this, args[0])
+            }
+
             return value.call(this, {
               query,
               ...rest,
             })
-            return value.call(this, args[0])
           } else {
             // For non-GET requests, split the first argument into body and the rest
             // and include the communityId in the body, as it is often needed and annoying to have to pass all the time
             const [body, rest] = args as [
               body: Record<string, unknown> | undefined,
-              rest: Record<string, unknown> | undefined
+              rest: Record<string, unknown> | undefined,
             ]
             return value.call(this, {
               body: { ...body, communityId },
@@ -85,7 +98,7 @@ export function proxyClient(
 export function proxySDKWithClient(
   sdkInstance: any,
   clientInstance: Record<string, any>,
-  prefix: string[] = []
+  prefix: string[] = [],
 ) {
   for (const key in clientInstance) {
     if (typeof clientInstance[key] === 'function') {
@@ -96,7 +109,7 @@ export function proxySDKWithClient(
         }
       } else {
         console.log(
-          `Method ${methodPath} is already defined on SDK, using the override.`
+          `Method ${methodPath} is already defined on SDK, using the override.`,
         )
       }
     } else if (typeof clientInstance[key] === 'object') {

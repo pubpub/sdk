@@ -2,17 +2,14 @@ import { PubPub } from '../../src/lib/client.js'
 
 export async function setupSDK({
   url,
-  communityId,
   email = '',
   password = '',
 }: {
   url: string
-  communityId: string
   email?: string
   password?: string
 }) {
   const pubpub = await PubPub.createSDK({
-    communityId,
     communityUrl: url,
     email,
     password,

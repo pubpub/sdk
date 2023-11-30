@@ -21,30 +21,21 @@ export type ProxiedFunction<
   IsGetRoute extends boolean = false,
   Property extends 'body' | 'query' = IsGetRoute extends false
     ? 'body'
-    : 'query'
+    : 'query',
 > = F extends (...args: infer A extends any[]) => infer R
   ? A[0] extends { [K in Property]: infer B }
     ? // if only the body is required, make the second argument optional
       Partial<Omit<A[0], Property>> extends Omit<A[0], Property>
       ? FormData extends B
-        ? (
-            input: Exclude<B, FormData>,
-            rest?: Prettify<Omit<A[0], Property>>
-          ) => R
+        ? (input: Exclude<B, FormData>, rest?: Omit<A[0], Property>) => R
         : Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
-        ? // if there are no required arguments, you don't need to pass the body
-          (
-            input?: B, //Prettify<Omit<B, 'communityId'>>,
-            rest?: Prettify<Omit<A[0], Property>>
-          ) => R
-        : (
-            input: Omit<B, 'communityId'>,
-            rest?: Prettify<Omit<A[0], Property>>
-          ) => R
-      : (
-          input: Omit<B, 'communityId'>,
-          rest: Prettify<Omit<A[0], Property>>
-        ) => R
+          ? // if there are no required arguments, you don't need to pass the body
+            (
+              input?: B, //Prettify<Omit<B, 'communityId'>>,
+              rest?: Omit<A[0], Property>,
+            ) => R
+          : (input: Omit<B, 'communityId'>, rest?: Omit<A[0], Property>) => R
+      : (input: Omit<B, 'communityId'>, rest: Omit<A[0], Property>) => R
     : (...args: A) => R
   : never
 
@@ -52,8 +43,8 @@ export type ProxiedClient<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? ProxiedFunction<T[K], K extends GetRequests ? true : false>
     : T[K] extends object
-    ? ProxiedClient<T[K]>
-    : T[K]
+      ? ProxiedClient<T[K]>
+      : T[K]
 }
 
 /**
@@ -61,12 +52,9 @@ export type ProxiedClient<T> = {
  */
 export type PClient = ProxiedClient<Client>
 
-declare const x: PClient
-x.pub.text.import
-
 export type DeepAccess<
   O extends object,
-  T extends ObjectPath<O> = ObjectPath<O>
+  T extends ObjectPath<O> = ObjectPath<O>,
 > = T extends `${infer A extends Extract<keyof O, string>}.${infer B}`
   ? B extends `${infer C}.${infer D}`
     ? A extends keyof O
@@ -77,24 +65,24 @@ export type DeepAccess<
         : never
       : never
     : A extends keyof O
-    ? B extends keyof O[A]
-      ? O[A][B]
+      ? B extends keyof O[A]
+        ? O[A][B]
+        : never
       : never
-    : never
   : T extends keyof O
-  ? O[T]
-  : never
+    ? O[T]
+    : never
 
 export type DeepClient<
   T extends ObjectPath<PClient>,
-  I extends 'in' | 'out' | 'func' = 'in'
+  I extends 'in' | 'out' | 'func' = 'in',
 > = DeepAccess<PClient, T> extends infer D
   ? D extends (args: infer A) => infer R
     ? I extends 'in'
       ? A
       : I extends 'out'
-      ? Awaited<R>
-      : D
+        ? Awaited<R>
+        : D
     : D
   : never
 
@@ -118,14 +106,14 @@ type AreBothReallyObjects<T, U> = T extends Record<string, any>
     ? T extends ThingsThatAreNotObjects
       ? false
       : U extends ThingsThatAreNotObjects
-      ? false
-      : true
+        ? false
+        : true
     : false
   : false
 
 export type DeepMerge<
   T extends Record<string, any>,
-  U extends Record<string, any>
+  U extends Record<string, any>,
 > = {
   [K in keyof T]: K extends keyof T
     ? K extends keyof U
@@ -134,8 +122,8 @@ export type DeepMerge<
         : U[K]
       : T[K]
     : K extends keyof U
-    ? U[K]
-    : never
+      ? U[K]
+      : never
 } & {
   [K in keyof U as K extends keyof T ? never : K]: U[K]
 }

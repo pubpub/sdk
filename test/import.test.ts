@@ -39,13 +39,14 @@ describe('imports', () => {
               [await readFile(path.join(__dirname, 'fixtures', 'basic.docx'))],
               {
                 type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-              }
+              },
             ),
             'basic.docx',
           ],
         ],
       })
 
+      console.log(imported)
       expect(imported).toBeDefined()
     } catch (e) {
       console.log(e)
@@ -54,20 +55,33 @@ describe('imports', () => {
   }, 60000)
   it('should be able to export a file, and that file should include the manually added test text', async () => {
     try {
-      const exported = await pubpub.pub.export({
+      const exported = await pubpub.exportPub({
         slug: draftPath.replace('/draft', ''),
         format: 'markdown',
       })
 
       expect(
         typeof exported === 'string' &&
-          exported.startsWith('https://assets.pubpub.org')
+          exported.startsWith('https://assets.pubpub.org'),
       ).toBeTruthy()
     } catch (e) {
       console.log(e)
       throw e
     }
   }, 60000)
+
+  it('should be able to upload a file as blob', async () => {
+    const file = new Blob(['test'], { type: 'text/plain' })
+    const { body: upload } = await pubpub.upload({
+      file: [file, 'test.txt'],
+    })
+
+    expect(upload).toHaveProperty('url')
+
+    const text = await (await fetch(upload.url)).text()
+
+    expect(text).toBe('test')
+  }, 20000)
 
   afterAll(async () => {
     await sleep(1000)

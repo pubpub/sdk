@@ -4,21 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  '@ts-rest/core@3.30.2':
-    hash: bgfq4rcfiv6wckzznx4r4pgvzy
-    path: patches/@ts-rest__core@3.30.2.patch
-
 importers:
 
   .:
     dependencies:
       '@anatine/zod-openapi':
         specifier: ^2.2.0
-        version: 2.2.0(openapi3-ts@4.1.2)(zod@3.22.2)
+        version: 2.2.0(openapi3-ts@4.1.2)(zod@3.22.4)
       '@ts-rest/core':
-        specifier: ^3.30.0
-        version: 3.30.2(patch_hash=bgfq4rcfiv6wckzznx4r4pgvzy)(zod@3.22.2)
+        specifier: github:pubpub/ts-rest#ts-rest-core-v3.30.5-gitpkg
+        version: github.com/pubpub/ts-rest/63177c3b5384a5080d506846f46fda0e5c25e9d7(zod@3.22.4)
       '@types/uuid':
         specifier: ^3.3.0
         version: 3.4.11
@@ -47,11 +42,11 @@ importers:
         specifier: ^3.3.0
         version: 3.4.0
       zod:
-        specifier: ^3.21.4
-        version: 3.22.2
+        specifier: ^3.22.4
+        version: 3.22.4
       zod-to-json-schema:
         specifier: ^3.21.4
-        version: 3.21.4(zod@3.22.2)
+        version: 3.21.4(zod@3.22.4)
     devDependencies:
       '@arethetypeswrong/cli':
         specifier: ^0.9.0
@@ -86,6 +81,12 @@ importers:
       '@swc/types':
         specifier: ^0.1.4
         version: 0.1.4
+      '@types/express':
+        specifier: ^4.17.15
+        version: 4.17.17
+      '@types/express-serve-static-core':
+        specifier: ^4.17.41
+        version: 4.17.41
       '@types/jest':
         specifier: ^29.5.4
         version: 29.5.4
@@ -110,6 +111,9 @@ importers:
       eslint:
         specifier: ^8.48.0
         version: 8.49.0
+      express:
+        specifier: ^4.17.3
+        version: 4.18.2
       husky:
         specifier: ^8.0.3
         version: 8.0.3
@@ -159,14 +163,14 @@ importers:
         specifier: git+https://github.com/pubpub/prosemirror-math#9e6722987690bfad58444d8edbd73294e255de17
         version: github.com/pubpub/prosemirror-math/9e6722987690bfad58444d8edbd73294e255de17(katex@0.13.24)(prosemirror-commands@1.5.2)(prosemirror-gapcursor@1.3.2)(prosemirror-history@1.3.2)(prosemirror-inputrules@1.2.1)(prosemirror-keymap@1.2.2)(prosemirror-model@1.19.3)(prosemirror-state@1.4.3)(prosemirror-transform@1.7.5)(prosemirror-view@1.31.8)
       '@blueprintjs/core':
-        specifier: ^3.26.0
-        version: 3.54.0(react-dom@16.14.0)(react@16.14.0)
+        specifier: 3.26.0
+        version: 3.26.0(react-dom@16.14.0)(react@16.14.0)
       '@blueprintjs/icons':
-        specifier: ^3.14.0
-        version: 3.33.0
+        specifier: 3.14.0
+        version: 3.14.0
       '@blueprintjs/select':
-        specifier: ^3.12.2
-        version: 3.19.1(react-dom@16.14.0)(react@16.14.0)
+        specifier: 3.12.2
+        version: 3.12.2(react-dom@16.14.0)(react@16.14.0)
       '@codemirror/autocomplete':
         specifier: ^0.20.0
         version: 0.20.3
@@ -282,14 +286,14 @@ importers:
         specifier: ^7.77.0
         version: 7.80.0(react@16.14.0)
       '@ts-rest/core':
-        specifier: ^3.28.0
-        version: 3.30.2(patch_hash=bgfq4rcfiv6wckzznx4r4pgvzy)(zod@3.22.4)
+        specifier: github:pubpub/ts-rest#ts-rest-core-v3.30.5-gitpkg
+        version: github.com/pubpub/ts-rest/63177c3b5384a5080d506846f46fda0e5c25e9d7(zod@3.22.4)
       '@ts-rest/express':
-        specifier: ^3.28.0
-        version: 3.30.2(@ts-rest/core@3.30.2)(express@4.18.2)(zod@3.22.4)
+        specifier: ^3.30.5
+        version: 3.30.5(@ts-rest/core@3.30.5)(express@4.18.2)(zod@3.22.4)
       '@ts-rest/open-api':
-        specifier: ^3.28.0
-        version: 3.30.2(@ts-rest/core@3.30.2)(zod@3.22.4)
+        specifier: ^3.30.5
+        version: 3.30.5(@ts-rest/core@3.30.5)(zod@3.22.4)
       '@types/html-minifier':
         specifier: ^4.0.1
         version: 4.0.2
@@ -1017,9 +1021,6 @@ importers:
       ts-loader:
         specifier: ^8.0.11
         version: 8.4.0(typescript@5.2.2)(webpack@4.47.0)
-      ts-morph:
-        specifier: ^20.0.0
-        version: 20.0.0
       ts-node:
         specifier: ^10.9.1
         version: 10.9.1(@swc/core@1.3.84)(@types/node@18.17.15)(typescript@5.2.2)
@@ -1151,17 +1152,6 @@ packages:
       openapi3-ts: 2.0.2
       ts-deepmerge: 6.2.0
       zod: 3.22.4
-    dev: false
-
-  /@anatine/zod-openapi@2.2.0(openapi3-ts@4.1.2)(zod@3.22.2):
-    resolution: {integrity: sha512-Ponwenf2NMIVbs9IuB3YoW7CQPkuRWxhYV/qxBu48DQhmRyipEw/YROVTWnvku7+lwhv1EyP4+h3J5SwrvmfHg==}
-    peerDependencies:
-      openapi3-ts: ^4.1.2
-      zod: ^3.20.0
-    dependencies:
-      openapi3-ts: 4.1.2
-      ts-deepmerge: 6.2.0
-      zod: 3.22.2
     dev: false
 
   /@anatine/zod-openapi@2.2.0(openapi3-ts@4.1.2)(zod@3.22.4):
@@ -3355,22 +3345,14 @@ packages:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
 
-  /@blueprintjs/colors@4.2.1:
-    resolution: {integrity: sha512-Cx7J2YnUuxn+fi+y5XtXnBB7+cFHN4xBrRkaAetp78i3VTCXjUk+d1omrOr8TqbRucUXTdrhbZOUHpzRLFcJpQ==}
-    dependencies:
-      tslib: 2.5.3
-    dev: false
-
-  /@blueprintjs/core@3.54.0(react-dom@16.14.0)(react@16.14.0):
-    resolution: {integrity: sha512-u2c1s6MNn0ocxhnC6CuiG5g3KV6b4cKUvSobznepA9SC3/AL1s3XOvT7DLWoHRv2B/vBOHFYEDzLw2/vlcGGZg==}
+  /@blueprintjs/core@3.26.0(react-dom@16.14.0)(react@16.14.0):
+    resolution: {integrity: sha512-A/jC9JCktOp9RMaWDD3XumYMk6QgYNYNwvzZLw7wcZT1PkzoNotdeyAT5d0+Y2lJtwCrKwLEd+6qbTx9eI1DqQ==}
     hasBin: true
     peerDependencies:
-      react: ^15.3.0 || 16 || 17
-      react-dom: ^15.3.0 || 16 || 17
+      react: ^15.3.0 || 16
+      react-dom: ^15.3.0 || 16
     dependencies:
-      '@blueprintjs/colors': 4.2.1
       '@blueprintjs/icons': 3.33.0
-      '@juggle/resize-observer': 3.4.0
       '@types/dom4': 2.0.2
       classnames: 2.3.2
       dom4: 2.1.6
@@ -3381,7 +3363,8 @@ packages:
       react-lifecycles-compat: 3.0.4
       react-popper: 1.3.11(react@16.14.0)
       react-transition-group: 2.9.0(react-dom@16.14.0)(react@16.14.0)
-      tslib: 2.3.1
+      resize-observer-polyfill: 1.5.1
+      tslib: 1.10.0
     dev: false
 
   /@blueprintjs/eslint-plugin@2.9.1(typescript@5.2.2):
@@ -3394,6 +3377,13 @@ packages:
       - typescript
     dev: true
 
+  /@blueprintjs/icons@3.14.0:
+    resolution: {integrity: sha512-cvQ3CSdy0DqVqcXcPqSxoycJw497TVP5goyE6xCFlVs84477ahxh7Uung6J+CCoDVBuI87h576LtuyjwSxorvQ==}
+    dependencies:
+      classnames: 2.3.2
+      tslib: 1.10.0
+    dev: false
+
   /@blueprintjs/icons@3.33.0:
     resolution: {integrity: sha512-Q6qoSDIm0kRYQZISm59UUcDCpV3oeHulkLuh3bSlw0HhcSjvEQh2PSYbtaifM60Q4aK4PCd6bwJHg7lvF1x5fQ==}
     dependencies:
@@ -3401,17 +3391,17 @@ packages:
       tslib: 2.3.1
     dev: false
 
-  /@blueprintjs/select@3.19.1(react-dom@16.14.0)(react@16.14.0):
-    resolution: {integrity: sha512-8UJIZMaWXRMQHr14wbmzJc/CklcSKxOU5JUux0xXKQz/hDW/g1a650tlwJmnxufvRdShbGinlVfHupCs0EL6sw==}
+  /@blueprintjs/select@3.12.2(react-dom@16.14.0)(react@16.14.0):
+    resolution: {integrity: sha512-29IGTE/Dc1Osts4HPQGHndQa/c+nQ8uh1fa0ZXEJi2eF4xofsVy0GRL+SpeY9w5FFUlupGzQm6c7qsFKWkltnA==}
     peerDependencies:
-      react: ^15.3.0 || 16 || 17
-      react-dom: ^15.3.0 || 16 || 17
+      react: ^15.3.0 || 16
+      react-dom: ^15.3.0 || 16
     dependencies:
-      '@blueprintjs/core': 3.54.0(react-dom@16.14.0)(react@16.14.0)
+      '@blueprintjs/core': 3.26.0(react-dom@16.14.0)(react@16.14.0)
       classnames: 2.3.2
       react: 16.14.0
       react-dom: 16.14.0(react@16.14.0)
-      tslib: 2.3.1
+      tslib: 1.10.0
     dev: false
 
   /@changesets/apply-release-plan@6.1.4:
@@ -5478,10 +5468,6 @@ packages:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
-
-  /@juggle/resize-observer@3.4.0:
-    resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
-    dev: false
 
   /@lezer/common@0.16.1:
     resolution: {integrity: sha512-qPmG7YTZ6lATyTOAWf8vXE+iRrt1NJd4cm2nJHK+v7X9TsOF6+HtuU/ctaZy2RCrluxDb89hI6KWQ5LfQGQWuA==}
@@ -7969,62 +7955,29 @@ packages:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
 
-  /@ts-morph/common@0.21.0:
-    resolution: {integrity: sha512-ES110Mmne5Vi4ypUKrtVQfXFDtCsDXiUiGxF6ILVlE90dDD4fdpC1LSjydl/ml7xJWKSDZwUYD2zkOePMSrPBA==}
-    dependencies:
-      fast-glob: 3.3.1
-      minimatch: 7.4.6
-      mkdirp: 2.1.6
-      path-browserify: 1.0.1
-    dev: true
-
-  /@ts-rest/core@3.30.2(patch_hash=bgfq4rcfiv6wckzznx4r4pgvzy)(zod@3.22.2):
-    resolution: {integrity: sha512-XPqKbHSPIk3piMGVJiutmwRhFjIkXqnu1ya5zhGOCGVkkMnguprr7VY4g+Tsks6rxeK6DoYoPoD5+LNymkfUYw==}
+  /@ts-rest/express@3.30.5(@ts-rest/core@3.30.5)(express@4.18.2)(zod@3.22.4):
+    resolution: {integrity: sha512-mTnr+5LzmZP2yXjZPefrCGk7bu6uxmJv58i3Pl6akJ/HYbsinYDJ/7Awr1jnySEUKlGF2ynBt0buvDrTBF5LJg==}
     peerDependencies:
-      zod: ^3.21.0
-    peerDependenciesMeta:
-      zod:
-        optional: true
-    dependencies:
-      zod: 3.22.2
-    dev: false
-    patched: true
-
-  /@ts-rest/core@3.30.2(patch_hash=bgfq4rcfiv6wckzznx4r4pgvzy)(zod@3.22.4):
-    resolution: {integrity: sha512-XPqKbHSPIk3piMGVJiutmwRhFjIkXqnu1ya5zhGOCGVkkMnguprr7VY4g+Tsks6rxeK6DoYoPoD5+LNymkfUYw==}
-    peerDependencies:
-      zod: ^3.21.0
-    peerDependenciesMeta:
-      zod:
-        optional: true
-    dependencies:
-      zod: 3.22.4
-    dev: false
-    patched: true
-
-  /@ts-rest/express@3.30.2(@ts-rest/core@3.30.2)(express@4.18.2)(zod@3.22.4):
-    resolution: {integrity: sha512-YRkveYn0rlTfb9VImOVHAf7OQiR+nQCzaq2Vc20A1fkZdIYsp3TKUUCXlhDWv7GnebBJqRK0QCSlVJad3Kc73A==}
-    peerDependencies:
-      '@ts-rest/core': 3.30.2
+      '@ts-rest/core': 3.30.5
       express: ^4.0.0
-      zod: ^3.21.0
+      zod: ^3.22.3
     peerDependenciesMeta:
       zod:
         optional: true
     dependencies:
-      '@ts-rest/core': 3.30.2(patch_hash=bgfq4rcfiv6wckzznx4r4pgvzy)(zod@3.22.4)
+      '@ts-rest/core': github.com/pubpub/ts-rest/63177c3b5384a5080d506846f46fda0e5c25e9d7(zod@3.22.4)
       express: 4.18.2
       zod: 3.22.4
     dev: false
 
-  /@ts-rest/open-api@3.30.2(@ts-rest/core@3.30.2)(zod@3.22.4):
-    resolution: {integrity: sha512-Pk4vorqI9y8fqfyUpmRbCACWiMgZfnGhuANHr80Z1sD5wzwLzlyxWQz0zqdJyz7Y3b5Jd4oCvYNDpfk4ErExFQ==}
+  /@ts-rest/open-api@3.30.5(@ts-rest/core@3.30.5)(zod@3.22.4):
+    resolution: {integrity: sha512-FOq6afvj6VCLMSQEO8J0B2YuZ2BfvQrscMy9i5rinI4sJO2/q17fdUqOoT9AI6n4coHCOFpcRUOz2xks7Nn5fA==}
     peerDependencies:
-      '@ts-rest/core': 3.30.2
-      zod: ^3.21.0
+      '@ts-rest/core': 3.30.5
+      zod: ^3.22.3
     dependencies:
       '@anatine/zod-openapi': 1.14.2(openapi3-ts@2.0.2)(zod@3.22.4)
-      '@ts-rest/core': 3.30.2(patch_hash=bgfq4rcfiv6wckzznx4r4pgvzy)(zod@3.22.4)
+      '@ts-rest/core': github.com/pubpub/ts-rest/63177c3b5384a5080d506846f46fda0e5c25e9d7(zod@3.22.4)
       openapi3-ts: 2.0.2
       zod: 3.22.4
     dev: false
@@ -8247,8 +8200,8 @@ packages:
     resolution: {integrity: sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==}
     dev: false
 
-  /@types/express-serve-static-core@4.17.36:
-    resolution: {integrity: sha512-zbivROJ0ZqLAtMzgzIUC4oNqDG9iF0lSsAqpOD9kbs5xcIM3dTiyuHvBc7R8MtWBp3AAWGaovJa+wzWPjLYW7Q==}
+  /@types/express-serve-static-core@4.17.41:
+    resolution: {integrity: sha512-OaJ7XLaelTgrvlZD8/aa0vvvxZdUmlCn6MtWeB7TkiKW70BQLc9XEPpDLPdbo52ZhXUCrznlWdCHWxJWtdyajA==}
     dependencies:
       '@types/node': 18.17.15
       '@types/qs': 6.9.8
@@ -8277,7 +8230,7 @@ packages:
     resolution: {integrity: sha512-Q4FmmuLGBG58btUnfS1c1r/NQdlp3DMfGDGig8WhfpA2YRUtEkxAjkZb0yvplJGYdF1fsQ81iMDcH24sSCNC/Q==}
     dependencies:
       '@types/body-parser': 1.19.2
-      '@types/express-serve-static-core': 4.17.36
+      '@types/express-serve-static-core': 4.17.41
       '@types/qs': 6.9.8
       '@types/serve-static': 1.15.2
 
@@ -11234,10 +11187,6 @@ packages:
   /co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
-    dev: true
-
-  /code-block-writer@12.0.0:
-    resolution: {integrity: sha512-q4dMFMlXtKR3XNBHyMHt/3pwYNA69EDk00lloMOaaUMKPUXBw6lpXtbu3MMVG6/uOihGnRDOlkyqsONEUj60+w==}
     dev: true
 
   /code-point-at@1.1.0:
@@ -18223,12 +18172,6 @@ packages:
     hasBin: true
     dev: true
 
-  /mkdirp@2.1.6:
-    resolution: {integrity: sha512-+hEnITedc8LAtIP9u3HJDFIdcLV2vXP33sqLLIzkv1Db1zO/1OxbvYf0Y1OC/S/Qo5dxHXepofhmxL02PsKe+A==}
-    engines: {node: '>=10'}
-    hasBin: true
-    dev: true
-
   /mockdate@3.0.5:
     resolution: {integrity: sha512-iniQP4rj1FhBdBYS/+eQv7j1tadJ9lJtdzgOpvsOHng/GbcDh2Fhdeq+ZRldrPYdXvCyfFUmFeEwEGXZB5I/AQ==}
     dev: true
@@ -19223,10 +19166,6 @@ packages:
 
   /path-browserify@0.0.1:
     resolution: {integrity: sha512-BapA40NHICOS+USX9SN4tyhq+A2RrN/Ws5F0Z5aMHDp98Fl86lX8Oti8B7uN93L4Ifv4fHOEA+pQw87gmMO/lQ==}
-
-  /path-browserify@1.0.1:
-    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
-    dev: true
 
   /path-case@3.0.4:
     resolution: {integrity: sha512-qO4qCFjXqVTrcbPt/hQfhTQ+VhFsqNKOPtytgNKkKxSoEp3XPUQ8ObFuePylOIok5gjn69ry8XiULxCwot3Wfg==}
@@ -23249,13 +23188,6 @@ packages:
       webpack: 4.47.0(webpack-cli@3.3.12)
     dev: true
 
-  /ts-morph@20.0.0:
-    resolution: {integrity: sha512-JVmEJy2Wow5n/84I3igthL9sudQ8qzjh/6i4tmYCm6IqYyKFlNbJZi7oBdjyqcWSWYRu3CtL0xbT6fS03ESZIg==}
-    dependencies:
-      '@ts-morph/common': 0.21.0
-      code-block-writer: 12.0.0
-    dev: true
-
   /ts-node@10.9.1(@swc/core@1.3.84)(@types/node@18.17.15)(typescript@5.2.2):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
@@ -23322,15 +23254,15 @@ packages:
       strip-bom: 3.0.0
     dev: true
 
+  /tslib@1.10.0:
+    resolution: {integrity: sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==}
+    dev: false
+
   /tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
 
   /tslib@2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
-    dev: false
-
-  /tslib@2.5.3:
-    resolution: {integrity: sha512-mSxlJJwl3BMEQCUNnxXBU9jP4JBktcEGhURcPR6VQVlnP0FdDEsIaz0C35dXNGLyRfrATNofF0F5p2KPxQgB+w==}
     dev: false
 
   /tslib@2.6.2:
@@ -24841,24 +24773,12 @@ packages:
       '@types/yoga-layout': 1.9.2
     dev: false
 
-  /zod-to-json-schema@3.21.4(zod@3.22.2):
-    resolution: {integrity: sha512-fjUZh4nQ1s6HMccgIeE0VP4QG/YRGPmyjO9sAh890aQKPEk3nqbfUXhMFaC+Dr5KvYBm8BCyvfpZf2jY9aGSsw==}
-    peerDependencies:
-      zod: ^3.21.4
-    dependencies:
-      zod: 3.22.2
-    dev: false
-
   /zod-to-json-schema@3.21.4(zod@3.22.4):
     resolution: {integrity: sha512-fjUZh4nQ1s6HMccgIeE0VP4QG/YRGPmyjO9sAh890aQKPEk3nqbfUXhMFaC+Dr5KvYBm8BCyvfpZf2jY9aGSsw==}
     peerDependencies:
       zod: ^3.21.4
     dependencies:
       zod: 3.22.4
-    dev: false
-
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
   /zod@3.22.4:
@@ -24933,4 +24853,18 @@ packages:
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.7.5
       prosemirror-view: 1.31.8
+    dev: false
+
+  github.com/pubpub/ts-rest/63177c3b5384a5080d506846f46fda0e5c25e9d7(zod@3.22.4):
+    resolution: {tarball: https://codeload.github.com/pubpub/ts-rest/tar.gz/63177c3b5384a5080d506846f46fda0e5c25e9d7}
+    id: github.com/pubpub/ts-rest/63177c3b5384a5080d506846f46fda0e5c25e9d7
+    name: '@ts-rest/core'
+    version: 3.30.5
+    peerDependencies:
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      zod:
+        optional: true
+    dependencies:
+      zod: 3.22.4
     dev: false

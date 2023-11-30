@@ -4,12 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/pubpub-client.svg)](https://www.npmjs.com/package/pubpub-client)
 ![GitHub license](https://img.shields.io/github/license/tefkah/pubpub-client)
 
-Unofficial Node Client for [PubPub](https://pubpub.org/).
-
-> **Warning**
-> This is not (yet) and official Client.
-> Anything here may break at any time.
-> Please use responsibly, don't spam the API.
+Official Node.js Client for [PubPub](https://pubpub.org/).
 
 ## Installation
 
@@ -22,20 +17,9 @@ pnpm add pubpub-client
 # npm install pubpub-client
 ```
 
-## Why does this exist?
-
-PubPub is a great platform for publishing academic work.
-However, the API is quite hidden and undocumented.
-
-This Client is an attempt to make it easier to interact with the API.
-
 ## Limitations
 
-Because there is no official API, this Client is built by reverse engineering the API calls made by the PubPub website.
-
-This means that the Client is not guaranteed to work with future versions of PubPub.
-
-Furthermore, the following is not possible to do with the Client or through the API in general:
+The following is not possible to do with the Client or through the API in general:
 
 ### Creating or deleting communities
 
@@ -46,28 +30,23 @@ I think this would cause too much risk of accidentally deleting a community or c
 
 The API does not support this.
 
-### Getting information about collections, pages, or communities
-
-Currently, the API does not (AFAIK) support a way to simply get a list of current collections or pagees.
-The Client does support doing this through the `hacks` methods.
-
-Basically what these do is request the actual page instead of calling the API and parse the JSON data that is passed there.
-
-This should be considered very unstable.
-
 ## Usage
 
 ```js
 import { PubPub } from 'pubpub-client'
 
 const communityUrl = 'https://demo.pubpub.org'
-const communityId = '...'
-const pubpub = new PubPub(communityId, communityUrl)
 
 async function main() {
-  await PubPub.login('username', 'password')
+  const pubpub = await PubPub.createSDK({
+    communityUrl,
+    email: '...',
+    password: '...',
+  })
 
   const pubs = await pubpub.pub.getMany()
+
+  console.log(pubs)
 }
 
 main()

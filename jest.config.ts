@@ -1,8 +1,8 @@
 // @ts-check
 const esModules = ['react-stylable-diff'].join('|')
 
-import { Config } from '@jest/types'
-import { Config as SWCConfig } from '@swc/types'
+import type { Config } from '@jest/types'
+import type { Config as SWCConfig } from '@swc/types'
 
 const config: Config.InitialOptions = {
   testEnvironment: 'node',
@@ -42,6 +42,7 @@ const config: Config.InitialOptions = {
             containers: ['./core/client/containers/index.ts'],
             'containers/*': ['./core/client/containers/*'],
             'deposit/*': ['./core/deposit/*'],
+            'workers/*': ['./core/workers/*'],
           },
         },
         module: {

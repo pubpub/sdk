@@ -35,7 +35,6 @@ describe('PubPub', () => {
     // eslint-disable-next-line no-extra-semi
     ;({ pub, pubpub } = await setupSDK({
       url: TEST_URL,
-      communityId: process.env.COMMUNITY_ID!,
       email: process.env.EMAIL,
       password: process.env.PASSWORD,
     }))
@@ -101,15 +100,15 @@ describe('PubPub', () => {
   })
 
   it('should be able to get collections', async () => {
-    const collections = await pubpub.collection.getMany()
+    const { body: collections } = await pubpub.collection.getMany()
 
-    expect(collections).toBeInstanceOf(Array)
+    expect(Array.isArray(collections)).toBeTruthy()
     expect(collections[0]).toHaveProperty('title')
   }, 10000)
 
   let collectionPubId: string
   it('should be able to add a pub to a collection', async () => {
-    const added = await pubpub.collection.addPub({
+    const added = await pubpub.collectionPub.create({
       collectionId,
       pubId: pub.id,
     })
@@ -139,47 +138,42 @@ describe('PubPub', () => {
     expect(modded.body.title).toBe('New title')
   })
 
-  it('should be able to find the attributions of a collection through annoying means', async () => {
-    const collections = await pubpub.collection.getMany()
+  it('should be able to get collections with attributions', async () => {
+    const { body: collections } = await pubpub.collection.getMany({
+      include: ['attributions'],
+    })
 
+    console.log(collections)
     const collection = collections[0]
-    expect(collections).toBeInstanceOf(Array)
+    expect(Array.isArray(collections)).toBeTruthy()
     expect(collection).toHaveProperty('title')
-    expect(collection).not.toHaveProperty('attributions')
-    expect(collection).toHaveProperty('slug')
+    expect(collection.attributions).toEqual([])
 
-    const collectionWithAttributions = await pubpub.collection.get(
-      collection.slug
+    const { body: createdAttribution } =
+      await pubpub.collectionAttribution.create({
+        collectionId: collection.id,
+        name: 'Test attribution',
+        roles: ['Guy'],
+      })
+
+    const { body: collectionWithAttributions } = await pubpub.collection.get({
+      params: { slugOrId: collection.slug },
+    })
+
+    expect(collectionWithAttributions.attributions?.[0]?.id).toEqual(
+      createdAttribution.id,
     )
 
-    expect(collectionWithAttributions).toHaveProperty('attributions')
-    expect(collectionWithAttributions).toHaveProperty('title')
-    expect(collectionWithAttributions).toHaveProperty('slug')
-    expect(collectionWithAttributions).toHaveProperty('avatar')
-    expect(collectionWithAttributions).toHaveProperty('isRestricted')
-    expect(collectionWithAttributions).toHaveProperty('isPublic')
-    expect(collectionWithAttributions).toHaveProperty('viewHash')
-    expect(collectionWithAttributions).toHaveProperty('editHash')
-    expect(collectionWithAttributions).toHaveProperty('metadata')
-    expect(collectionWithAttributions).toHaveProperty('kind')
-    expect(collectionWithAttributions).toHaveProperty('doi')
-    expect(collectionWithAttributions).toHaveProperty('readNextPreviewSize')
-    expect(collectionWithAttributions).toHaveProperty('layout')
-    expect(collectionWithAttributions).toHaveProperty('pageId')
-    expect(collectionWithAttributions).toHaveProperty('communityId')
-    expect(collectionWithAttributions).toHaveProperty('scopeSummaryId')
-    expect(collectionWithAttributions).toHaveProperty('createdAt')
-    expect(collectionWithAttributions).toHaveProperty('updatedAt')
-    expect(collectionWithAttributions).toHaveProperty('crossrefDepositRecordId')
+    const { body: removedAttribution } =
+      await pubpub.collectionAttribution.remove({
+        id: createdAttribution.id,
+        collectionId: collection.id,
+      })
   }, 10000)
 
   it('should be able to modify a pub', async () => {
     const modded = await pubpub.pub.update({
       pubId: pub.id,
-      CitationStyle: {
-        citationStyle: 'apa-7',
-        inlineCitationStyle: 'author',
-      },
       description: 'This is a test description',
     })
 
