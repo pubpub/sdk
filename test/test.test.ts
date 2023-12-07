@@ -1,11 +1,15 @@
 // import { describe, it, beforeAll, expect, afterAll } from 'vitest'
 import type { PubPubSDK } from '../src/lib/client.js'
 import { setupSDK } from './utils/setup.js'
-import dotenv from 'dotenv'
-dotenv.config()
-
 import app from '../core/server/server.js'
 import { sleep } from './utils/sleep.js'
+import { resolve } from 'path'
+
+import dotenv from 'dotenv'
+
+dotenv.config({
+  path: resolve(__dirname, '../../.env'),
+})
 
 const TEST_PORT = 7357 as const
 
@@ -140,10 +144,13 @@ describe('PubPub', () => {
 
   it('should be able to get collections with attributions', async () => {
     const { body: collections } = await pubpub.collection.getMany({
+
+      query: {
+
+      },
       include: ['attributions'],
     })
 
-    console.log(collections)
     const collection = collections[0]
     expect(Array.isArray(collections)).toBeTruthy()
     expect(collection).toHaveProperty('title')
@@ -172,6 +179,13 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to modify a pub', async () => {
+    pubpub.pub.getMany({
+      query: {
+        filter: {
+          customPublishedAt,
+        },
+      },
+    })
     const modded = await pubpub.pub.update({
       pubId: pub.id,
       description: 'This is a test description',
@@ -182,6 +196,28 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to update a community', async () => {})
+
+  it('should be able to import a pub', async () => {
+    const { body } = await pubpub.pub.text.import({
+      files: [
+        {
+          blob: new Blob(['heya'], { type: 'text/plain' }),
+          filename: 'hey.txt',
+        },
+        {
+          blob: new Blob(['heya'], { type: 'text/plain' }),
+          filename: 'hey.txt',
+        },
+      ],
+      title: 'gamer lord',
+    })
+    const { doc, pub } = body
+    console.log(body)
+
+    expect(JSON.stringify(doc)?.includes('heya')).toBeTruthy()
+    expect(pub).toHaveProperty('title')
+    expect(pub.title).toBe('gamer lord')
+  }, 20000)
 
   it('should remove a pub', async () => {
     const remove = await pubpub.pub.remove({ pubId: pub.id })

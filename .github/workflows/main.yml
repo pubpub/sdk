@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: ci
     steps:
+      # necessary for some tests
+      - uses: nikeee/setup-pandoc@v1
+        with:
+          pandoc-version: 2.19.2
+
       - uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}

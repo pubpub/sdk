@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { createClient } from '../../core/utils/api/client.js'
+import type { createClient } from 'utils/api/client'
 import type { GetRequests } from './proxies.js'
 
 export type Client = ReturnType<typeof createClient>
@@ -27,21 +27,35 @@ export type ProxiedFunction<
     ? // if only the body is required, make the second argument optional
       Partial<Omit<A[0], Property>> extends Omit<A[0], Property>
       ? FormData extends B
-        ? (input: Exclude<B, FormData>, rest?: Omit<A[0], Property>) => R
+        ? (
+            input: Exclude<B, FormData>,
+            rest?: Prettify<Omit<A[0], Property>>,
+          ) => R
         : Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
           ? // if there are no required arguments, you don't need to pass the body
             (
-              input?: B, //Prettify<Omit<B, 'communityId'>>,
-              rest?: Omit<A[0], Property>,
+              input?: Prettify<B>, //Prettify<Omit<B, 'communityId'>>,
+              rest?: Prettify<Omit<A[0], Property>>,
             ) => R
-          : (input: Omit<B, 'communityId'>, rest?: Omit<A[0], Property>) => R
-      : (input: Omit<B, 'communityId'>, rest: Omit<A[0], Property>) => R
-    : (...args: A) => R
+          : (
+              input: Prettify<Omit<B, 'communityId'>>,
+              rest?: Prettify<Omit<A[0], Property>>,
+            ) => R
+      : (
+          input: Prettify<Omit<B, 'communityId'>>,
+          rest: Prettify<Omit<A[0], Property>>,
+        ) => R
+    : undefined extends A[0]
+      ? (input?: Prettify<A[0]>) => R
+      : (input: Prettify<A[0]>) => R
   : never
 
 export type ProxiedClient<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
-    ? ProxiedFunction<T[K], K extends GetRequests ? true : false>
+    ? K extends GetRequests
+      ? // don't proxy get requests
+        T[K]
+      : ProxiedFunction<T[K]>
     : T[K] extends object
       ? ProxiedClient<T[K]>
       : T[K]
@@ -49,6 +63,7 @@ export type ProxiedClient<T> = {
 
 /**
  * The raw client inferred from `ts-rest`.
+ * @interface
  */
 export type PClient = ProxiedClient<Client>
 

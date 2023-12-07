@@ -16,8 +16,8 @@
     "prepare": "husky install",
     "size": "banal ./dist/index.js",
     "pretest": "pnpm run -C=core build-client-dev",
-    "ttest": "firebase emulators:exec --only database --import ./core/.firebase/default-contents \"jest\"",
-    "test": "jest"
+    "test": "firebase emulators:exec --only database --import ./core/.firebase/default-contents \"jest\"",
+    "generate-docs": "typedoc && tsx src/docgen/formatDocs.mts"
   },
   "keywords": [
     "pubpub",
@@ -49,7 +49,7 @@
   ],
   "dependencies": {
     "@anatine/zod-openapi": "^2.2.0",
-    "@ts-rest/core": "github:pubpub/ts-rest#ts-rest-core-v3.30.5-gitpkg",
+    "@ts-rest/core": "github:pubpub/ts-rest#ts-rest-core-v3.30.52-gitpkg",
     "@types/uuid": "^3.3.0",
     "crypto-js": "^4.1.1",
     "prosemirror-compress-pubpub": "0.0.3",
@@ -77,8 +77,10 @@
     "@types/express": "^4.17.15",
     "@types/express-serve-static-core": "^4.17.41",
     "@types/jest": "^29.5.4",
+    "@types/mdast": "^4.0.3",
     "@types/node": "^18.15.3",
     "@types/react": "^16.8.5",
+    "@types/unist": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "dotenv": "^16.3.1",
@@ -87,15 +89,37 @@
     "express": "^4.17.3",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
+    "mdast-util-find-and-replace": "^3.0.1",
+    "mdast-util-heading-range": "^4.0.0",
+    "mdast-util-to-markdown": "^2.1.0",
+    "mdast-util-to-string": "^4.0.0",
     "prettier": "^3.1.0",
     "reflect-metadata": "^0.1.13",
+    "remark-collapse": "^0.1.2",
+    "remark-parse": "^11.0.0",
+    "remark-sectionize": "^2.0.0",
+    "remark-stringify": "^11.0.0",
+    "remark-toc": "^9.0.0",
     "size-limit": "^9.0.0",
+    "ts-morph": "^21.0.1",
     "tsup": "^7.2.0",
     "tsx": "^3.12.7",
     "typedoc": "^0.25.3",
+    "typedoc-plugin-markdown": "4.0.0-next.36",
     "typescript": "^5.2.2",
+    "unified": "^11.0.4",
+    "unist-util-is": "^6.0.0",
+    "unist-util-visit": "^5.0.0",
     "vite": "^4.1.4",
     "vite-tsconfig-paths": "^4.2.0"
+  },
+  "overrides": {
+    "@ts-rest/express": {
+      "@ts-rest/core": "3.30.52"
+    },
+    "@ts-rest/open-api": {
+      "@ts-rest/core": "3.30.52"
+    }
   },
   "size-limit": [
     {

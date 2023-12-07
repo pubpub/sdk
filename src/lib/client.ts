@@ -5,13 +5,13 @@ import { createClient } from 'utils/api/client.js'
 
 import type { ExportFormats, WorkerTaskExportOutput } from './types.js'
 
-import { proxyClient, proxySDKWithClient, getRequestsMap } from './proxies.js'
-import type {
-  PClient,
-  DeepInput,
-  DeepMerge,
-  DeepOutput,
-} from './client-types.js'
+import {
+  proxyClient,
+  proxySDKWithClient,
+  getRequestsMap,
+  filesRequestMap,
+} from './proxies.js'
+import type { PClient, DeepInput, DeepMerge } from './client-types.js'
 
 /**
  * Small test to see if a string looks like a pub slug,
@@ -47,6 +47,9 @@ export class PubPub {
    * Automatically called when using `PubPub.createSDK`
    * */
   async login(email: string, password: string) {
+    if (this.loggedIn) {
+      throw new Error('Already logged in')
+    }
     // don't use the client for this
     const response = await fetch(`${this.communityUrl}/api/login`, {
       method: 'POST',
@@ -70,17 +73,19 @@ export class PubPub {
       ${data}`)
     }
 
-    this.#cookie = cookie // .join('; ')
-    const authenticatedClient = proxyClient(
-      createClient({
+    this.#cookie = cookie
+
+    const authenticatedClient = proxyClient({
+      client: createClient({
         baseUrl: this.communityUrl,
         baseHeaders: {
           Cookie: this.#cookie || '',
         },
       }),
-      this.communityId,
+      communityId: this.communityId,
       getRequestsMap,
-    )
+      filesRequestsMap: filesRequestMap,
+    })
 
     this.client = authenticatedClient
     proxySDKWithClient(this, authenticatedClient)
@@ -89,37 +94,13 @@ export class PubPub {
   }
 
   async logout() {
-    const response = await this.client.logout()
+    const response = await this.client.auth.logout()
 
     this.#cookie = undefined
     this.loggedIn = false
     console.log('Succesfully logged out!')
 
     return response
-  }
-
-  /**
-   * Get the HTML content of a page
-   */
-  getPage = async ({ slug }: { slug: string }) => {
-    const bareSlug = slug.replace(this.communityUrl, '')?.replace(/^\//, '')
-    const response = await fetch(`${this.communityUrl}/${bareSlug}`, {
-      method: 'GET',
-      keepalive: false,
-      headers: {
-        Cookie: this.#cookie || '',
-      },
-    })
-
-    if (!response.status || response.status < 200 || response.status >= 300) {
-      throw new Error(
-        `Request failed with status ${response.status}: ${response.statusText}`,
-      )
-    }
-
-    const data = await response.text()
-
-    return data
   }
 
   exportPub = async ({
@@ -160,106 +141,118 @@ export class PubPub {
   }
 
   // TODO: Remove this if https://github.com/ts-rest/ts-rest/pull/413 is merged or fixed in some other way
-  #formUpload = async ({
-    route,
-    fieldName,
-    files,
-    rest,
-  }: {
-    route: `/${string}`
-    fieldName: 'file' | 'files'
-    files: ([Blob, string] | File)[]
-    rest?: Record<string, unknown>
-  }) => {
-    const formData = new FormData()
+  // #formUpload = async ({
+  //   route,
+  //   fieldName,
+  //   files,
+  //   rest,
+  // }: {
+  //   route: `/${string}`
+  //   fieldName: 'file' | 'files'
+  //   files: ([Blob, string] | File)[]
+  //   rest?: Record<string, unknown>
+  // }) => {
+  //   const formData = new FormData()
 
-    if (rest) {
-      Object.entries(rest).forEach(([key, value]) => {
-        formData.set(key, JSON.stringify(value))
-      })
-    }
+  //   if (rest) {
+  //     Object.entries(rest).forEach(([key, value]) => {
+  //       formData.set(key, JSON.stringify(value))
+  //     })
+  //   }
 
-    files.forEach((file) => {
-      if (Array.isArray(file)) {
-        const [blob, filename] = file
-        formData.set(fieldName, blob, filename)
-      } else {
-        formData.set(fieldName, file)
-      }
-    })
+  //   files.forEach((file) => {
+  //     if (Array.isArray(file)) {
+  //       const [blob, filename] = file
+  //       formData.set(fieldName, blob, filename)
+  //     } else {
+  //       formData.set(fieldName, file)
+  //     }
+  //   })
 
-    const response = await fetch(`${this.communityUrl}${route}`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        Cookie: this.#cookie || '',
-        ContentType: 'multipart/form-data',
-      },
-    })
+  //   const response = await fetch(`${this.communityUrl}${route}`, {
+  //     method: 'POST',
+  //     body: formData,
+  //     headers: {
+  //       Cookie: this.#cookie || '',
+  //       ContentType: 'multipart/form-data',
+  //     },
+  //   })
 
-    const data = await response.json()
+  //   const data = await response.json()
 
-    return {
-      status: response.status as any,
-      body: data as any,
-      headers: response.headers as any,
-    }
-  }
+  //   return {
+  //     status: response.status as any,
+  //     body: data as any,
+  //     headers: response.headers as any,
+  //   }
+  // }
 
-  upload = async ({
-    file,
-  }: Exclude<DeepInput<'upload'>, FormData>): Promise<DeepOutput<'upload'>> =>
-    this.client.upload({
-      file,
-    })
+  // upload = async ({
+  //   file,
+  // }: Exclude<DeepInput<'upload'>, FormData>): Promise<DeepOutput<'upload'>> =>
+  //   this.client.upload({
+  //     file,
+  //   })
   // this.#formUpload({
   //   route: '/api/upload',
   //   fieldName: 'file',
   //   files: [file],
   // })
 
-  text = {
-    import: async ({
-      files,
-      ...rest
-    }: DeepInput<'pub.text.import'>): Promise<DeepOutput<'pub.text.import'>> =>
-      this.#formUpload({
-        route: `/api/pubs/text/import`,
-        fieldName: 'files',
-        files,
-        rest,
-      }),
+  // pub = {
+  //   text: {
+  //     import: async ({
+  //       files,
+  //       ...rest
+  //     }: DeepInput<'pub.text.import'>): Promise<
+  //       DeepOutput<'pub.text.import'>
+  //     > =>
+  //       this.#formUpload({
+  //         route: `/api/pubs/text/import`,
+  //         fieldName: 'files',
+  //         files,
+  //         rest,
+  //       }),
 
-    importToPub: async (
-      { files, ...rest }: Parameters<DeepInput<'pub.text.importToPub'>>[0],
-      { pubId }: Parameters<DeepInput<'pub.text.importToPub'>>[1]['params'],
-    ): ReturnType<DeepInput<'pub.text.importToPub'>> =>
-      this.#formUpload({
-        route: `/api/pubs/${pubId}/text/import`,
-        fieldName: 'files',
-        files,
-        rest,
-      }),
+  //     importToPub: async (
+  //       {
+  //         files,
+  //         ...rest
+  //       }: Omit<Parameters<DeepInput<'pub.text.importToPub'>>[0], 'files'> & {
+  //         files: [Blob, string][] | File[]
+  //       },
+  //       { pubId }: Parameters<DeepInput<'pub.text.importToPub'>>[1]['params'],
+  //     ): ReturnType<DeepInput<'pub.text.importToPub'>> =>
+  //       this.#formUpload({
+  //         route: `/api/pubs/${pubId}/text/import`,
+  //         fieldName: 'files',
+  //         files,
+  //         rest,
+  //       }),
 
-    convert: async ({
-      files,
-    }: DeepInput<'pub.text.convert'>): Promise<
-      DeepOutput<'pub.text.convert'>
-    > =>
-      this.#formUpload({
-        route: `/api/pubs/text/convert`,
-        fieldName: 'files',
-        files,
-      }),
-  }
+  //     convert: async ({
+  //       files,
+  //     }: {
+  //       files: [Blob, string][] | File[]
+  //     }): Promise<DeepOutput<'pub.text.convert'>> =>
+  //       this.#formUpload({
+  //         route: `/api/pubs/text/convert`,
+  //         fieldName: 'files',
+  //         files,
+  //       }),
+  //   },
+  // }
 
   /**
    * Basic export function, equivalent to the `/api/export` endpoint
    *
-   * @private
    */
-  #export = async ({ pubId, format, historyKey }: DeepInput<'export'>) => {
-    const { body } = await this.client.export({
+  #export = async ({
+    pubId,
+    format,
+    historyKey,
+  }: DeepInput<'workerTask.createExport'>) => {
+    const { body } = await this.client.workerTask.createExport({
       pubId,
       format,
       historyKey: historyKey! < 0 ? undefined : historyKey,
@@ -295,7 +288,9 @@ export class PubPub {
     const poll = async (): Promise<unknown> => {
       console.log(`Polling for ${workerTaskId}`)
       const { body: task } = await this.client.workerTask.get({
-        workerTaskId,
+        query: {
+          workerTaskId,
+        },
       })
 
       if ('error' in task && task.error) {

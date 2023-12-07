@@ -24,7 +24,6 @@ describe('imports', () => {
     // eslint-disable-next-line no-extra-semi
     ;({ pub, pubpub, draftPath } = await setupSDK({
       url: IMPORT_TEST_COMMUNITY_URL,
-      communityId: IMPORT_TEST_COMMUNITY_ID,
       email: process.env.IMPORT_TEST_EMAIL ?? process.env.EMAIL,
       password: process.env.IMPORT_TEST_PASSWORD ?? process.env.PASSWORD,
     }))
@@ -34,15 +33,15 @@ describe('imports', () => {
     try {
       const imported = await pubpub.pub.text.import({
         files: [
-          [
-            new Blob(
+          {
+            blob: new Blob(
               [await readFile(path.join(__dirname, 'fixtures', 'basic.docx'))],
               {
                 type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
               },
             ),
-            'basic.docx',
-          ],
+            filename: 'basic.docx',
+          },
         ],
       })
 
@@ -72,8 +71,8 @@ describe('imports', () => {
 
   it('should be able to upload a file as blob', async () => {
     const file = new Blob(['test'], { type: 'text/plain' })
-    const { body: upload } = await pubpub.upload({
-      file: [file, 'test.txt'],
+    const { body: upload } = await pubpub.upload.file({
+      file: { blob: file, filename: 'test.txt' },
     })
 
     expect(upload).toHaveProperty('url')

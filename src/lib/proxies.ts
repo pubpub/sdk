@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Client, PClient } from './client-types'
+import type { Client, PClient } from './client-types.js'
 
 /**
  * Map of GET requests, used to correctly proxy the client
@@ -17,6 +17,36 @@ export type GetRequestMap = typeof getRequestsMap
 export type GetRequests = keyof GetRequestMap
 
 /**
+ * Map of requests that accept files, used to correctly proxy the client
+ *
+ * Files need to be put at the bottom of the form data body, which means putting it as the last property in the body object.
+ *
+ * This is really hard to enforce, so we let users put the files wherever in the body and we move it to be the last.
+ *
+ * As an example, this
+ * ```ts
+ * client.pub.text.import({
+ *  files: [new Blob(['Hello'], { type: 'text/plain' }), 'hello.txt'],
+ *  title: "Hello",
+ * })
+ * ```
+ *
+ * would turn into this
+ *
+ * ```ts
+ * formData.set(files, new Blob(['Hello'], { type: 'text/plain' }), 'hello.txt')
+ * formData.set(, 'title')
+ *
+ */
+export const filesRequestMap = {
+  convert: true,
+  importToPub: true,
+  import: true,
+} as const
+
+export type FilesRequestMap = typeof filesRequestMap
+export type FilesRequests = keyof FilesRequestMap
+/**
  * This makes the client a bit nicer to use. The body is flattened and becomes the first arg, IF its not a get request,
  * and you don't need to pass the communityId.
  *
@@ -30,11 +60,17 @@ export type GetRequests = keyof GetRequestMap
  * ({ content: string }, { query: {} }) => ...
  *
  */
-export function proxyClient(
-  client: Client,
-  communityId: string,
+export function proxyClient({
+  client,
+  communityId,
   getRequestsMap = {},
-): PClient {
+  filesRequestsMap = {},
+}: {
+  client: Client
+  communityId: string
+  getRequestsMap?: Partial<GetRequestMap>
+  filesRequestsMap?: Partial<FilesRequestMap>
+}): PClient {
   // Recursive function to traverse and proxy the client object
   function proxyObject<T extends Record<string, any>>(obj: T) {
     const newObj = {}
@@ -45,42 +81,40 @@ export function proxyClient(
           const isGetRequest = getRequestsMap[key] || false
 
           if (isGetRequest) {
-            // For GET requests, split the arguments into query and rest
+            // for get requests, no proxying
 
-            const [query, rest] = args as [
-              query: Record<string, unknown> | undefined,
-              rest: Record<string, unknown> | undefined,
-            ]
-            /**
-             * if it contains any of the following keys, the query is not the first argument, instead just treat it as a normal request
-             * This happens when the query is optional
-             */
-            if (
-              query &&
-              ('params' in query ||
-                'query' in query ||
-                'cache' in query ||
-                'body' in query)
-            ) {
-              return value.call(this, args[0])
-            }
-
-            return value.call(this, {
-              query,
-              ...rest,
-            })
-          } else {
-            // For non-GET requests, split the first argument into body and the rest
-            // and include the communityId in the body, as it is often needed and annoying to have to pass all the time
-            const [body, rest] = args as [
-              body: Record<string, unknown> | undefined,
-              rest: Record<string, unknown> | undefined,
-            ]
-            return value.call(this, {
-              body: { ...body, communityId },
-              ...rest,
-            })
+            return value.call(this, ...args)
           }
+
+          // For non-GET requests, split the first argument into body and the rest
+          // and include the communityId in the body, as it is often needed and annoying to have to pass all the time
+          // eslint-disable-next-line prefer-const
+          let [body, rest] = args as [
+            body: Record<string, unknown> | undefined,
+            rest: Record<string, unknown> | undefined,
+          ]
+
+          const hasFiles = filesRequestsMap[key] || false
+          if (hasFiles) {
+            const {
+              // @ts-expect-error doesn't matter if it doesn't have it
+              files,
+              // @ts-expect-error doesn't matter if it doesn't have it
+              file,
+              ...restBody
+            } = body
+
+            body = {
+              ...restBody,
+              ...(Boolean(file) && { file }),
+              ...(Boolean(files) && { files }),
+            }
+          }
+
+          return value.call(this, {
+            body: { communityId, ...body },
+            ...rest,
+          })
         }
       } else if (typeof value === 'object' && value !== null) {
         // Recursively proxy nested objects
