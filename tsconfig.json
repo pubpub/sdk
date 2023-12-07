@@ -81,5 +81,5 @@
     "test/utils/sleep.ts" //    "core/utils/api/client.ts"
   ],
 
-  "exclude": ["node_modules", "dist", "web"]
+  "exclude": ["node_modules", "dist", "web", "**/*.test.ts"]
 }
