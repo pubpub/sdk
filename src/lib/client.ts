@@ -14,13 +14,6 @@ import {
 import type { PClient, DeepInput, DeepMerge } from './client-types.js'
 
 /**
- * Small test to see if a string looks like a pub slug,
- * such that we have better type inference for the result
- */
-const looksLikePubSlug = (pub: string): pub is `pub/${string}` =>
-  /pub\/.*?$/.test(pub)
-
-/**
  * @interface
  */
 export type PubPubSDK = DeepMerge<PClient, PubPub>
@@ -114,22 +107,18 @@ export class PubPub {
     format: ExportFormats
     historyKey?: number
   }) => {
-    if (!slug && pubId) {
-      const { body: pub } = await this.client.pub.get({
-        params: { slugOrId: pubId },
+    if (!pubId && slug) {
+      const { body } = await this.client.pub.get({
+        params: {
+          slugOrId: slug,
+        },
       })
-      if (format === 'formatted' && pub.downloads?.[0]?.type === 'formatted') {
-        return pub.downloads[0].url
+
+      if (!body) {
+        throw new Error(`Could not find pub with slug ${slug}`)
       }
-      slug = pub.slug
-    }
 
-    if (!slug) {
-      throw new Error('No slug or id provided')
-    }
-
-    if (!looksLikePubSlug(slug)) {
-      throw new Error('Invalid slug, should be of the form pub/slug')
+      pubId = body.id
     }
 
     const { url } = await this.#export({
@@ -139,109 +128,6 @@ export class PubPub {
 
     return url
   }
-
-  // TODO: Remove this if https://github.com/ts-rest/ts-rest/pull/413 is merged or fixed in some other way
-  // #formUpload = async ({
-  //   route,
-  //   fieldName,
-  //   files,
-  //   rest,
-  // }: {
-  //   route: `/${string}`
-  //   fieldName: 'file' | 'files'
-  //   files: ([Blob, string] | File)[]
-  //   rest?: Record<string, unknown>
-  // }) => {
-  //   const formData = new FormData()
-
-  //   if (rest) {
-  //     Object.entries(rest).forEach(([key, value]) => {
-  //       formData.set(key, JSON.stringify(value))
-  //     })
-  //   }
-
-  //   files.forEach((file) => {
-  //     if (Array.isArray(file)) {
-  //       const [blob, filename] = file
-  //       formData.set(fieldName, blob, filename)
-  //     } else {
-  //       formData.set(fieldName, file)
-  //     }
-  //   })
-
-  //   const response = await fetch(`${this.communityUrl}${route}`, {
-  //     method: 'POST',
-  //     body: formData,
-  //     headers: {
-  //       Cookie: this.#cookie || '',
-  //       ContentType: 'multipart/form-data',
-  //     },
-  //   })
-
-  //   const data = await response.json()
-
-  //   return {
-  //     status: response.status as any,
-  //     body: data as any,
-  //     headers: response.headers as any,
-  //   }
-  // }
-
-  // upload = async ({
-  //   file,
-  // }: Exclude<DeepInput<'upload'>, FormData>): Promise<DeepOutput<'upload'>> =>
-  //   this.client.upload({
-  //     file,
-  //   })
-  // this.#formUpload({
-  //   route: '/api/upload',
-  //   fieldName: 'file',
-  //   files: [file],
-  // })
-
-  // pub = {
-  //   text: {
-  //     import: async ({
-  //       files,
-  //       ...rest
-  //     }: DeepInput<'pub.text.import'>): Promise<
-  //       DeepOutput<'pub.text.import'>
-  //     > =>
-  //       this.#formUpload({
-  //         route: `/api/pubs/text/import`,
-  //         fieldName: 'files',
-  //         files,
-  //         rest,
-  //       }),
-
-  //     importToPub: async (
-  //       {
-  //         files,
-  //         ...rest
-  //       }: Omit<Parameters<DeepInput<'pub.text.importToPub'>>[0], 'files'> & {
-  //         files: [Blob, string][] | File[]
-  //       },
-  //       { pubId }: Parameters<DeepInput<'pub.text.importToPub'>>[1]['params'],
-  //     ): ReturnType<DeepInput<'pub.text.importToPub'>> =>
-  //       this.#formUpload({
-  //         route: `/api/pubs/${pubId}/text/import`,
-  //         fieldName: 'files',
-  //         files,
-  //         rest,
-  //       }),
-
-  //     convert: async ({
-  //       files,
-  //     }: {
-  //       files: [Blob, string][] | File[]
-  //     }): Promise<DeepOutput<'pub.text.convert'>> =>
-  //       this.#formUpload({
-  //         route: `/api/pubs/text/convert`,
-  //         fieldName: 'files',
-  //         files,
-  //       }),
-  //   },
-  // }
 
   /**
    * Basic export function, equivalent to the `/api/export` endpoint
@@ -268,6 +154,8 @@ export class PubPub {
         // throw new Error('Worker task id is not a string')
         return body
       }
+
+      console.dir(body, { depth: null })
 
       if (!('taskId' in body)) {
         throw new Error('Worker task id is not a string')

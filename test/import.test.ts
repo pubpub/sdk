@@ -57,6 +57,7 @@ describe('imports', () => {
       const exported = await pubpub.exportPub({
         slug: draftPath.replace('/draft', ''),
         format: 'markdown',
+        pubId: pub.id,
       })
 
       expect(

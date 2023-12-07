@@ -83,7 +83,9 @@ describe('PubPub', () => {
 
   it('should be able to get pubs', async () => {
     const { body: pubs } = await pubpub.pub.getMany({
-      limit: 1,
+      query: {
+        limit: 1,
+      },
     })
 
     const first = pubs[0]
@@ -144,11 +146,7 @@ describe('PubPub', () => {
 
   it('should be able to get collections with attributions', async () => {
     const { body: collections } = await pubpub.collection.getMany({
-
-      query: {
-
-      },
-      include: ['attributions'],
+      query: { include: ['attributions'] },
     })
 
     const collection = collections[0]
@@ -179,13 +177,6 @@ describe('PubPub', () => {
   }, 10000)
 
   it('should be able to modify a pub', async () => {
-    pubpub.pub.getMany({
-      query: {
-        filter: {
-          customPublishedAt,
-        },
-      },
-    })
     const modded = await pubpub.pub.update({
       pubId: pub.id,
       description: 'This is a test description',
@@ -212,7 +203,6 @@ describe('PubPub', () => {
       title: 'gamer lord',
     })
     const { doc, pub } = body
-    console.log(body)
 
     expect(JSON.stringify(doc)?.includes('heya')).toBeTruthy()
     expect(pub).toHaveProperty('title')
