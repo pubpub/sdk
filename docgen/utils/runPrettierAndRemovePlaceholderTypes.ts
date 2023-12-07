@@ -12,24 +12,21 @@ export const PLACEHOLDER_TYPE = 'type REMOVEME = ' as const
  * 5. Write the file again
  * 6. Return the contents of the file
  */
-export function runPrettierAndRemovePlaceholderTypes(
+export async function runPrettierAndRemovePlaceholderTypes(
   markdown: string,
   outputPath: string,
 ) {
   writeFileSync(outputPath, markdown)
 
-  execSync(`prettier --write ${outputPath}`)
-
-  const file = readFileSync(outputPath, { encoding: 'utf-8' })
-
-  const placeHoldersRemoved = replace(file, [
+  execSync(`pnpm exec prettier -w ${outputPath}`)
+  const file_1 = readFileSync(outputPath, { encoding: 'utf-8' })
+  const placeHoldersRemoved = replace(file_1, [
     [
       // we insert these so that prettier will format codeblocks correctly, but we should get rid of them if we don't need them
       new RegExp(`${PLACEHOLDER_TYPE.trim()} ?`, 'g'),
       '',
     ],
   ])
-
   writeFileSync(outputPath, placeHoldersRemoved)
   return placeHoldersRemoved
 }

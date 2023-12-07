@@ -7,8 +7,11 @@ import {
 /**
  * Run some dirty fixes on the markdown after it has been processed by remark
  */
-export function postprocessingFix(markdown: string, outputPath: string) {
-  const prettiered = runPrettierAndRemovePlaceholderTypes(markdown, outputPath)
+export async function postprocessingFix(markdown: string, outputPath: string) {
+  const prettiered = await runPrettierAndRemovePlaceholderTypes(
+    markdown,
+    outputPath,
+  )
 
   const modelTypes = new Map()
 
@@ -16,7 +19,6 @@ export function postprocessingFix(markdown: string, outputPath: string) {
    * some ugly global replaces
    */
   const placeHoldersRemoved = replace(prettiered, [
-    [new RegExp(`${PLACEHOLDER_TYPE.trim()}( |\n)`, 'g'), ''],
     [/(\s+)(layout\??):(?:.|\n)+?(\1\w+:)/g, '$1$2: Layout$3'],
     [
       /(\n\s*?\| )string\1boolean\1string\[\](?:.|\n)+?\1undefined/g,

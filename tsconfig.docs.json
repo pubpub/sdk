@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noErrorTruncation": true
   },
-  "files": ["./src/docgen/toBeGeneratedTypes.ts"],
+  "files": ["./docgen/toBeGeneratedTypes.ts"],
   "exclude": [
     "**/*.test.ts",
     "**/*.spec.ts",

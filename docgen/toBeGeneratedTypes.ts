@@ -1,27 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Prettify } from '@ts-rest/core'
-import type { PClient as C } from '../lib/client-types.js'
+import type { PClient as C } from '../src/lib/client-types.js'
 
 type PP = Prettify<C>
 
 type P0 = {
   [K in keyof PP]: Prettify<PP[K]>
-}
-
-type DeepP<P0 extends Record<string, any>> = {
-  [K in keyof P0]: P0[K] extends (...args: any[]) => any
-    ? P0[K]
-    : Prettify<{
-        [K2 in keyof P0[K]]: P0[K][K2] extends (...args: any[]) => any
-          ? P0[K][K2]
-          : Prettify<P0[K][K2]>
-      }>
-}
-
-type PrettyClient = Prettify<C>
-
-type SpreadClient = {
-  [K in keyof PrettyClient]: PrettyClient[K]
 }
 
 /**

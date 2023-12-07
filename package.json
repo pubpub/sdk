@@ -17,7 +17,7 @@
     "size": "banal ./dist/index.js",
     "pretest": "pnpm run -C=core build-client-dev",
     "test": "firebase emulators:exec --only database --import ./core/.firebase/default-contents \"jest\"",
-    "generate-docs": "typedoc && tsx src/docgen/formatDocs.mts"
+    "generate-docs": "typedoc && tsx docgen/formatDocs.mts"
   },
   "keywords": [
     "pubpub",

@@ -1,7 +1,7 @@
 {
   // Comments are supported, like tsconfig.json
-  "entryPoints": ["src/docgen/toBeGeneratedTypes.ts"],
-  "out": "src/docgen/docs",
+  "entryPoints": ["docgen/toBeGeneratedTypes.ts"],
+  "out": "docgen/docs",
   "plugin": ["typedoc-plugin-markdown"],
   "compilerOptions": {
     "noErrorTruncation": true

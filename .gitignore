@@ -132,6 +132,6 @@ dist
 # incomplete docxs files
 ~$*
 
-src/docgen/docs
+docgen/docs
 temp.md
 docs.md
