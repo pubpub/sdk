@@ -46,5 +46,7 @@ export async function processFile<
   const TEMP = new URL('../TEMP.md', import.meta.url).pathname
   const postProcessedMarkdown = await postprocessingFix(processed, TEMP)
 
+  rmSync(TEMP)
+
   return postProcessedMarkdown as any
 }

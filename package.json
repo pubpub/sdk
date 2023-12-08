@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
-    "postbuild": "pnpm attw --pack . && size-limit",
+    "postbuild": "npm pack && attw . && size-limit",
     "lint": "tsc",
     "ci": "rm -rf dist && npm run lint && pnpm run test && pnpm run build",
     "prepublish": "pnpm run ci",
