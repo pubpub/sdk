@@ -5,11 +5,11 @@ THIS FILE IS GENERATED. DO NOT EDIT IT DIRECTLY. EDIT THE TEMPLATE IN `docgen/sn
 
 # PubPub SDK
 
-[![npm version](https://img.shields.io/npm/v/pubpub-client.svg)](https://www.npmjs.com/package/@pubpub/sdk)
-[![npm downloads](https://img.shields.io/npm/dm/pubpub-client.svg)](https://www.npmjs.com/package/@pubpub/sdk)
+[![npm version](https://img.shields.io/npm/v/@pubpub/sdk.svg)](https://www.npmjs.com/package/@pubpub/sdk)
+[![npm downloads](https://img.shields.io/npm/dm/@pubpub/sdk.svg)](https://www.npmjs.com/package/@pubpub/sdk)
 ![GitHub license](https://img.shields.io/github/license/pubpub/sdk)
 
-Official Node.js Client for [PubPub](https://pubpub.org/).
+Official Node.js SDK for [PubPub](https://pubpub.org/).
 
 ## Contents
 
@@ -157,11 +157,11 @@ main()
 
 ## Limitations
 
-The following is not possible to do with the Client or through the API in general:
+The following is not possible to do with the SDK or through the API in general:
 
 ### Creating or deleting communities
 
-While technically possible through the API, this is not possible through the Client.
+While technically possible through the API, this is not possible through the SDK.
 We think this would cause too much risk of accidentally deleting a community or creating too many superfluous communities.
 
 ### Creating, deleting, or modifying users
@@ -826,6 +826,8 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       avatar: string | null
@@ -888,6 +890,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -1062,6 +1066,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       avatar: string | null
@@ -1126,6 +1132,8 @@ You need to be **logged in** and have access to this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'avatar'
@@ -1157,6 +1165,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -1196,6 +1206,8 @@ getMany: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       avatar: string | null
@@ -1251,101 +1263,38 @@ You need to be **logged in** and have access to this resource.
         orderBy?: 'ASC' | 'DESC' | undefined
         filter?:
           | {
-              [x: string]: any
-              [x: number]: any
-              [x: symbol]: any
-              createdAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
+              id?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
+              communityId?: string | boolean | string[] | undefined
+              title?: StringFilter
+              avatar?: StringFilter
+              viewHash?: StringFilter
+              editHash?: StringFilter
+              scopeSummaryId?: string | boolean | string[] | undefined
+              slug?: StringFilter
+              isRestricted?: boolean | undefined
+              isPublic?: boolean | undefined
+              metadata?: { [x: string]: any } | undefined
+              kind?:
+                | 'tag'
+                | 'issue'
+                | 'book'
+                | 'conference'
+                | ('tag' | 'issue' | 'book' | 'conference' | null)[]
+                | null
                 | undefined
-              updatedAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
+              doi?: StringFilter
+              readNextPreviewSize?:
+                | 'none'
+                | 'minimal'
+                | 'medium'
+                | 'choose-best'
+                | ('none' | 'minimal' | 'medium' | 'choose-best')[]
                 | undefined
+              layoutAllowsDuplicatePubs?: boolean | undefined
+              pageId?: string | boolean | string[] | undefined
+              crossrefDepositRecordId?: string | boolean | string[] | undefined
             }
           | undefined
         include?:
@@ -1360,6 +1309,8 @@ You need to be **logged in** and have access to this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'avatar'
@@ -1380,101 +1331,38 @@ You need to be **logged in** and have access to this resource.
             )[]
           | undefined
       } & {
-        [x: string]: any
-        [x: number]: any
-        [x: symbol]: any
-        createdAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
+        id?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
+        communityId?: string | boolean | string[] | undefined
+        title?: StringFilter
+        avatar?: StringFilter
+        viewHash?: StringFilter
+        editHash?: StringFilter
+        scopeSummaryId?: string | boolean | string[] | undefined
+        slug?: StringFilter
+        isRestricted?: boolean | undefined
+        isPublic?: boolean | undefined
+        metadata?: { [x: string]: any } | undefined
+        kind?:
+          | 'tag'
+          | 'issue'
+          | 'book'
+          | 'conference'
+          | ('tag' | 'issue' | 'book' | 'conference' | null)[]
+          | null
           | undefined
-        updatedAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
+        doi?: StringFilter
+        readNextPreviewSize?:
+          | 'none'
+          | 'minimal'
+          | 'medium'
+          | 'choose-best'
+          | ('none' | 'minimal' | 'medium' | 'choose-best')[]
           | undefined
+        layoutAllowsDuplicatePubs?: boolean | undefined
+        pageId?: string | boolean | string[] | undefined
+        crossrefDepositRecordId?: string | boolean | string[] | undefined
       })
     | undefined
   cache?: RequestCache | undefined
@@ -1495,6 +1383,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -1707,6 +1597,8 @@ batchCreate: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1757,6 +1649,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -1784,6 +1678,8 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1816,12 +1712,14 @@ You need to be **logged in** and have access to this resource.
   affiliation: null | string
   avatar: null | string
   collectionId: string
+  createdAt: string
   isAuthor: null | boolean
   name: string
   orcid: null | string
   order: number
   roles: null | string[]
   title: null | string
+  updatedAt: string
   userId: null | string
 }
 ```
@@ -1842,6 +1740,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -1869,6 +1769,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1915,6 +1817,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'collectionId'
               | 'title'
               | 'avatar'
@@ -1939,6 +1843,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -1968,6 +1874,8 @@ getMany: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -2013,107 +1921,30 @@ You need to be an **admin** of this community in order to access this resource.
         orderBy?: 'ASC' | 'DESC' | undefined
         filter?:
           | {
-              [x: string]: any
-              [x: number]: any
-              [x: symbol]: any
-              createdAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
+              id?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
+              collectionId?: string | boolean | string[] | undefined
+              title?: StringFilter
+              avatar?: StringFilter
+              name?: StringFilter
+              order?: NumberFilter
+              isAuthor?: boolean | undefined
+              roles?:
+                | ( StringFilter
                   )[]
                 | undefined
-              updatedAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
-                | undefined
+              affiliation?: StringFilter
+              orcid?: StringFilter
+              userId?: string | boolean | string[] | undefined
             }
           | undefined
         include?: ('collection' | 'user')[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'collectionId'
               | 'title'
               | 'avatar'
@@ -2127,101 +1958,22 @@ You need to be an **admin** of this community in order to access this resource.
             )[]
           | undefined
       } & {
-        [x: string]: any
-        [x: number]: any
-        [x: symbol]: any
-        createdAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
+        id?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
+        collectionId?: string | boolean | string[] | undefined
+        title?: StringFilter
+        avatar?: StringFilter
+        name?: StringFilter
+        order?: NumberFilter
+        isAuthor?: boolean | undefined
+        roles?:
+          | ( StringFilter
             )[]
           | undefined
-        updatedAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
-          | undefined
+        affiliation?: StringFilter
+        orcid?: StringFilter
+        userId?: string | boolean | string[] | undefined
       })
     | undefined
   cache?: RequestCache | undefined
@@ -2242,6 +1994,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -2319,6 +2073,8 @@ update: (input, rest?) =>
   Promise<{
     status: 200
     body: {
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       title?: string | null | undefined
       avatar?: string | null | undefined
       name?: string | null | undefined
@@ -2350,6 +2106,7 @@ You need to be **logged in** and have access to this resource.
   affiliation: null | string
   avatar: null | string
   collectionId: string
+  createdAt: string
   id: string
   isAuthor: null | boolean
   name: null | string
@@ -2357,6 +2114,7 @@ You need to be **logged in** and have access to this resource.
   order: number
   roles: null | string[]
   title: null | string
+  updatedAt: string
   userId: null | string
 }
 ```
@@ -2376,6 +2134,8 @@ You need to be **logged in** and have access to this resource.
 Promise<{
   status: 200
   body: {
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     title?: string | null | undefined
     avatar?: string | null | undefined
     name?: string | null | undefined
@@ -2404,6 +2164,8 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string
       collectionId: string
       rank: string
@@ -2451,6 +2213,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string
     collectionId: string
     rank: string
@@ -2473,6 +2237,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -2540,6 +2306,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -2767,6 +2535,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       subdomain: string
       domain: string | null
       title: string
@@ -2895,6 +2665,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     subdomain: string
     domain: string | null
     title: string
@@ -3054,6 +2826,8 @@ getCommunities: (input?) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       subdomain: string
       domain: string | null
       title: string
@@ -3175,6 +2949,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     subdomain: string
     domain: string | null
     title: string
@@ -3949,6 +3725,8 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string | null
       collectionId: string | null
       communityId: string | null
@@ -4001,6 +3779,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string | null
     collectionId: string | null
     communityId: string | null
@@ -4026,6 +3806,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string | null
       collectionId: string | null
       communityId: string | null
@@ -4072,6 +3854,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'pubId'
               | 'collectionId'
               | 'communityId'
@@ -4094,6 +3878,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string | null
     collectionId: string | null
     communityId: string | null
@@ -4123,6 +3909,8 @@ getMany: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string | null
       collectionId: string | null
       communityId: string | null
@@ -4162,107 +3950,31 @@ You need to be an **admin** of this community in order to access this resource.
         orderBy?: 'ASC' | 'DESC' | undefined
         filter?:
           | {
-              [x: string]: any
-              [x: number]: any
-              [x: symbol]: any
-              createdAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
+              id?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
+              pubId?: string | boolean | string[] | undefined
+              collectionId?: string | boolean | string[] | undefined
+              communityId?: string | boolean | string[] | undefined
+              organizationId?: string | boolean | string[] | undefined
+              userId?: string | boolean | string[] | undefined
+              permissions?:
+                | 'view'
+                | 'edit'
+                | 'manage'
+                | 'admin'
+                | ('view' | 'edit' | 'manage' | 'admin')[]
                 | undefined
-              updatedAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
-                | undefined
+              isOwner?: boolean | undefined
+              subscribedToActivityDigest?: boolean | undefined
             }
           | undefined
         include?: ('community' | 'collection' | 'pub' | 'user')[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'pubId'
               | 'collectionId'
               | 'communityId'
@@ -4274,101 +3986,23 @@ You need to be an **admin** of this community in order to access this resource.
             )[]
           | undefined
       } & {
-        [x: string]: any
-        [x: number]: any
-        [x: symbol]: any
-        createdAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
+        id?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
+        pubId?: string | boolean | string[] | undefined
+        collectionId?: string | boolean | string[] | undefined
+        communityId?: string | boolean | string[] | undefined
+        organizationId?: string | boolean | string[] | undefined
+        userId?: string | boolean | string[] | undefined
+        permissions?:
+          | 'view'
+          | 'edit'
+          | 'manage'
+          | 'admin'
+          | ('view' | 'edit' | 'manage' | 'admin')[]
           | undefined
-        updatedAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
-          | undefined
+        isOwner?: boolean | undefined
+        subscribedToActivityDigest?: boolean | undefined
       })
     | undefined
   cache?: RequestCache | undefined
@@ -4389,6 +4023,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string | null
     collectionId: string | null
     communityId: string | null
@@ -4538,6 +4174,8 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4594,6 +4232,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -4621,6 +4261,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4665,6 +4307,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -4689,6 +4333,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -4716,6 +4362,8 @@ getMany: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4753,107 +4401,26 @@ You need to be an **admin** of this community in order to access this resource.
         orderBy?: 'ASC' | 'DESC' | undefined
         filter?:
           | {
-              [x: string]: any
-              [x: number]: any
-              [x: symbol]: any
-              createdAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
-                | undefined
-              updatedAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
-                | undefined
+              id?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
+              communityId?: string | boolean | string[] | undefined
+              title?: StringFilter
+              description?: StringFilter
+              avatar?: StringFilter
+              viewHash?: StringFilter
+              slug?: StringFilter
+              isPublic?: boolean | undefined
+              layoutAllowsDuplicatePubs?: boolean | undefined
+              isNarrowWidth?: boolean | undefined
             }
           | undefined
         include?: 'community'[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -4867,101 +4434,18 @@ You need to be an **admin** of this community in order to access this resource.
             )[]
           | undefined
       } & {
-        [x: string]: any
-        [x: number]: any
-        [x: symbol]: any
-        createdAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
-          | undefined
-        updatedAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
-          | undefined
+        id?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
+        communityId?: string | boolean | string[] | undefined
+        title?: StringFilter
+        description?: StringFilter
+        avatar?: StringFilter
+        viewHash?: StringFilter
+        slug?: StringFilter
+        isPublic?: boolean | undefined
+        layoutAllowsDuplicatePubs?: boolean | undefined
+        isNarrowWidth?: boolean | undefined
       })
     | undefined
   cache?: RequestCache | undefined
@@ -4982,6 +4466,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -5064,6 +4550,8 @@ update: (input, rest?) =>
       isPublic?: boolean | undefined
       layout?: Layout
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -5186,6 +4674,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -5395,6 +4885,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -5520,6 +5012,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -5553,6 +5047,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -5657,6 +5153,8 @@ getMany: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -5762,101 +5260,47 @@ You need to be an **admin** of this community in order to access this resource.
         orderBy?: 'ASC' | 'DESC' | undefined
         filter?:
           | {
-              [x: string]: any
-              [x: number]: any
-              [x: symbol]: any
-              createdAt?:
-                | boolean
-                | Date
+              id?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
+              communityId?: string | boolean | string[] | undefined
+              title?: StringFilter
+              description?: StringFilter
+              avatar?: StringFilter
+              viewHash?: StringFilter
+              editHash?: StringFilter
+              scopeSummaryId?: string | boolean | string[] | undefined
+              slug?: StringFilter
+              metadata?:
                 | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
+                    mtg_id?: StringFilter
+                    bibcode?: StringFilter
+                    mtg_presentation_id?: StringFilter
                   }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
                 | undefined
-              updatedAt?:
-                | boolean
-                | Date
+              doi?: StringFilter
+              crossrefDepositRecordId?: string | boolean | string[] | undefined
+              htmlTitle?: StringFilter
+              htmlDescription?: StringFilter
+              customPublishedAt?: DateFilter
+              labels?:
                 | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
+                    id?: string | boolean | string[] | undefined
+                    title?: StringFilter
+                    color?: StringFilter
+                    publicApply?: boolean | undefined
+                  }[]
                 | undefined
+              downloads?:
+                | {
+                    createdAt?: DateFilter
+                    type?: 'formatted' | 'formatted'[] | undefined
+                    url?: StringFilter
+                  }[]
+                | undefined
+              reviewHash?: StringFilter
+              commentHash?: StringFilter
+              draftId?: string | boolean | string[] | undefined
             }
           | undefined
         include?:
@@ -5876,6 +5320,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -5898,101 +5344,47 @@ You need to be an **admin** of this community in order to access this resource.
             )[]
           | undefined
       } & {
-        [x: string]: any
-        [x: number]: any
-        [x: symbol]: any
-        createdAt?:
-          | boolean
-          | Date
+        id?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
+        communityId?: string | boolean | string[] | undefined
+        title?: StringFilter
+        description?: StringFilter
+        avatar?: StringFilter
+        viewHash?: StringFilter
+        editHash?: StringFilter
+        scopeSummaryId?: string | boolean | string[] | undefined
+        slug?: StringFilter
+        metadata?:
           | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
+              mtg_id?: StringFilter
+              bibcode?: StringFilter
+              mtg_presentation_id?: StringFilter
             }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
           | undefined
-        updatedAt?:
-          | boolean
-          | Date
+        doi?: StringFilter
+        crossrefDepositRecordId?: string | boolean | string[] | undefined
+        htmlTitle?: StringFilter
+        htmlDescription?: StringFilter
+        customPublishedAt?: DateFilter
+        labels?:
           | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
+              id?: string | boolean | string[] | undefined
+              title?: StringFilter
+              color?: StringFilter
+              publicApply?: boolean | undefined
+            }[]
           | undefined
+        downloads?:
+          | {
+              createdAt?: DateFilter
+              type?: 'formatted' | 'formatted'[] | undefined
+              url?: StringFilter
+            }[]
+          | undefined
+        reviewHash?: StringFilter
+        commentHash?: StringFilter
+        draftId?: string | boolean | string[] | undefined
       })
     | undefined
   cache?: RequestCache | undefined
@@ -6013,6 +5405,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -6163,6 +5557,8 @@ queryMany: (input, rest?) =>
         string,
         {
           id: string
+          createdAt: string
+          updatedAt: string
           communityId: string
           title: string
           description: string | null
@@ -6289,6 +5685,8 @@ Promise<{
       string,
       {
         id: string
+        createdAt: string
+        updatedAt: string
         communityId: string
         title: string
         description: string | null
@@ -6532,7 +5930,7 @@ Promise<{
 Create a pub and upload a file and import it to a pub.
 
 ```ts
-import: (input, rest?) => Promise<{ status: 201; body: { pub: { id: string; communityId: string; title: string; description: string | null; avatar: string | null; viewHash: string | null; editHash: string | null; scopeSummaryId: string | null; slug: string; metadata: { mtg_id: string; bibcode: string; mtg_presentation_id: string; } | null; doi: string | null; crossrefDepositRecordId: string | null; attributions: { id: string; pubId: string; title: string | null; avatar: string | null; name: string | null; order: number; isAuthor: boolean | null; roles: string[] | null; affiliation: string | null; orcid: string | null; userId: string | null; }[]; htmlTitle: string | null; htmlDescription: string | null; customPublishedAt: string | null; labels: { id: string; title: string; color: string; publicApply: boolean; }[] | null; downloads: { createdAt: string; type: "formatted"; url: string; }[] | null; reviewHash: string | null; commentHash: string | null; draftId: string; }; doc: { type: "doc"; content: any[]; attrs?: Record<string, any> | undefined; }; }; headers: Headers; }>;
+import: (input, rest?) => Promise<{ status: 201; body: { pub: { id: string; createdAt: string; updatedAt: string; communityId: string; title: string; description: string | null; avatar: string | null; viewHash: string | null; editHash: string | null; scopeSummaryId: string | null; slug: string; metadata: { mtg_id: string; bibcode: string; mtg_presentation_id: string; } | null; doi: string | null; crossrefDepositRecordId: string | null; attributions: { id: string; createdAt: string; updatedAt: string; pubId: string; title: string | null; avatar: string | null; name: string | null; order: number; isAuthor: boolean | null; roles: string[] | null; affiliation: string | null; orcid: string | null; userId: string | null; }[]; htmlTitle: string | null; htmlDescription: string | null; customPublishedAt: string | null; labels: { id: string; title: string; color: string; publicApply: boolean; }[] | null; downloads: { createdAt: string; type: "formatted"; url: string; }[] | null; reviewHash: string | null; commentHash: string | null; draftId: string; }; doc: { type: "doc"; content: any[]; attrs?: Record<string, any> | undefined; }; }; headers: Headers; }>;
 ```
 
 ###### Access
@@ -6862,7 +6260,6 @@ update: (input, rest?) =>
   Promise<{
     status: 200
     body: {
-      id?: string | undefined
       title?: string | undefined
       description?: string | null | undefined
       avatar?: string | null | undefined
@@ -6921,7 +6318,6 @@ You need to be **logged in** and have access to this resource.
   editHash: null | string
   htmlDescription: null | string
   htmlTitle: null | string
-  id: string
   labels:
     | null
     | {
@@ -6958,7 +6354,6 @@ You need to be **logged in** and have access to this resource.
 Promise<{
   status: 200
   body: {
-    id?: string | undefined
     title?: string | undefined
     description?: string | null | undefined
     avatar?: string | null | undefined
@@ -7015,6 +6410,8 @@ batchCreate: (input, rest?) =>
     status: 201
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string
       title: string | null
       avatar: string | null
@@ -7065,6 +6462,8 @@ Promise<{
   status: 201
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -7093,6 +6492,8 @@ create: (input, rest?) =>
         status: 201
         body: {
           id: string
+          createdAt: string
+          updatedAt: string
           pubId: string
           title: string | null
           avatar: string | null
@@ -7126,6 +6527,7 @@ You need to be **logged in** and have access to this resource.
 {
   affiliation: null | string
   avatar: null | string
+  createdAt: string
   isAuthor: null | boolean
   name: string
   orcid: null | string
@@ -7133,6 +6535,7 @@ You need to be **logged in** and have access to this resource.
   pubId: string
   roles: null | string[]
   title: null | string
+  updatedAt: string
   userId: null | string
 }
 ```
@@ -7154,6 +6557,8 @@ Promise<
       status: 201
       body: {
         id: string
+        createdAt: string
+        updatedAt: string
         pubId: string
         title: string | null
         avatar: string | null
@@ -7187,6 +6592,8 @@ get: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string
       title: string | null
       avatar: string | null
@@ -7233,6 +6640,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'pubId'
               | 'title'
               | 'avatar'
@@ -7257,6 +6666,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -7286,6 +6697,8 @@ getMany: (args) =>
     status: 200
     body: {
       id: string
+      createdAt: string
+      updatedAt: string
       pubId: string
       title: string | null
       avatar: string | null
@@ -7331,107 +6744,30 @@ You need to be an **admin** of this community in order to access this resource.
         orderBy?: 'ASC' | 'DESC' | undefined
         filter?:
           | {
-              [x: string]: any
-              [x: number]: any
-              [x: symbol]: any
-              createdAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
+              id?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
+              pubId?: string | boolean | string[] | undefined
+              title?: StringFilter
+              avatar?: StringFilter
+              name?: StringFilter
+              order?: NumberFilter
+              isAuthor?: boolean | undefined
+              roles?:
+                | ( StringFilter
                   )[]
                 | undefined
-              updatedAt?:
-                | boolean
-                | Date
-                | {
-                    eq?: Date | undefined
-                    gt?: Date | undefined
-                    gte?: Date | undefined
-                    lt?: Date | undefined
-                    lte?: Date | undefined
-                    ne?: Date | undefined
-                  }
-                | (
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                  )[]
-                | (
-                    | boolean
-                    | Date
-                    | {
-                        eq?: Date | undefined
-                        gt?: Date | undefined
-                        gte?: Date | undefined
-                        lt?: Date | undefined
-                        lte?: Date | undefined
-                        ne?: Date | undefined
-                      }
-                    | (
-                        | Date
-                        | {
-                            eq?: Date | undefined
-                            gt?: Date | undefined
-                            gte?: Date | undefined
-                            lt?: Date | undefined
-                            lte?: Date | undefined
-                            ne?: Date | undefined
-                          }
-                      )[]
-                  )[]
-                | undefined
+              affiliation?: StringFilter
+              orcid?: StringFilter
+              userId?: string | boolean | string[] | undefined
             }
           | undefined
         include?: ('pub' | 'user')[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'pubId'
               | 'title'
               | 'avatar'
@@ -7445,101 +6781,22 @@ You need to be an **admin** of this community in order to access this resource.
             )[]
           | undefined
       } & {
-        [x: string]: any
-        [x: number]: any
-        [x: symbol]: any
-        createdAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
+        id?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
+        pubId?: string | boolean | string[] | undefined
+        title?: StringFilter
+        avatar?: StringFilter
+        name?: StringFilter
+        order?: NumberFilter
+        isAuthor?: boolean | undefined
+        roles?:
+          | ( StringFilter
             )[]
           | undefined
-        updatedAt?:
-          | boolean
-          | Date
-          | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
-            }
-          | (
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-            )[]
-          | (
-              | boolean
-              | Date
-              | {
-                  eq?: Date | undefined
-                  gt?: Date | undefined
-                  gte?: Date | undefined
-                  lt?: Date | undefined
-                  lte?: Date | undefined
-                  ne?: Date | undefined
-                }
-              | (
-                  | Date
-                  | {
-                      eq?: Date | undefined
-                      gt?: Date | undefined
-                      gte?: Date | undefined
-                      lt?: Date | undefined
-                      lte?: Date | undefined
-                      ne?: Date | undefined
-                    }
-                )[]
-            )[]
-          | undefined
+        affiliation?: StringFilter
+        orcid?: StringFilter
+        userId?: string | boolean | string[] | undefined
       })
     | undefined
   cache?: RequestCache | undefined
@@ -7560,6 +6817,8 @@ Promise<{
   status: 200
   body: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -7648,6 +6907,8 @@ update: (input, rest?) =>
     | {
         status: 200
         body: {
+          createdAt?: string | undefined
+          updatedAt?: string | undefined
           title?: string | null | undefined
           avatar?: string | null | undefined
           name?: string | null | undefined
@@ -7680,6 +6941,7 @@ You need to be **logged in** and have access to this resource.
 {
   affiliation: null | string
   avatar: null | string
+  createdAt: string
   id: string
   isAuthor: null | boolean
   name: null | string
@@ -7688,6 +6950,7 @@ You need to be **logged in** and have access to this resource.
   pubId: string
   roles: null | string[]
   title: null | string
+  updatedAt: string
   userId: null | string
 }
 ```
@@ -7708,6 +6971,8 @@ Promise<
   | {
       status: 200
       body: {
+        createdAt?: string | undefined
+        updatedAt?: string | undefined
         title?: string | null | undefined
         avatar?: string | null | undefined
         name?: string | null | undefined
@@ -7760,6 +7025,8 @@ create: (input, rest?) =>
       approvedByTarget: boolean
       targetPub: {
         id: string
+        createdAt: string
+        updatedAt: string
         communityId: string
         title: string
         description: string | null
@@ -7871,6 +7138,8 @@ Promise<{
     approvedByTarget: boolean
     targetPub: {
       id: string
+      createdAt: string
+      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -8731,6 +8000,8 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   pubId: string
   title: string | null
   avatar: string | null
@@ -8749,10 +8020,14 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   pubId: string
   collectionId: string
   collection: {
     id: string
+    createdAt: string
+    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -8772,6 +8047,8 @@ Promise<
     crossrefDepositRecordId: string | null
     attributions: {
       id: string
+      createdAt: string
+      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -8796,6 +8073,8 @@ Promise<
 {
   number: number
   id: string
+  createdAt: string
+  updatedAt: string
   pubId: string | null
   title: string | null
   labels: string[] | null
@@ -8832,6 +8111,8 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   communityId: string
   title: string
   description: string | null
@@ -8849,6 +8130,8 @@ Promise<
   crossrefDepositRecordId: string | null
   attributions: {
     id: string
+    createdAt: string
+    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -8889,6 +8172,8 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   pubId: string | null
   collectionId: string | null
   communityId: string | null
@@ -8905,6 +8190,8 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   communityId: string
   title: string
   description: string | null
@@ -8923,6 +8210,8 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   subdomain: string
   domain: string | null
   title: string
@@ -9021,6 +8310,8 @@ Promise<
 ```ts
 {
   id: string
+  createdAt: string
+  updatedAt: string
   communityId: string
   title: string
   avatar: string | null
@@ -9148,7 +8439,9 @@ pnpm generate-docs
 
 ## TODO
 
+* \[ ] Add CORS
 * \[ ] Add CRUD methods for discussions
+* \[ ] Reorder some methods (make attributions a submethod of pub, for example)
 
 ## FAQ
 

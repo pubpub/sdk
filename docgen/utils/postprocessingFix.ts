@@ -22,7 +22,7 @@ export function postprocessingFix(markdown: string, outputPath: string) {
       ' StringFilter',
     ],
     [/(\n\s*?\| )number\1boolean\1\{(?:.|\n)+?\1undefined/g, ' NumberFilter'],
-    [/(\n\s*?\| )Date\1boolean\1\{(?:.|\n)+?\1undefined/g, ' DateFilter'],
+    [/(\n\s*?\| )boolean\1Date\1\{(?:.|\n)+?\1undefined/g, ' DateFilter'],
     /**
      * This replaces e.g. `collectionPubs?: { /** very big  thing *\/}
      * with

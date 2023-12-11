@@ -6,6 +6,7 @@ import { sleep } from './utils/sleep.js'
 import { resolve } from 'path'
 
 import dotenv from 'dotenv'
+import { PClient } from '../dist/lib/client-types.js'
 
 dotenv.config({
   path: resolve(__dirname, '../../.env'),
@@ -31,7 +32,7 @@ afterAll(async () => {
 })
 
 describe('PubPub', () => {
-  let pubpub: PubPubSDK
+  let pubpub: PClient
   let removed = false
 
   let pub: Awaited<ReturnType<typeof pubpub.pub.create>>['body']
@@ -193,6 +194,24 @@ describe('PubPub', () => {
     expect(pub).toHaveProperty('title')
     expect(pub.title).toBe('gamer lord')
   }, 20000)
+
+  it('can get pubs created in the last minute', async () => {
+    const oneMinuteAgo = new Date(Date.now() - 1000 * 60)
+    const { body } = await pubpub.pub.getMany({
+      query: {
+        createdAt: {
+          gt: oneMinuteAgo,
+        },
+      },
+    })
+
+    console.log({ body })
+    body.forEach((pub) => {
+      expect(Number(new Date(pub.createdAt))).toBeGreaterThan(
+        Number(oneMinuteAgo),
+      )
+    })
+  })
 
   it('should remove a pub', async () => {
     const remove = await pubpub.pub.remove({ pubId: pub.id })
