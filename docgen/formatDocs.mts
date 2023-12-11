@@ -4,6 +4,7 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import remarkToc from 'remark-toc'
+import { replace } from './utils/replace'
 
 const CLIENT_PATH = new URL('./docs/interfaces/Client.md', import.meta.url)
   .pathname
@@ -19,23 +20,25 @@ const COLLECTION_PATH = new URL(
   import.meta.url,
 ).pathname
 
-const README_PATH = new URL('./doc-snippets/readme.md', import.meta.url)
-  .pathname
+const DOCSNIPPETS_PATH = new URL('./doc-snippets/', import.meta.url)
 
-async function formatDocs() {
-  const pub = await processFile({
+const getDocSnippet = (name: string) =>
+  readFileSync(new URL(name, DOCSNIPPETS_PATH).pathname, { encoding: 'utf-8' })
+
+function formatDocs() {
+  const pub = processFile({
     inputPath: PUB_PATH,
     subsectionName: 'pubpub.pub',
     sectionsToExtract: { 'pubpub.pub.doi': true, 'pubpub.pub.text': true },
   })
 
-  const collection = await processFile({
+  const collection = processFile({
     inputPath: COLLECTION_PATH,
     subsectionName: 'pubpub.collection',
     sectionsToExtract: { 'pubpub.collection.doi': true },
   })
 
-  const main = await processFile({
+  const main = processFile({
     inputPath: CLIENT_PATH,
     subsectionName: (name) => (/pubpub\./.test(name) ? name : `pubpub.${name}`),
     replaceSectionWith: [
@@ -47,9 +50,15 @@ async function formatDocs() {
 
   const [, mainClean] = main.match(/## Properties\n((?:.|\n)+)/) ?? []
 
-  const readmeSnippet = readFileSync(README_PATH, { encoding: 'utf-8' })
+  const querying = getDocSnippet('./querying.md')
+  const starting = getDocSnippet('./starting.md')
+  const readmeSnippet = getDocSnippet('./readme.md')
 
-  const readmeWithAPI = readmeSnippet.replace(/## API/, `## API\n${mainClean}`)
+  const readmeReplaced = replace(readmeSnippet, [
+    [/## API/, `## API\n${mainClean}`],
+    [/### Querying/, `${querying}`],
+    [/### Starting/, `${starting}`],
+  ])
 
   const a = unified()
     .use(remarkParse)
@@ -58,7 +67,7 @@ async function formatDocs() {
       maxDepth: 4,
     })
     .use(remarkStringify)
-    .processSync(readmeWithAPI)
+    .processSync(readmeReplaced)
 
   const finalREADME = new URL('../readme.md', import.meta.url).pathname
 

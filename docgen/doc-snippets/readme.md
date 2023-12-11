@@ -53,7 +53,11 @@ We think this would cause too much risk of accidentally deleting a community or 
 
 Too risky.
 
-### Stuff
+## Guides
+
+### Starting
+
+### Querying
 
 ## API
 

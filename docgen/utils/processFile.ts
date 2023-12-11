@@ -6,9 +6,7 @@ import type { ExtractSections, ReplaceSectionWith } from './processMarkdown'
 import { processMarkdown } from './processMarkdown'
 import type { RootContent } from 'mdast'
 
-export async function processFile<
-  E extends ExtractSections | undefined = undefined,
->({
+export function processFile<E extends ExtractSections | undefined = undefined>({
   inputPath,
   sectionsToExtract,
   subsectionName,
@@ -18,13 +16,11 @@ export async function processFile<
   sectionsToExtract?: E
   subsectionName?: string | ((name: string) => string)
   replaceSectionWith?: ReplaceSectionWith[]
-}): Promise<
-  E extends undefined
-    ? string
-    : {
-        [K in keyof E]: RootContent[]
-      }
-> {
+}): E extends undefined
+  ? string
+  : {
+      [K in keyof E]: RootContent[]
+    } {
   const inputMarkdown = readFileSync(inputPath, { encoding: 'utf-8' })
 
   const preprocessedMarkdown = preprocessingFix(inputMarkdown)
@@ -44,7 +40,7 @@ export async function processFile<
   })
 
   const TEMP = new URL('../TEMP.md', import.meta.url).pathname
-  const postProcessedMarkdown = await postprocessingFix(processed, TEMP)
+  const postProcessedMarkdown = postprocessingFix(processed, TEMP)
 
   rmSync(TEMP)
 

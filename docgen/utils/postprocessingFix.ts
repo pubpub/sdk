@@ -7,11 +7,8 @@ import {
 /**
  * Run some dirty fixes on the markdown after it has been processed by remark
  */
-export async function postprocessingFix(markdown: string, outputPath: string) {
-  const prettiered = await runPrettierAndRemovePlaceholderTypes(
-    markdown,
-    outputPath,
-  )
+export function postprocessingFix(markdown: string, outputPath: string) {
+  const prettiered = runPrettierAndRemovePlaceholderTypes(markdown, outputPath)
 
   const modelTypes = new Map()
 
@@ -24,10 +21,13 @@ export async function postprocessingFix(markdown: string, outputPath: string) {
       /(\n\s*?\| )string\1boolean\1string\[\](?:.|\n)+?\1undefined/g,
       ' StringFilter',
     ],
-    [
-      /(\n\s*?\| )number\1boolean\1\{(?:.|\n)+?\1undefined/g,
-      ' NumberOrDateFilter',
-    ],
+    [/(\n\s*?\| )number\1boolean\1\{(?:.|\n)+?\1undefined/g, ' NumberFilter'],
+    [/(\n\s*?\| )Date\1boolean\1\{(?:.|\n)+?\1undefined/g, ' DateFilter'],
+    /**
+     * This replaces e.g. `collectionPubs?: { /** very big  thing *\/}
+     * with
+     * `collectionPubs?: CollectionPub[]`
+     */
     [
       /(\s+?)(draft|review|submission|discussion|page|member|collection|pub|collectionPub|attribution|release|community|user)(s?): (\{\n(?:\n|.)+?\1\})(\[\])?/g,
       (_, space, name: string, s: string, bod: string, arr: string) => {
@@ -60,11 +60,6 @@ export async function postprocessingFix(markdown: string, outputPath: string) {
         return `${space}${name}${s}?: ${upperCaseName}${arr || ''}`
       },
     ],
-    /**
-     * This replaces e.g. `collectionPubs?: { /** very big  thing *\/}
-     * with
-     * `collectionPubs?: CollectionPub[]`
-     */
     // [
     //   /(\w)(\w+)\?:\n(\s+\| )(\{(?:\n|.)+?)\3undefined/g,
 
