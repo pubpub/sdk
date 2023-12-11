@@ -1,6 +1,6 @@
 {
   "name": "@pubpub/sdk",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0",
   "description": "Unofficial PubPub API client for Node.js and the browser.",
   "type": "module",
   "main": "dist/index.cjs",
@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
-    "postbuild": "npm pack && attw . && size-limit",
+    "postbuild": "attw . -P && size-limit",
     "lint": "tsc",
     "ci": "rm -rf dist && npm run lint && pnpm run test && pnpm run build",
     "prepublish": "pnpm run ci",
