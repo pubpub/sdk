@@ -54,7 +54,12 @@ export type ProxiedClient<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? K extends GetRequests
       ? // don't proxy get requests
-        T[K]
+        T[K] extends (...args: infer A) => infer R
+        ? A[0] extends { params: any }
+          ? //  ? Q extends Partial<Q>
+            (input: A[0]) => R
+          : (input?: A[0]) => R
+        : T[K]
       : ProxiedFunction<T[K]>
     : T[K] extends object
       ? ProxiedClient<T[K]>

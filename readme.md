@@ -774,7 +774,7 @@ Promise<
 Logout and clear authentication cookie
 
 ```ts
-logout: (args?) => Promise<{ status: 200; body: 'success'; headers: Headers }>
+logout: (input?) => Promise<{ status: 200; body: 'success'; headers: Headers }>
 ```
 
 ##### Access
@@ -787,7 +787,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args?`
+`input?`
 
 ```ts
 {
@@ -826,8 +826,6 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       avatar: string | null
@@ -845,6 +843,8 @@ create: (input, rest?) =>
       layoutAllowsDuplicatePubs: boolean
       pageId: string | null
       crossrefDepositRecordId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -890,8 +890,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -909,6 +907,8 @@ Promise<{
     layoutAllowsDuplicatePubs: boolean
     pageId: string | null
     crossrefDepositRecordId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -1061,13 +1061,11 @@ Promise<
 Get a collection by it's id or slug
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       avatar: string | null
@@ -1085,6 +1083,8 @@ get: (args) =>
       layoutAllowsDuplicatePubs: boolean
       pageId: string | null
       crossrefDepositRecordId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       attributions?: Attribution[]
       collectionPubs?: CollectionPub[]
       members?: Member[]
@@ -1105,7 +1105,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -1132,8 +1132,6 @@ You need to be **logged in** and have access to this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'avatar'
@@ -1165,8 +1163,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -1184,6 +1180,8 @@ Promise<{
     layoutAllowsDuplicatePubs: boolean
     pageId: string | null
     crossrefDepositRecordId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     attributions?: Attribution[]
     collectionPubs?: CollectionPub[]
     members?: Member[]
@@ -1201,13 +1199,11 @@ Promise<{
 Get many collections
 
 ```ts
-getMany: (args) =>
+getMany: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       avatar: string | null
@@ -1225,6 +1221,8 @@ getMany: (args) =>
       layoutAllowsDuplicatePubs: boolean
       pageId: string | null
       crossrefDepositRecordId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       attributions?: Attribution[]
       collectionPubs?: CollectionPub[]
       members?: Member[]
@@ -1245,7 +1243,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -1264,8 +1262,6 @@ You need to be **logged in** and have access to this resource.
         filter?:
           | {
               id?: string | boolean | string[] | undefined
-              createdAt?: DateFilter
-              updatedAt?: DateFilter
               communityId?: string | boolean | string[] | undefined
               title?: StringFilter
               avatar?: StringFilter
@@ -1309,8 +1305,6 @@ You need to be **logged in** and have access to this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'avatar'
@@ -1332,8 +1326,6 @@ You need to be **logged in** and have access to this resource.
           | undefined
       } & {
         id?: string | boolean | string[] | undefined
-        createdAt?: DateFilter
-        updatedAt?: DateFilter
         communityId?: string | boolean | string[] | undefined
         title?: StringFilter
         avatar?: StringFilter
@@ -1383,8 +1375,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -1402,6 +1392,8 @@ Promise<{
     layoutAllowsDuplicatePubs: boolean
     pageId: string | null
     crossrefDepositRecordId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     attributions?: Attribution[]
     collectionPubs?: CollectionPub[]
     members?: Member[]
@@ -1597,8 +1589,6 @@ batchCreate: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1609,6 +1599,8 @@ batchCreate: (input, rest?) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }[]
     headers: Headers
   }>
@@ -1649,8 +1641,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -1661,6 +1651,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }[]
   headers: Headers
 }>
@@ -1678,8 +1670,6 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1690,6 +1680,8 @@ create: (input, rest?) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -1740,8 +1732,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -1752,6 +1742,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -1764,13 +1756,11 @@ Promise<{
 Get a collection attribution
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1781,6 +1771,8 @@ get: (args) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       collection?: Collection
       user?: User
     }
@@ -1798,7 +1790,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -1817,8 +1809,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'collectionId'
               | 'title'
               | 'avatar'
@@ -1843,8 +1833,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -1855,6 +1843,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     collection?: Collection
     user?: User
   }
@@ -1869,13 +1859,11 @@ Promise<{
 Get multiple collection attributions. You are limited to attributions in your community.
 
 ```ts
-getMany: (args) =>
+getMany: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -1886,6 +1874,8 @@ getMany: (args) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       collection?: Collection
       user?: User
     }[]
@@ -1903,7 +1893,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -1922,8 +1912,6 @@ You need to be an **admin** of this community in order to access this resource.
         filter?:
           | {
               id?: string | boolean | string[] | undefined
-              createdAt?: DateFilter
-              updatedAt?: DateFilter
               collectionId?: string | boolean | string[] | undefined
               title?: StringFilter
               avatar?: StringFilter
@@ -1943,8 +1931,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'collectionId'
               | 'title'
               | 'avatar'
@@ -1959,8 +1945,6 @@ You need to be an **admin** of this community in order to access this resource.
           | undefined
       } & {
         id?: string | boolean | string[] | undefined
-        createdAt?: DateFilter
-        updatedAt?: DateFilter
         collectionId?: string | boolean | string[] | undefined
         title?: StringFilter
         avatar?: StringFilter
@@ -1994,8 +1978,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     collectionId: string
     title: string | null
     avatar: string | null
@@ -2006,6 +1988,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     collection?: Collection
     user?: User
   }[]
@@ -2164,13 +2148,13 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string
       collectionId: string
       rank: string
       contextHint: string | null
       pubRank: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -2213,13 +2197,13 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string
     collectionId: string
     rank: string
     contextHint: string | null
     pubRank: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -2232,13 +2216,11 @@ Promise<{
 Get the pubs associated with a collection
 
 ```ts
-get: (args) =>
+get: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -2264,6 +2246,8 @@ get: (args) =>
       reviewHash: string | null
       commentHash: string | null
       draftId: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }[]
     headers: Headers
   }>
@@ -2279,7 +2263,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -2306,8 +2290,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -2344,6 +2326,8 @@ Promise<{
     reviewHash: string | null
     commentHash: string | null
     draftId: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }[]
   headers: Headers
 }>
@@ -2530,13 +2514,11 @@ Promise<{
 Get a community
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       subdomain: string
       domain: string | null
       title: string
@@ -2627,6 +2609,8 @@ get: (args) =>
       organizationId: string | null
       scopeSummaryId: string | null
       accentTextColor: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -2642,7 +2626,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -2665,8 +2649,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     subdomain: string
     domain: string | null
     title: string
@@ -2809,6 +2791,8 @@ Promise<{
     organizationId: string | null
     scopeSummaryId: string | null
     accentTextColor: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -2826,8 +2810,6 @@ getCommunities: (input?) =>
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       subdomain: string
       domain: string | null
       title: string
@@ -2918,6 +2900,8 @@ getCommunities: (input?) =>
       organizationId: string | null
       scopeSummaryId: string | null
       accentTextColor: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }[]
     headers: Headers
   }>
@@ -2949,8 +2933,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     subdomain: string
     domain: string | null
     title: string
@@ -3093,6 +3075,8 @@ Promise<{
     organizationId: string | null
     scopeSummaryId: string | null
     accentTextColor: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }[]
   headers: Headers
 }>
@@ -3725,8 +3709,6 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string | null
       collectionId: string | null
       communityId: string | null
@@ -3735,6 +3717,8 @@ create: (input, rest?) =>
       permissions: 'view' | 'edit' | 'manage' | 'admin'
       isOwner: boolean | null
       subscribedToActivityDigest: boolean
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -3779,8 +3763,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string | null
     collectionId: string | null
     communityId: string | null
@@ -3789,6 +3771,8 @@ Promise<{
     permissions: 'view' | 'edit' | 'manage' | 'admin'
     isOwner: boolean | null
     subscribedToActivityDigest: boolean
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -3801,13 +3785,11 @@ Promise<{
 Get a member
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string | null
       collectionId: string | null
       communityId: string | null
@@ -3816,6 +3798,8 @@ get: (args) =>
       permissions: 'view' | 'edit' | 'manage' | 'admin'
       isOwner: boolean | null
       subscribedToActivityDigest: boolean
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       user?: User
       community?: Community
       pub?: Pub
@@ -3835,7 +3819,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -3854,8 +3838,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'pubId'
               | 'collectionId'
               | 'communityId'
@@ -3878,8 +3860,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string | null
     collectionId: string | null
     communityId: string | null
@@ -3888,6 +3868,8 @@ Promise<{
     permissions: 'view' | 'edit' | 'manage' | 'admin'
     isOwner: boolean | null
     subscribedToActivityDigest: boolean
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     user?: User
     community?: Community
     pub?: Pub
@@ -3904,13 +3886,11 @@ Promise<{
 Get many members
 
 ```ts
-getMany: (args) =>
+getMany: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string | null
       collectionId: string | null
       communityId: string | null
@@ -3919,6 +3899,8 @@ getMany: (args) =>
       permissions: 'view' | 'edit' | 'manage' | 'admin'
       isOwner: boolean | null
       subscribedToActivityDigest: boolean
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       user?: User
       community?: Community
       pub?: Pub
@@ -3938,7 +3920,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -3951,8 +3933,6 @@ You need to be an **admin** of this community in order to access this resource.
         filter?:
           | {
               id?: string | boolean | string[] | undefined
-              createdAt?: DateFilter
-              updatedAt?: DateFilter
               pubId?: string | boolean | string[] | undefined
               collectionId?: string | boolean | string[] | undefined
               communityId?: string | boolean | string[] | undefined
@@ -3973,8 +3953,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'pubId'
               | 'collectionId'
               | 'communityId'
@@ -3987,8 +3965,6 @@ You need to be an **admin** of this community in order to access this resource.
           | undefined
       } & {
         id?: string | boolean | string[] | undefined
-        createdAt?: DateFilter
-        updatedAt?: DateFilter
         pubId?: string | boolean | string[] | undefined
         collectionId?: string | boolean | string[] | undefined
         communityId?: string | boolean | string[] | undefined
@@ -4023,8 +3999,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string | null
     collectionId: string | null
     communityId: string | null
@@ -4033,6 +4007,8 @@ Promise<{
     permissions: 'view' | 'edit' | 'manage' | 'admin'
     isOwner: boolean | null
     subscribedToActivityDigest: boolean
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     user?: User
     community?: Community
     pub?: Pub
@@ -4174,8 +4150,6 @@ create: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4186,6 +4160,8 @@ create: (input, rest?) =>
       layout: Layout
       layoutAllowsDuplicatePubs: boolean
       isNarrowWidth: boolean | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -4232,8 +4208,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -4244,6 +4218,8 @@ Promise<{
     layout: Layout
     layoutAllowsDuplicatePubs: boolean
     isNarrowWidth: boolean | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -4256,13 +4232,11 @@ Promise<{
 Get a page by it's slug or id.
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4273,6 +4247,8 @@ get: (args) =>
       layout: Layout
       layoutAllowsDuplicatePubs: boolean
       isNarrowWidth: boolean | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -4288,7 +4264,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -4307,8 +4283,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -4333,8 +4307,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -4345,6 +4317,8 @@ Promise<{
     layout: Layout
     layoutAllowsDuplicatePubs: boolean
     isNarrowWidth: boolean | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -4357,13 +4331,11 @@ Promise<{
 Get many pages
 
 ```ts
-getMany: (args) =>
+getMany: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4374,6 +4346,8 @@ getMany: (args) =>
       layout: Layout
       layoutAllowsDuplicatePubs: boolean
       isNarrowWidth: boolean | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }[]
     headers: Headers
   }>
@@ -4389,7 +4363,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -4402,8 +4376,6 @@ You need to be an **admin** of this community in order to access this resource.
         filter?:
           | {
               id?: string | boolean | string[] | undefined
-              createdAt?: DateFilter
-              updatedAt?: DateFilter
               communityId?: string | boolean | string[] | undefined
               title?: StringFilter
               description?: StringFilter
@@ -4419,8 +4391,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -4435,8 +4405,6 @@ You need to be an **admin** of this community in order to access this resource.
           | undefined
       } & {
         id?: string | boolean | string[] | undefined
-        createdAt?: DateFilter
-        updatedAt?: DateFilter
         communityId?: string | boolean | string[] | undefined
         title?: StringFilter
         description?: StringFilter
@@ -4466,8 +4434,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -4478,6 +4444,8 @@ Promise<{
     layout: Layout
     layoutAllowsDuplicatePubs: boolean
     isNarrowWidth: boolean | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }[]
   headers: Headers
 }>
@@ -4550,8 +4518,6 @@ update: (input, rest?) =>
       isPublic?: boolean | undefined
       layout?: Layout
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4577,6 +4543,8 @@ update: (input, rest?) =>
       reviewHash: string | null
       commentHash: string | null
       draftId: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
     headers: Headers
   }>
@@ -4674,8 +4642,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -4712,6 +4678,8 @@ Promise<{
     reviewHash: string | null
     commentHash: string | null
     draftId: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   headers: Headers
 }>
@@ -4880,13 +4848,11 @@ Get a pub by it's slug or id.
 The slug is the thing after `/pub/` in the URL, but before `/release` or `/draft`.
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -4912,6 +4878,8 @@ get: (args) =>
       reviewHash: string | null
       commentHash: string | null
       draftId: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       attributions?: Attribution[]
       collectionPubs?: CollectionPub[]
       community?: Community
@@ -4980,7 +4948,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -5012,8 +4980,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -5047,8 +5013,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -5085,6 +5049,8 @@ Promise<{
     reviewHash: string | null
     commentHash: string | null
     draftId: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     attributions?: Attribution[]
     collectionPubs?: CollectionPub[]
     community?: Community
@@ -5148,13 +5114,11 @@ Promise<{
 Get many pubs
 
 ```ts
-getMany: (args) =>
+getMany: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -5180,6 +5144,8 @@ getMany: (args) =>
       reviewHash: string | null
       commentHash: string | null
       draftId: string
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       attributions?: Attribution[]
       collectionPubs?: CollectionPub[]
       community?: Community
@@ -5248,7 +5214,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -5261,8 +5227,6 @@ You need to be an **admin** of this community in order to access this resource.
         filter?:
           | {
               id?: string | boolean | string[] | undefined
-              createdAt?: DateFilter
-              updatedAt?: DateFilter
               communityId?: string | boolean | string[] | undefined
               title?: StringFilter
               description?: StringFilter
@@ -5320,8 +5284,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -5345,8 +5307,6 @@ You need to be an **admin** of this community in order to access this resource.
           | undefined
       } & {
         id?: string | boolean | string[] | undefined
-        createdAt?: DateFilter
-        updatedAt?: DateFilter
         communityId?: string | boolean | string[] | undefined
         title?: StringFilter
         description?: StringFilter
@@ -5405,8 +5365,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     description: string | null
@@ -5443,6 +5401,8 @@ Promise<{
     reviewHash: string | null
     commentHash: string | null
     draftId: string
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     attributions?: Attribution[]
     collectionPubs?: CollectionPub[]
     community?: Community
@@ -5557,8 +5517,6 @@ queryMany: (input, rest?) =>
         string,
         {
           id: string
-          createdAt: string
-          updatedAt: string
           communityId: string
           title: string
           description: string | null
@@ -5597,6 +5555,8 @@ queryMany: (input, rest?) =>
           releases?: Release[]
           isRelease: boolean
           releaseNumber: number | null
+          createdAt?: string | undefined
+          updatedAt?: string | undefined
         }
       >
       pubIds: string[]
@@ -5685,8 +5645,6 @@ Promise<{
       string,
       {
         id: string
-        createdAt: string
-        updatedAt: string
         communityId: string
         title: string
         description: string | null
@@ -5729,6 +5687,8 @@ Promise<{
         releases?: Release[]
         isRelease: boolean
         releaseNumber: number | null
+        createdAt?: string | undefined
+        updatedAt?: string | undefined
       }
     >
     pubIds: string[]
@@ -5871,7 +5831,7 @@ Promise<{
 Get the text of a Pub as a ProseMirror document
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
@@ -5893,7 +5853,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ###### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -5930,7 +5890,7 @@ Promise<{
 Create a pub and upload a file and import it to a pub.
 
 ```ts
-import: (input, rest?) => Promise<{ status: 201; body: { pub: { id: string; createdAt: string; updatedAt: string; communityId: string; title: string; description: string | null; avatar: string | null; viewHash: string | null; editHash: string | null; scopeSummaryId: string | null; slug: string; metadata: { mtg_id: string; bibcode: string; mtg_presentation_id: string; } | null; doi: string | null; crossrefDepositRecordId: string | null; attributions: { id: string; createdAt: string; updatedAt: string; pubId: string; title: string | null; avatar: string | null; name: string | null; order: number; isAuthor: boolean | null; roles: string[] | null; affiliation: string | null; orcid: string | null; userId: string | null; }[]; htmlTitle: string | null; htmlDescription: string | null; customPublishedAt: string | null; labels: { id: string; title: string; color: string; publicApply: boolean; }[] | null; downloads: { createdAt: string; type: "formatted"; url: string; }[] | null; reviewHash: string | null; commentHash: string | null; draftId: string; }; doc: { type: "doc"; content: any[]; attrs?: Record<string, any> | undefined; }; }; headers: Headers; }>;
+import: (input, rest?) => Promise<{ status: 201; body: { pub: { id: string; communityId: string; title: string; description: string | null; avatar: string | null; viewHash: string | null; editHash: string | null; scopeSummaryId: string | null; slug: string; metadata: { mtg_id: string; bibcode: string; mtg_presentation_id: string; } | null; doi: string | null; crossrefDepositRecordId: string | null; attributions: { id: string; pubId: string; title: string | null; avatar: string | null; name: string | null; order: number; isAuthor: boolean | null; roles: string[] | null; affiliation: string | null; orcid: string | null; userId: string | null; createdAt?: string | undefined; updatedAt?: string | undefined; }[]; htmlTitle: string | null; htmlDescription: string | null; customPublishedAt: string | null; labels: { id: string; title: string; color: string; publicApply: boolean; }[] | null; downloads: { createdAt: string; type: "formatted"; url: string; }[] | null; reviewHash: string | null; commentHash: string | null; draftId: string; createdAt?: string | undefined; updatedAt?: string | undefined; }; doc: { type: "doc"; content: any[]; attrs?: Record<string, any> | undefined; }; }; headers: Headers; }>;
 ```
 
 ###### Access
@@ -6410,8 +6370,6 @@ batchCreate: (input, rest?) =>
     status: 201
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string
       title: string | null
       avatar: string | null
@@ -6422,6 +6380,8 @@ batchCreate: (input, rest?) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }[]
     headers: Headers
   }>
@@ -6462,8 +6422,6 @@ Promise<{
   status: 201
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -6474,6 +6432,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }[]
   headers: Headers
 }>
@@ -6492,8 +6452,6 @@ create: (input, rest?) =>
         status: 201
         body: {
           id: string
-          createdAt: string
-          updatedAt: string
           pubId: string
           title: string | null
           avatar: string | null
@@ -6504,6 +6462,8 @@ create: (input, rest?) =>
           affiliation: string | null
           orcid: string | null
           userId: string | null
+          createdAt?: string | undefined
+          updatedAt?: string | undefined
         }
         headers: Headers
       }
@@ -6557,8 +6517,6 @@ Promise<
       status: 201
       body: {
         id: string
-        createdAt: string
-        updatedAt: string
         pubId: string
         title: string | null
         avatar: string | null
@@ -6569,6 +6527,8 @@ Promise<
         affiliation: string | null
         orcid: string | null
         userId: string | null
+        createdAt?: string | undefined
+        updatedAt?: string | undefined
       }
       headers: Headers
     }
@@ -6587,13 +6547,11 @@ Promise<
 Get a pub attribution
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string
       title: string | null
       avatar: string | null
@@ -6604,6 +6562,8 @@ get: (args) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       pub?: Pub
       user?: User
     }
@@ -6621,7 +6581,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -6640,8 +6600,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'pubId'
               | 'title'
               | 'avatar'
@@ -6666,8 +6624,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -6678,6 +6634,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     pub?: Pub
     user?: User
   }
@@ -6692,13 +6650,11 @@ Promise<{
 Get multiple pub attributions. You are limited to attributions in your community.
 
 ```ts
-getMany: (args) =>
+getMany: (input?) =>
   Promise<{
     status: 200
     body: {
       id: string
-      createdAt: string
-      updatedAt: string
       pubId: string
       title: string | null
       avatar: string | null
@@ -6709,6 +6665,8 @@ getMany: (args) =>
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
       pub?: Pub
       user?: User
     }[]
@@ -6726,7 +6684,7 @@ You need to be an **admin** of this community in order to access this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -6745,8 +6703,6 @@ You need to be an **admin** of this community in order to access this resource.
         filter?:
           | {
               id?: string | boolean | string[] | undefined
-              createdAt?: DateFilter
-              updatedAt?: DateFilter
               pubId?: string | boolean | string[] | undefined
               title?: StringFilter
               avatar?: StringFilter
@@ -6766,8 +6722,6 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
-              | 'createdAt'
-              | 'updatedAt'
               | 'pubId'
               | 'title'
               | 'avatar'
@@ -6782,8 +6736,6 @@ You need to be an **admin** of this community in order to access this resource.
           | undefined
       } & {
         id?: string | boolean | string[] | undefined
-        createdAt?: DateFilter
-        updatedAt?: DateFilter
         pubId?: string | boolean | string[] | undefined
         title?: StringFilter
         avatar?: StringFilter
@@ -6817,8 +6769,6 @@ Promise<{
   status: 200
   body: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -6829,6 +6779,8 @@ Promise<{
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
     pub?: Pub
     user?: User
   }[]
@@ -7025,8 +6977,6 @@ create: (input, rest?) =>
       approvedByTarget: boolean
       targetPub: {
         id: string
-        createdAt: string
-        updatedAt: string
         communityId: string
         title: string
         description: string | null
@@ -7057,6 +7007,8 @@ create: (input, rest?) =>
         commentHash: string | null
         draftId: string
         releases?: Release[]
+        createdAt?: string | undefined
+        updatedAt?: string | undefined
       }
     }
     headers: Headers
@@ -7138,8 +7090,6 @@ Promise<{
     approvedByTarget: boolean
     targetPub: {
       id: string
-      createdAt: string
-      updatedAt: string
       communityId: string
       title: string
       description: string | null
@@ -7179,6 +7129,8 @@ Promise<{
       commentHash: string | null
       draftId: string
       releases?: Release[]
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }
   }
   headers: Headers
@@ -7192,7 +7144,7 @@ Promise<{
 Get a pubEdge by id
 
 ```ts
-get: (args) =>
+get: (input) =>
   Promise<{
     status: 200
     body: {
@@ -7228,7 +7180,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args`
+`input`
 
 ```ts
 {
@@ -7927,7 +7879,7 @@ Get the status of a worker task. This is used to poll for the status of a worker
 as an import or export.
 
 ```ts
-get: (args) =>
+get: (input?) =>
   Promise<
     | {
         status: 201
@@ -7953,7 +7905,7 @@ You need to be **logged in** and have access to this resource.
 
 ##### Parameters
 
-`args`
+`input?`
 
 ```ts
 {
@@ -8000,8 +7952,6 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   pubId: string
   title: string | null
   avatar: string | null
@@ -8012,6 +7962,8 @@ Promise<
   affiliation: string | null
   orcid: string | null
   userId: string | null
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8020,14 +7972,10 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   pubId: string
   collectionId: string
   collection: {
     id: string
-    createdAt: string
-    updatedAt: string
     communityId: string
     title: string
     avatar: string | null
@@ -8047,8 +7995,6 @@ Promise<
     crossrefDepositRecordId: string | null
     attributions: {
       id: string
-      createdAt: string
-      updatedAt: string
       collectionId: string
       title: string | null
       avatar: string | null
@@ -8059,11 +8005,17 @@ Promise<
       affiliation: string | null
       orcid: string | null
       userId: string | null
+      createdAt?: string | undefined
+      updatedAt?: string | undefined
     }[]
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }
   rank: string
   contextHint: string | null
   pubRank: string
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8073,8 +8025,6 @@ Promise<
 {
   number: number
   id: string
-  createdAt: string
-  updatedAt: string
   pubId: string | null
   title: string | null
   labels: string[] | null
@@ -8084,6 +8034,8 @@ Promise<
   visibilityId: string
   anchorId: string | null
   commenterId: string | null
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8111,8 +8063,6 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   communityId: string
   title: string
   description: string | null
@@ -8130,8 +8080,6 @@ Promise<
   crossrefDepositRecordId: string | null
   attributions: {
     id: string
-    createdAt: string
-    updatedAt: string
     pubId: string
     title: string | null
     avatar: string | null
@@ -8142,6 +8090,8 @@ Promise<
     affiliation: string | null
     orcid: string | null
     userId: string | null
+    createdAt?: string | undefined
+    updatedAt?: string | undefined
   }[]
   htmlTitle: string | null
   htmlDescription: string | null
@@ -8164,6 +8114,8 @@ Promise<
   reviewHash: string | null
   commentHash: string | null
   draftId: string
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8172,8 +8124,6 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   pubId: string | null
   collectionId: string | null
   communityId: string | null
@@ -8182,6 +8132,8 @@ Promise<
   permissions: 'view' | 'edit' | 'manage' | 'admin'
   isOwner: boolean | null
   subscribedToActivityDigest: boolean
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8190,8 +8142,6 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   communityId: string
   title: string
   description: string | null
@@ -8202,6 +8152,8 @@ Promise<
   layout: Layout
   layoutAllowsDuplicatePubs: boolean
   isNarrowWidth: boolean | null
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8210,8 +8162,6 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   subdomain: string
   domain: string | null
   title: string
@@ -8302,6 +8252,8 @@ Promise<
   organizationId: string | null
   scopeSummaryId: string | null
   accentTextColor: string
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 
@@ -8310,8 +8262,6 @@ Promise<
 ```ts
 {
   id: string
-  createdAt: string
-  updatedAt: string
   communityId: string
   title: string
   avatar: string | null
@@ -8329,6 +8279,8 @@ Promise<
   layoutAllowsDuplicatePubs: boolean
   pageId: string | null
   crossrefDepositRecordId: string | null
+  createdAt?: string | undefined
+  updatedAt?: string | undefined
 }
 ```
 

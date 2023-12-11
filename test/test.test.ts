@@ -1,4 +1,3 @@
-// import { describe, it, beforeAll, expect, afterAll } from 'vitest'
 import type { PubPubSDK } from '../src/lib/client.js'
 import { setupSDK } from './utils/setup.js'
 import app from '../core/server/server.js'
@@ -6,7 +5,6 @@ import { sleep } from './utils/sleep.js'
 import { resolve } from 'path'
 
 import dotenv from 'dotenv'
-import { PClient } from '../dist/lib/client-types.js'
 
 dotenv.config({
   path: resolve(__dirname, '../../.env'),
@@ -32,7 +30,7 @@ afterAll(async () => {
 })
 
 describe('PubPub', () => {
-  let pubpub: PClient
+  let pubpub: PubPubSDK
   let removed = false
 
   let pub: Awaited<ReturnType<typeof pubpub.pub.create>>['body']
@@ -155,11 +153,10 @@ describe('PubPub', () => {
       createdAttribution.id,
     )
 
-    const { body: removedAttribution } =
-      await pubpub.collectionAttribution.remove({
-        id: createdAttribution.id,
-        collectionId: collection.id,
-      })
+    await pubpub.collectionAttribution.remove({
+      id: createdAttribution.id,
+      collectionId: collection.id,
+    })
   }, 10000)
 
   it('should be able to modify a pub', async () => {
@@ -172,7 +169,7 @@ describe('PubPub', () => {
     expect(modded.body).toHaveProperty('description')
   }, 10000)
 
-  it('should be able to update a community', async () => {})
+  // it('should be able to update a community', async () => {})
 
   it('should be able to import a pub', async () => {
     const { body } = await pubpub.pub.text.import({
@@ -186,14 +183,30 @@ describe('PubPub', () => {
           filename: 'hey.txt',
         },
       ],
-      title: 'gamer lord',
+      title: 'imported pub',
     })
     const { doc, pub } = body
 
     expect(JSON.stringify(doc)?.includes('heya')).toBeTruthy()
     expect(pub).toHaveProperty('title')
-    expect(pub.title).toBe('gamer lord')
+    expect(pub.title).toBe('imported pub')
   }, 20000)
+
+  it('should be able to query things', async () => {
+    const { body: pubs } = await pubpub.pub.getMany({
+      query: {
+        title: {
+          contains: 'imported',
+        },
+      },
+    })
+
+    const first = pubs[0]
+    expect(first).toHaveProperty('title')
+    expect(first.title).toBe('imported pub')
+
+    await pubpub.pub.remove({ pubId: first.id })
+  })
 
   it('can get pubs created in the last minute', async () => {
     const oneMinuteAgo = new Date(Date.now() - 1000 * 60)
@@ -205,9 +218,8 @@ describe('PubPub', () => {
       },
     })
 
-    console.log({ body })
     body.forEach((pub) => {
-      expect(Number(new Date(pub.createdAt))).toBeGreaterThan(
+      expect(Number(new Date(pub.createdAt!))).toBeGreaterThan(
         Number(oneMinuteAgo),
       )
     })
