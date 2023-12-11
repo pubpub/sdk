@@ -9,20 +9,15 @@ const IMPORT_TEST_COMMUNITY_URL =
   process.env.IMPORT_TEST_COMMUNITY_URL ??
   ('https://client-test.pubpub.org' as const)
 
-const IMPORT_TEST_COMMUNITY_ID =
-  process.env.IMPORT_TEST_COMMUNITY_ID ??
-  ('94873d35-f9ca-4e2d-9c33-681dc893d302' as const)
-
 describe('imports', () => {
   let pubpub: PubPubSDK
   let pub = {} as Awaited<ReturnType<typeof pubpub.pub.create>>['body']
 
   let removed = false
-  let draftPath = ''
 
   beforeAll(async () => {
     // eslint-disable-next-line no-extra-semi
-    ;({ pub, pubpub, draftPath } = await setupSDK({
+    ;({ pub, pubpub } = await setupSDK({
       url: IMPORT_TEST_COMMUNITY_URL,
       email: process.env.IMPORT_TEST_EMAIL ?? process.env.EMAIL,
       password: process.env.IMPORT_TEST_PASSWORD ?? process.env.PASSWORD,
@@ -55,9 +50,8 @@ describe('imports', () => {
   it('should be able to export a file, and that file should include the manually added test text', async () => {
     try {
       const exported = await pubpub.exportPub({
-        slug: draftPath.replace('/draft', ''),
         format: 'markdown',
-        pubId: pub.id,
+        pubId: pub.id!,
       })
 
       expect(
