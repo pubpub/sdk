@@ -1,10 +1,10 @@
 # PubPub SDK
 
-[![npm version](https://img.shields.io/npm/v/pubpub-client.svg)](https://www.npmjs.com/package/@pubpub/sdk)
-[![npm downloads](https://img.shields.io/npm/dm/pubpub-client.svg)](https://www.npmjs.com/package/@pubpub/sdk)
+[![npm version](https://img.shields.io/npm/v/@pubpub/sdk.svg)](https://www.npmjs.com/package/@pubpub/sdk)
+[![npm downloads](https://img.shields.io/npm/dm/@pubpub/sdk.svg)](https://www.npmjs.com/package/@pubpub/sdk)
 ![GitHub license](https://img.shields.io/github/license/pubpub/sdk)
 
-Official Node.js Client for [PubPub](https://pubpub.org/).
+Official Node.js SDK for [PubPub](https://pubpub.org/).
 
 ## Contents
 
@@ -42,11 +42,11 @@ main()
 
 ## Limitations
 
-The following is not possible to do with the Client or through the API in general:
+The following is not possible to do with the SDK or through the API in general:
 
 ### Creating or deleting communities
 
-While technically possible through the API, this is not possible through the Client.
+While technically possible through the API, this is not possible through the SDK.
 We think this would cause too much risk of accidentally deleting a community or creating too many superfluous communities.
 
 ### Creating, deleting, or modifying users
@@ -94,7 +94,9 @@ pnpm generate-docs
 
 ## TODO
 
+- [ ] Add CORS
 - [ ] Add CRUD methods for discussions
+- [ ] Reorder some methods (make attributions a submethod of pub, for example)
 
 ## FAQ
 
