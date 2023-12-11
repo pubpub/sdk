@@ -125,7 +125,7 @@ Official Node.js SDK for [PubPub](https://pubpub.org/).
 
 ## Installation
 
-If you use this in Node, you have to use Node 18 or higher in order to support native FormData.
+If you use the SDK in Node, you must use Node 18 or higher in order to support native FormData.
 
 ```bash
 pnpm add @pubpub/sdk
@@ -155,18 +155,19 @@ async function main() {
 main()
 ```
 
+Replace `https://demo.pubpub.org` with your community URL, and replace `…` with your PubPUb login email address and password, respectively.
+
 ## Limitations
 
-The following is not possible to do with the SDK or through the API in general:
+The following actions are not permitted by the SDK, nor through the API in general:
 
 ### Creating or deleting communities
 
-While technically possible through the API, this is not possible through the SDK.
-We think this would cause too much risk of accidentally deleting a community or creating too many superfluous communities.
+Deleting a community is not permitted, due to the risk of accidental deletion of a community. Creating a community is not permitted, due to the potential for abuse (e.g., spam communities).
 
 ### Creating, deleting, or modifying users
 
-Too risky.
+It is not possible to create, delete or modifying users, due to the risks involved.
 
 ## Guides
 
@@ -186,7 +187,9 @@ const pubpub = await PubPub.createSDK({
 })
 ```
 
-Ideally, after you are done, should should logout:
+Replace `https://demo.pubpub.org` with your community url, and replace `…` with your login email address and password, respectively.
+
+Once your session is complete, you should logout:
 
 ```ts
 await pubpub.logout()
@@ -200,9 +203,9 @@ These follow a standard pattern, and are documented here.
 
 #### `get`/`GET /api/<models>/<id>`
 
-The `get` methods allow you to get a single model by its `id`, OR by it's slug (if it has one).
+The `get` methods allow you to get a single model by its `id`, OR by its `slug` (if it has one).
 
-It also features the `includes` and `attributes` parameters, which are documented below.
+To get a single model by its `id`:
 
 ```ts
 const pubById = await pubpub.pub.get({
@@ -210,14 +213,18 @@ const pubById = await pubpub.pub.get({
 })
 ```
 
-The `slug` for Pubs is the part after `/pub` in the URL.
+Replace `00000000-0000-0000-0000-000000000000` with the model’s `id`.
+
+The `slug` of a Pub is the part of the URL after `/pub`. To get a single model by its `slug`:
 
 ```ts
 // for https://demo.pubpub.org/pub/my-pub
 const { body: myPub } = await pubpub.pub.get({
-  slugOrId: 'my-pub',
+  slugOrId: 'my-pub', 
 })
 ```
+
+Replace `my-pub` with your Pub’s slug.
 
 #### `getMany`/`GET /api/<models>`
 
@@ -1291,6 +1298,8 @@ You need to be **logged in** and have access to this resource.
               layoutAllowsDuplicatePubs?: boolean | undefined
               pageId?: string | boolean | string[] | undefined
               crossrefDepositRecordId?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
             }
           | undefined
         include?:
@@ -1305,6 +1314,8 @@ You need to be **logged in** and have access to this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'avatar'
@@ -1355,6 +1366,8 @@ You need to be **logged in** and have access to this resource.
         layoutAllowsDuplicatePubs?: boolean | undefined
         pageId?: string | boolean | string[] | undefined
         crossrefDepositRecordId?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
       })
     | undefined
   cache?: RequestCache | undefined
@@ -1925,12 +1938,16 @@ You need to be an **admin** of this community in order to access this resource.
               affiliation?: StringFilter
               orcid?: StringFilter
               userId?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
             }
           | undefined
         include?: ('collection' | 'user')[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'collectionId'
               | 'title'
               | 'avatar'
@@ -1958,6 +1975,8 @@ You need to be an **admin** of this community in order to access this resource.
         affiliation?: StringFilter
         orcid?: StringFilter
         userId?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
       })
     | undefined
   cache?: RequestCache | undefined
@@ -3947,12 +3966,16 @@ You need to be an **admin** of this community in order to access this resource.
                 | undefined
               isOwner?: boolean | undefined
               subscribedToActivityDigest?: boolean | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
             }
           | undefined
         include?: ('community' | 'collection' | 'pub' | 'user')[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'pubId'
               | 'collectionId'
               | 'communityId'
@@ -3979,6 +4002,8 @@ You need to be an **admin** of this community in order to access this resource.
           | undefined
         isOwner?: boolean | undefined
         subscribedToActivityDigest?: boolean | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
       })
     | undefined
   cache?: RequestCache | undefined
@@ -4385,12 +4410,16 @@ You need to be an **admin** of this community in order to access this resource.
               isPublic?: boolean | undefined
               layoutAllowsDuplicatePubs?: boolean | undefined
               isNarrowWidth?: boolean | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
             }
           | undefined
         include?: 'community'[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -4414,6 +4443,8 @@ You need to be an **admin** of this community in order to access this resource.
         isPublic?: boolean | undefined
         layoutAllowsDuplicatePubs?: boolean | undefined
         isNarrowWidth?: boolean | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
       })
     | undefined
   cache?: RequestCache | undefined
@@ -5265,6 +5296,8 @@ You need to be an **admin** of this community in order to access this resource.
               reviewHash?: StringFilter
               commentHash?: StringFilter
               draftId?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
             }
           | undefined
         include?:
@@ -5284,6 +5317,8 @@ You need to be an **admin** of this community in order to access this resource.
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'communityId'
               | 'title'
               | 'description'
@@ -5345,6 +5380,8 @@ You need to be an **admin** of this community in order to access this resource.
         reviewHash?: StringFilter
         commentHash?: StringFilter
         draftId?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
       })
     | undefined
   cache?: RequestCache | undefined
@@ -6716,12 +6753,16 @@ You need to be an **admin** of this community in order to access this resource.
               affiliation?: StringFilter
               orcid?: StringFilter
               userId?: string | boolean | string[] | undefined
+              createdAt?: DateFilter
+              updatedAt?: DateFilter
             }
           | undefined
         include?: ('pub' | 'user')[] | undefined
         attributes?:
           | (
               | 'id'
+              | 'createdAt'
+              | 'updatedAt'
               | 'pubId'
               | 'title'
               | 'avatar'
@@ -6749,6 +6790,8 @@ You need to be an **admin** of this community in order to access this resource.
         affiliation?: StringFilter
         orcid?: StringFilter
         userId?: string | boolean | string[] | undefined
+        createdAt?: DateFilter
+        updatedAt?: DateFilter
       })
     | undefined
   cache?: RequestCache | undefined

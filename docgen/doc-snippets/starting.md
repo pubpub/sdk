@@ -14,7 +14,9 @@ const pubpub = await PubPub.createSDK({
 })
 ```
 
-Ideally, after you are done, should should logout:
+Replace `https://demo.pubpub.org` with your community url, and replace `…` with your login email address and password, respectively. 
+
+Once your session is complete, you should logout:
 
 ```ts
 await pubpub.logout()

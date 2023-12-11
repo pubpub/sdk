@@ -6,9 +6,10 @@ These follow a standard pattern, and are documented here.
 
 #### `get`/`GET /api/<models>/<id>`
 
-The `get` methods allow you to get a single model by its `id`, OR by it's slug (if it has one).
+The `get` methods allow you to get a single model by its `id`, OR by its `slug` (if it has one).
 
-It also features the `includes` and `attributes` parameters, which are documented below.
+
+To get a single model by its `id`:
 
 ```ts
 const pubById = await pubpub.pub.get({
@@ -16,14 +17,18 @@ const pubById = await pubpub.pub.get({
 })
 ```
 
-The `slug` for Pubs is the part after `/pub` in the URL.
+Replace `00000000-0000-0000-0000-000000000000` with the model’s `id`.
+
+The `slug` of a Pub is the part of the URL after `/pub`. To get a single model by its `slug`:
 
 ```ts
 // for https://demo.pubpub.org/pub/my-pub
 const { body: myPub } = await pubpub.pub.get({
-  slugOrId: 'my-pub',
+  slugOrId: 'my-pub', 
 })
 ```
+
+Replace `my-pub` with your Pub’s slug.
 
 #### `getMany`/`GET /api/<models>`
 

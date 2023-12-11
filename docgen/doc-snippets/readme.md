@@ -10,7 +10,7 @@ Official Node.js SDK for [PubPub](https://pubpub.org/).
 
 ## Installation
 
-If you use this in Node, you have to use Node 18 or higher in order to support native FormData.
+If you use the SDK in Node, you must use Node 18 or higher in order to support native FormData.
 
 ```bash
 pnpm add @pubpub/sdk
@@ -40,18 +40,21 @@ async function main() {
 main()
 ```
 
+Replace `https://demo.pubpub.org` with your community URL, and replace `…` with your PubPUb login email address and password, respectively. 
+
 ## Limitations
 
-The following is not possible to do with the SDK or through the API in general:
+The following actions are not permitted by the SDK, nor through the API in general:
+
 
 ### Creating or deleting communities
 
-While technically possible through the API, this is not possible through the SDK.
-We think this would cause too much risk of accidentally deleting a community or creating too many superfluous communities.
+Deleting a community is not permitted, due to the risk of accidental deletion of a community. Creating a community is not permitted, due to the potential for abuse (e.g., spam communities).
+
 
 ### Creating, deleting, or modifying users
 
-Too risky.
+It is not possible to create, delete or modifying users, due to the risks involved. 
 
 ## Guides
 
