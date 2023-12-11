@@ -12,15 +12,15 @@ dotenv.config({
 
 const TEST_PORT = 7357 as const
 
-const TEST_URL = process.env.COMMUNITY_URL ?? `http://localhost:${TEST_PORT}`
+const TEST_URL = `http://localhost:${TEST_PORT}`
 
 let server: ReturnType<typeof app.listen>
 
 beforeAll(async () => {
-  // don't run app locally if you're testing against a remote community
-  if (process.env.COMMUNITY_URL) {
-    return
-  }
+  // // don't run app locally if you're testing against a remote community
+  // if (process.env.COMMUNITY_URL) {
+  //   return
+  // }
   server = app.listen(TEST_PORT)
   console.log('✅ Server started')
 })
@@ -217,7 +217,7 @@ describe('PubPub', () => {
         },
       },
     })
-    console.log(result)
+    console.dir(result, { depth: null })
 
     result.body.forEach((pub) => {
       expect(Number(new Date(pub.createdAt!))).toBeGreaterThan(
