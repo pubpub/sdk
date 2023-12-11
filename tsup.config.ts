@@ -5,7 +5,7 @@ const config = defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  bundle: false,
+  bundle: true,
   metafile: true,
   entry: ['src'],
   minify: false,
