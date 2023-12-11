@@ -87,6 +87,7 @@
     "esbuild": "^0.18.20",
     "eslint": "^8.48.0",
     "express": "^4.17.3",
+    "firebase-tools": "^13.0.1",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
     "mdast-util-find-and-replace": "^3.0.1",
