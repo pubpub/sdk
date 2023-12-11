@@ -8,7 +8,6 @@ These follow a standard pattern, and are documented here.
 
 The `get` methods allow you to get a single model by its `id`, OR by its `slug` (if it has one).
 
-
 To get a single model by its `id`:
 
 ```ts
@@ -17,7 +16,7 @@ const pubById = await pubpub.pub.get({
 })
 ```
 
-Replace `00000000-0000-0000-0000-000000000000` with the model’s `id`.
+Replace `00000000-0000-0000-0000-000000000000` with the model’s `id`. To identify the `id` of a community, page, or collection, you may use the [PubPub ID Finder](https://pubpub.tefkah.com/).
 
 The `slug` of a Pub is the part of the URL after `/pub`. To get a single model by its `slug`:
 
