@@ -210,15 +210,16 @@ describe('PubPub', () => {
 
   it('can get pubs created in the last minute', async () => {
     const oneMinuteAgo = new Date(Date.now() - 1000 * 60)
-    const { body } = await pubpub.pub.getMany({
+    const result = await pubpub.pub.getMany({
       query: {
         createdAt: {
           gt: oneMinuteAgo,
         },
       },
     })
+    console.log(result)
 
-    body.forEach((pub) => {
+    result.body.forEach((pub) => {
       expect(Number(new Date(pub.createdAt!))).toBeGreaterThan(
         Number(oneMinuteAgo),
       )
