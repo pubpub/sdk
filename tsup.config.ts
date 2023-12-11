@@ -1,13 +1,19 @@
+// @ts-check
 import { defineConfig } from 'tsup'
-import { copyFile } from 'fs/promises'
-import readdirp from 'readdirp'
 
 const config = defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  bundle: false,
+  bundle: true,
+  metafile: true,
   entry: ['src'],
+  minify: false,
+  sourcemap: true,
+  treeshake: {
+    preset: 'smallest',
+  },
+  splitting: true,
 })
 
 export default config

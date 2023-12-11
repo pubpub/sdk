@@ -2,28 +2,53 @@ name: CI
 on:
   push:
     branches:
-      - '**'
+      - 'main'
   pull_request:
     branches:
       - '**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    environment: ci
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
+      # necessary for some tests
+      - uses: nikeee/setup-pandoc@v1
         with:
-          version: 7
+          pandoc-version: 2.19.2
+
+      - uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
-          cache: 'pnpm'
 
-      - run: pnpm install --frozen-lockfile
+      - name: Setup XMLLint bc otherwise break
+        run: sudo apt-get install libxml2-utils -y
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
       - run: pnpm run ci
-        env:
-          EMAIL: ${{ secrets.EMAIL }}
-          COMMUNITY_ID: ${{ secrets.COMMUNITY_ID }}
-          COMMUNITY_URL: ${{ secrets.COMMUNITY_URL }}
-          PASSWORD: ${{ secrets.PASSWORD }}

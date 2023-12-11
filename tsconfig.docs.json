@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noErrorTruncation": true
+  },
+  "files": ["./docgen/toBeGeneratedTypes.ts"],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.stories.tsx",
+    "**/test/**/*",
+    "./src/lib/client.ts"
+  ]
+}

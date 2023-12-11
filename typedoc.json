@@ -1,0 +1,20 @@
+{
+  // Comments are supported, like tsconfig.json
+  "entryPoints": ["docgen/toBeGeneratedTypes.ts"],
+  "out": "docgen/docs",
+  "plugin": ["typedoc-plugin-markdown"],
+  "compilerOptions": {
+    "noErrorTruncation": true
+  },
+  "excludeTags": [
+    "@override",
+    "@virtual",
+    "@privateRemarks",
+    "@satisfies",
+    "@overload"
+  ],
+  "excludeInternal": true,
+  "tsconfig": "tsconfig.docs.json",
+  "useCodeBlocks": true,
+  "expandObjects": true
+}

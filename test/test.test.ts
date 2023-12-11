@@ -1,192 +1,246 @@
-import { describe, it, beforeAll, expect } from 'vitest'
-import { fileURLToPath } from 'url'
-import { PubPub } from '../src/lib/client'
-import { afterAll } from 'vitest'
-import { buildSchema } from '../src/lib/editor/schema'
-import { Node, Fragment, Slice } from 'prosemirror-model'
-import uuid from 'uuid'
+import type { PubPubSDK } from '../src/lib/client.js'
+import { setupSDK } from './utils/setup.js'
+import app from '../core/server/server.js'
+import { sleep } from './utils/sleep.js'
+import { resolve } from 'path'
 
-let pubpub: PubPub
+import dotenv from 'dotenv'
 
-const basicImport = {
-  doc: {
-    type: 'doc',
-    content: [
-      {
-        type: 'heading',
-        attrs: { id: 'abstract', level: 1, fixedId: 'abstract' },
-        content: [{ text: 'Abstract', type: 'text' }],
-      },
-      {
-        type: 'paragraph',
-        content: [{ text: 'This is a test abstract.', type: 'text' }],
-      },
-    ],
-  },
-  warnings: [],
-  proposedMetadata: {},
-  pandocErrorOutput: '',
-}
+dotenv.config({
+  path: resolve(__dirname, '../../.env'),
+})
 
-describe('ProseMirror', () => {
-  it('should be able to define a schema', () => {
-    const schema = buildSchema()
-    expect(schema).toBeDefined()
-  })
+const TEST_PORT = 7357 as const
 
-  it('should be able to Node.fromJSON with basic docx', async () => {
-    const documentSchema = buildSchema()
-    try {
-      const hydratedDocument = Node.fromJSON(documentSchema, basicImport.doc)
+const TEST_URL = `http://localhost:${TEST_PORT}`
 
-      console.log(hydratedDocument)
-      expect(hydratedDocument).toBeDefined()
-    } catch (e) {
-      console.log(e)
-      throw e
-    }
-  })
+let server: ReturnType<typeof app.listen>
 
-  it('should be able to create a uuid', () => {
-    const id = uuid.v4()
-    expect(id).toBeDefined()
-  })
+beforeAll(async () => {
+  // // don't run app locally if you're testing against a remote community
+  // if (process.env.COMMUNITY_URL) {
+  //   return
+  // }
+  server = app.listen(TEST_PORT)
+  console.log('✅ Server started')
+})
+
+afterAll(async () => {
+  server?.close()
 })
 
 describe('PubPub', () => {
+  let pubpub: PubPubSDK
+  let removed = false
+
+  let pub: Awaited<ReturnType<typeof pubpub.pub.create>>['body']
   beforeAll(async () => {
-    if (!process.env.COMMUNITY_ID) throw new Error('Missing community id')
-    if (!process.env.COMMUNITY_URL) throw new Error('Missing community url')
-    if (!process.env.EMAIL) throw new Error('Missing email')
-    if (!process.env.PASSWORD) throw new Error('Missing password')
+    // eslint-disable-next-line no-extra-semi
+    ;({ pub, pubpub } = await setupSDK({
+      url: TEST_URL,
+      email: process.env.EMAIL,
+      password: process.env.PASSWORD,
+    }))
 
-    pubpub = new PubPub(process.env.COMMUNITY_ID!, process.env.COMMUNITY_URL)
-
-    await pubpub.login(process.env.EMAIL ?? '', process.env.PASSWORD ?? '')
-
-    expect(pubpub.loggedIn).toBeTruthy()
+    expect(pub).toBeTruthy()
   })
 
-  const testUrl = 'pub/25f1ymdq/draft'
-  const testId = '10a6ef16-4d19-4e9f-93bf-0ae1a5e247bc'
-  // const testUrl = 'pub/9kvcb438/draft'
-
-  it('should be able to import a docx file to a pub', async () => {
-    // const file = await readFile(
-    //   fileURLToPath(new URL('./basic.docx', import.meta.url))
-    // )
-
-    try {
-      const imported = await pubpub.pub.import(
-        testUrl,
-        [
-          {
-            file: fileURLToPath(new URL('./basic.docx', import.meta.url)),
-            fileName: 'basic.docx',
-            mimeType:
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          },
-        ],
-        (doc, schema) => {
-          console.dir(doc, { depth: 5 })
-          const newDoc = doc.addToEnd(
-            schema.nodes.paragraph.create(
-              { id: 'test-id' },
-              schema.text('manually insterted text')
-            )
-          )
-          console.dir(newDoc, { depth: 5 })
-          return newDoc
-        }
-      )
-
-      expect(imported).toBeDefined()
-    } catch (e) {
-      console.log(e)
-      throw e
-    }
-  }, 60000)
-  it('should be able to export a file, and that file should include the manually added test text', async () => {
-    try {
-      const exported = await pubpub.pub.export({
-        slug: testUrl,
-        format: 'markdown',
-      })
-
-      expect(
-        typeof exported === 'string' &&
-          exported.startsWith('https://assets.pubpub.org')
-      ).toBeTruthy()
-    } catch (e) {
-      console.log(e)
-      throw e
-    }
-  }, 60000)
-
-  it('should be able to get pubs', async () => {
-    const pubs = await pubpub.pub.getMany({
-      limit: 1,
+  it('should be able to return something through normal api calls', async () => {
+    const res = await fetch(`${TEST_URL}/api/pubs/many`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        alreadyFetchedPubIds: [],
+        pubOptions: {},
+        query: {
+          limit: 2,
+        },
+      }),
     })
 
-    const firstPubId = pubs.pubIds[0]
-    expect(pubs.pubsById[firstPubId]).toHaveProperty('title')
+    const json = await res.json()
+
+    expect(json).toBeDefined()
+  })
+
+  it('should be able to get pubs', async () => {
+    const { body: pubs } = await pubpub.pub.getMany({
+      query: {
+        limit: 1,
+      },
+    })
+
+    const first = pubs[0]
+    expect(first).toHaveProperty('title')
   }, 10000)
 
-  it('should be able to get collections', async () => {
-    const collections = await pubpub.collection.hacks.getMany()
+  let collectionId: string
+  it('should be able to create a collection', async () => {
+    const collection = await pubpub.collection.create({
+      title: 'Test collection',
+      kind: 'book',
+      isPublic: true,
+    })
 
-    expect(collections).toBeInstanceOf(Array)
+    collectionId = collection.body.id
+    expect(collection.status).toBe(201)
+    expect(collection.body).toHaveProperty('title')
+  })
+
+  it('should be able to get collections', async () => {
+    const { body: collections } = await pubpub.collection.getMany()
+
+    expect(Array.isArray(collections)).toBeTruthy()
     expect(collections[0]).toHaveProperty('title')
   }, 10000)
 
-  it('should be able to find the attributions of a collection through annoying means', async () => {
-    const collections = await pubpub.collection.hacks.getMany()
+  let collectionPubId: string
+  it('should be able to add a pub to a collection', async () => {
+    const added = await pubpub.collectionPub.create({
+      collectionId,
+      pubId: pub.id,
+    })
+
+    collectionPubId = added.body.id
+    expect(added.status).toBe(201)
+    expect(added.body).toHaveProperty('rank')
+  })
+
+  it('should be able to change the contextHint of a collectionPub', async () => {
+    const changed = await pubpub.collectionPub.update({
+      id: collectionPubId,
+      contextHint: 'chapter',
+    })
+
+    expect(changed.status).toBe(200)
+    expect(changed.body).toEqual({ contextHint: 'chapter' })
+  })
+
+  it('should be able to modify a colection', async () => {
+    const modded = await pubpub.collection.update({
+      id: collectionId,
+      title: 'New title',
+    })
+
+    expect(modded.status).toBe(200)
+    expect(modded.body.title).toBe('New title')
+  })
+
+  it('should be able to get collections with attributions', async () => {
+    const { body: collections } = await pubpub.collection.getMany({
+      query: { include: ['attributions'] },
+    })
 
     const collection = collections[0]
-    expect(collections).toBeInstanceOf(Array)
+    expect(Array.isArray(collections)).toBeTruthy()
     expect(collection).toHaveProperty('title')
-    expect(collection).not.toHaveProperty('attributions')
-    expect(collection).toHaveProperty('slug')
+    expect(collection.attributions).toEqual([])
 
-    const collectionWithAttributions = await pubpub.collection.hacks.get(
-      collection.slug
+    const { body: createdAttribution } =
+      await pubpub.collectionAttribution.create({
+        collectionId: collection.id,
+        name: 'Test attribution',
+        roles: ['Guy'],
+      })
+
+    const { body: collectionWithAttributions } = await pubpub.collection.get({
+      params: { slugOrId: collection.slug },
+    })
+
+    expect(collectionWithAttributions.attributions?.[0]?.id).toEqual(
+      createdAttribution.id,
     )
 
-    expect(collectionWithAttributions).toHaveProperty('attributions')
-    expect(collectionWithAttributions).toHaveProperty('title')
-    expect(collectionWithAttributions).toHaveProperty('slug')
-    expect(collectionWithAttributions).toHaveProperty('avatar')
-    expect(collectionWithAttributions).toHaveProperty('isRestricted')
-    expect(collectionWithAttributions).toHaveProperty('isPublic')
-    expect(collectionWithAttributions).toHaveProperty('viewHash')
-    expect(collectionWithAttributions).toHaveProperty('editHash')
-    expect(collectionWithAttributions).toHaveProperty('metadata')
-    expect(collectionWithAttributions).toHaveProperty('kind')
-    expect(collectionWithAttributions).toHaveProperty('doi')
-    expect(collectionWithAttributions).toHaveProperty('readNextPreviewSize')
-    expect(collectionWithAttributions).toHaveProperty('layout')
-    expect(collectionWithAttributions).toHaveProperty('pageId')
-    expect(collectionWithAttributions).toHaveProperty('communityId')
-    expect(collectionWithAttributions).toHaveProperty('scopeSummaryId')
-    expect(collectionWithAttributions).toHaveProperty('createdAt')
-    expect(collectionWithAttributions).toHaveProperty('updatedAt')
-    expect(collectionWithAttributions).toHaveProperty('crossrefDepositRecordId')
+    await pubpub.collectionAttribution.remove({
+      id: createdAttribution.id,
+      collectionId: collection.id,
+    })
   }, 10000)
 
   it('should be able to modify a pub', async () => {
-    const modded = await pubpub.pub.update(testId, {
-      citationStyle: {
-        citationStyle: 'apa-7',
-        inlineCitationStyle: 'author',
-      },
+    const modded = await pubpub.pub.update({
+      pubId: pub.id,
       description: 'This is a test description',
     })
 
-    console.log(modded)
-    expect(modded).toHaveProperty('description')
+    expect(modded.status).toBe(200)
+    expect(modded.body).toHaveProperty('description')
   }, 10000)
 
+  // it('should be able to update a community', async () => {})
+
+  it('should be able to import a pub', async () => {
+    const { body } = await pubpub.pub.text.import({
+      files: [
+        {
+          blob: new Blob(['heya'], { type: 'text/plain' }),
+          filename: 'hey.txt',
+        },
+        {
+          blob: new Blob(['heya'], { type: 'text/plain' }),
+          filename: 'hey.txt',
+        },
+      ],
+      title: 'imported pub',
+    })
+    const { doc, pub } = body
+
+    expect(JSON.stringify(doc)?.includes('heya')).toBeTruthy()
+    expect(pub).toHaveProperty('title')
+    expect(pub.title).toBe('imported pub')
+  }, 20000)
+
+  it('should be able to query things', async () => {
+    const { body: pubs } = await pubpub.pub.getMany({
+      query: {
+        title: {
+          contains: 'imported',
+        },
+      },
+    })
+
+    const first = pubs[0]
+    expect(first).toHaveProperty('title')
+    expect(first.title).toBe('imported pub')
+
+    await pubpub.pub.remove({ pubId: first.id })
+  })
+
+  it('can get pubs created in the last minute', async () => {
+    const oneMinuteAgo = new Date(Date.now() - 1000 * 60)
+    const result = await pubpub.pub.getMany({
+      query: {
+        createdAt: {
+          gt: oneMinuteAgo,
+        },
+      },
+    })
+    console.dir(result, { depth: null })
+
+    result.body.forEach((pub) => {
+      expect(Number(new Date(pub.createdAt!))).toBeGreaterThan(
+        Number(oneMinuteAgo),
+      )
+    })
+  })
+
+  it('should remove a pub', async () => {
+    const remove = await pubpub.pub.remove({ pubId: pub.id })
+
+    removed = true
+    expect(remove.status).toBe(200)
+    expect(remove.body).toEqual({})
+  })
+
   afterAll(async () => {
-    pubpub && (await pubpub.logout())
+    sleep(1000)
+    if (!removed) {
+      await pubpub.pub.remove({ pubId: pub.id })
+    }
+    if (pubpub) {
+      await pubpub.logout()
+    }
   })
 })

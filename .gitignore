@@ -131,3 +131,7 @@ dist
 
 # incomplete docxs files
 ~$*
+
+docgen/docs
+temp.md
+docs.md
