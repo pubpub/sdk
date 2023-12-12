@@ -22,7 +22,7 @@ describe('imports', () => {
       email: process.env.IMPORT_TEST_EMAIL ?? process.env.EMAIL,
       password: process.env.IMPORT_TEST_PASSWORD ?? process.env.PASSWORD,
     }))
-  })
+  }, 30000)
 
   it('should be able to import a docx file to a pub', async () => {
     try {
@@ -75,7 +75,7 @@ describe('imports', () => {
     const text = await (await fetch(upload.url)).text()
 
     expect(text).toBe('test')
-  }, 20000)
+  }, 30000)
 
   afterAll(async () => {
     await sleep(1000)
@@ -85,5 +85,5 @@ describe('imports', () => {
     }
 
     await pubpub.logout()
-  })
+  }, 30000)
 })
