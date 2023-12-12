@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import SHA3 from 'crypto-js/sha3'
-import encHex from 'crypto-js/enc-hex'
+import SHA3 from 'crypto-js/sha3.js'
+import encHex from 'crypto-js/enc-hex.js'
 import { createClient } from 'utils/api/client.js'
 
 import type { ExportFormats, WorkerTaskExportOutput } from './types.js'

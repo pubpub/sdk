@@ -1,6 +1,6 @@
 {
   "name": "@pubpub/sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unofficial PubPub API client for Node.js and the browser.",
   "type": "module",
   "main": "dist/index.cjs",
