@@ -8,7 +8,6 @@ These follow a standard pattern, and are documented here.
 
 The `get` methods allow you to get a single model by its `id`, OR by its `slug` (if it has one).
 
-
 To get a single model by its `id`:
 
 ```ts
@@ -24,7 +23,7 @@ The `slug` of a Pub is the part of the URL after `/pub`. To get a single model b
 ```ts
 // for https://demo.pubpub.org/pub/my-pub
 const { body: myPub } = await pubpub.pub.get({
-  slugOrId: 'my-pub', 
+  slugOrId: 'my-pub',
 })
 ```
 
@@ -458,49 +457,58 @@ type NumberFilter =
         )[]
     )[]
   | undefined
+```
 
-type DateFilter =
+For Dates, you can either input a `Date` object, or an ISO formatted string.
+It does not really matter, as it implicitly `Date.toISOString()` gets called on the value.
+
+```ts
+type Date =
   | boolean
+  | string
   | Date
   | {
-      eq?: Date | undefined
-      gt?: Date | undefined
-      gte?: Date | undefined
-      lt?: Date | undefined
-      lte?: Date | undefined
-      ne?: Date | undefined
+      eq?: Date | string | undefined
+      gt?: Date | string | undefined
+      gte?: Date | string | undefined
+      lt?: Date | string | undefined
+      lte?: Date | string | undefined
+      ne?: Date | string | undefined
     }
   | (
+      | string
       | Date
       | {
-          eq?: Date | undefined
-          gt?: Date | undefined
-          gte?: Date | undefined
-          lt?: Date | undefined
-          lte?: Date | undefined
-          ne?: Date | undefined
+          eq?: Date | string | undefined
+          gt?: Date | string | undefined
+          gte?: Date | string | undefined
+          lt?: Date | string | undefined
+          lte?: Date | string | undefined
+          ne?: Date | string | undefined
         }
     )[]
   | (
       | boolean
+      | string
       | Date
       | {
-          eq?: Date | undefined
-          gt?: Date | undefined
-          gte?: Date | undefined
-          lt?: Date | undefined
-          lte?: Date | undefined
-          ne?: Date | undefined
+          eq?: Date | string | undefined
+          gt?: Date | string | undefined
+          gte?: Date | string | undefined
+          lt?: Date | string | undefined
+          lte?: Date | string | undefined
+          ne?: Date | string | undefined
         }
       | (
+          | string
           | Date
           | {
-              eq?: Date | undefined
-              gt?: Date | undefined
-              gte?: Date | undefined
-              lt?: Date | undefined
-              lte?: Date | undefined
-              ne?: Date | undefined
+              eq?: Date | string | undefined
+              gt?: Date | string | undefined
+              gte?: Date | string | undefined
+              lt?: Date | string | undefined
+              lte?: Date | string | undefined
+              ne?: Date | string | undefined
             }
         )[]
     )[]
