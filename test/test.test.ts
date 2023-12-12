@@ -23,7 +23,7 @@ beforeAll(async () => {
   // }
   server = app.listen(TEST_PORT)
   console.log('✅ Server started')
-})
+}, 30000)
 
 afterAll(async () => {
   server?.close()
@@ -43,7 +43,7 @@ describe('PubPub', () => {
     }))
 
     expect(pub).toBeTruthy()
-  })
+  }, 30000)
 
   it('should be able to return something through normal api calls', async () => {
     const res = await fetch(`${TEST_URL}/api/pubs/many`, {
