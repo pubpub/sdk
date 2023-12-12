@@ -10,6 +10,7 @@ const config = defineConfig({
   entry: ['src'],
   minify: false,
   sourcemap: true,
+  noExternal: ['crypto-js'],
   treeshake: {
     preset: 'smallest',
   },
