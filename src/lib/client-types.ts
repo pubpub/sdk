@@ -19,35 +19,44 @@ export type Prettify<T> = {
 export type ProxiedFunction<
   F,
   IsGetRoute extends boolean = false,
-  Property extends 'body' | 'query' = IsGetRoute extends false
+  BodyOrQuery extends 'body' | 'query' = IsGetRoute extends false
     ? 'body'
     : 'query',
-> = F extends (...args: infer A extends any[]) => infer R
-  ? A[0] extends { [K in Property]: infer B }
+> = F extends (...args: infer Arguments extends any[]) => infer R
+  ? Arguments[0] extends { [K in BodyOrQuery]: infer B }
     ? // if only the body is required, make the second argument optional
-      Partial<Omit<A[0], Property>> extends Omit<A[0], Property>
-      ? FormData extends B
+      Partial<Omit<Arguments[0], BodyOrQuery>> extends Omit<
+        Arguments[0],
+        BodyOrQuery
+      >
+      ? // form bodies look like FormData & {...}, we don't want to require the FormData part
+        FormData extends B
         ? (
             input: Exclude<B, FormData>,
-            rest?: Prettify<Omit<A[0], Property>>,
+            rest?: Prettify<Omit<Arguments[0], BodyOrQuery>>,
           ) => R
         : Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
           ? // if there are no required arguments, you don't need to pass the body
             (
-              input?: Prettify<B>, //Prettify<Omit<B, 'communityId'>>,
-              rest?: Prettify<Omit<A[0], Property>>,
+              input?: Prettify<Omit<B, 'communityId'>>, //Prettify<Omit<B, 'communityId'>>,
+              rest?: Prettify<Omit<Arguments[0], BodyOrQuery>>,
             ) => R
           : (
               input: Prettify<Omit<B, 'communityId'>>,
-              rest?: Prettify<Omit<A[0], Property>>,
+              rest?: Prettify<Omit<Arguments[0], BodyOrQuery>>,
             ) => R
-      : (
-          input: Prettify<Omit<B, 'communityId'>>,
-          rest: Prettify<Omit<A[0], Property>>,
-        ) => R
-    : undefined extends A[0]
-      ? (input?: Prettify<A[0]>) => R
-      : (input: Prettify<A[0]>) => R
+      : FormData extends B
+        ? (
+            input: Exclude<B, FormData>,
+            rest: Prettify<Omit<Arguments[0], BodyOrQuery>>,
+          ) => R
+        : (
+            input: Prettify<Omit<B, 'communityId'>>,
+            rest: Prettify<Omit<Arguments[0], BodyOrQuery>>,
+          ) => R
+    : undefined extends Arguments[0]
+      ? (input?: Prettify<Arguments[0]>) => R
+      : (input: Prettify<Arguments[0]>) => R
   : never
 
 export type ProxiedClient<T> = {

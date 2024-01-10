@@ -3240,7 +3240,6 @@ You need to be **logged in** and have access to this resource.
   accentTextColor: string
   avatar: null | string
   citeAs: null | string
-  communityId: string
   defaultPubCollections: null | string[]
   description: null | string
   domain: null | string
@@ -3643,7 +3642,7 @@ You need to be **logged in** and have access to this resource.
     CitationStyle:
       | undefined
       | {
-          citationStyle:
+          citationStyle?:
             | 'acm-siggraph'
             | 'american-anthro'
             | 'apa'
@@ -3657,12 +3656,18 @@ You need to be **logged in** and have access to this resource.
             | 'mla'
             | 'vancouver'
             | 'ama'
-          inlineCitationStyle: 'label' | 'count' | 'authorYear' | 'author'
+            | undefined
+          inlineCitationStyle?:
+            | 'label'
+            | 'count'
+            | 'authorYear'
+            | 'author'
+            | undefined
         }
     License:
       | undefined
       | {
-          kind:
+          kind?:
             | 'cc-by'
             | 'cc-0'
             | 'cc-by-nc'
@@ -3671,30 +3676,53 @@ You need to be **logged in** and have access to this resource.
             | 'cc-by-nc-sa'
             | 'cc-by-sa'
             | 'copyright'
-          copyrightSelection: {
-            choice: 'infer-from-scope' | 'choose-here'
-            year: number | null
-          }
+            | undefined
+          copyrightSelection?:
+            | {
+                choice?: 'infer-from-scope' | 'choose-here' | undefined
+                year?: number | null | undefined
+              }
+            | undefined
         }
     NodeLabels:
       | undefined
       | {
-          image: { enabled: boolean; text: string }
-          video: { enabled: boolean; text: string }
-          audio: { enabled: boolean; text: string }
-          table: { enabled: boolean; text: string }
-          math: { enabled: boolean; text: string }
-          iframe: { enabled: boolean; text: string }
+          image?:
+            | { enabled?: boolean | undefined; text?: string | undefined }
+            | undefined
+          video?:
+            | { enabled?: boolean | undefined; text?: string | undefined }
+            | undefined
+          audio?:
+            | { enabled?: boolean | undefined; text?: string | undefined }
+            | undefined
+          table?:
+            | { enabled?: boolean | undefined; text?: string | undefined }
+            | undefined
+          math?:
+            | { enabled?: boolean | undefined; text?: string | undefined }
+            | undefined
+          iframe?:
+            | { enabled?: boolean | undefined; text?: string | undefined }
+            | undefined
         }
     PubEdgeDisplay:
       | undefined
-      | { defaultsToCarousel: boolean; descriptionIsVisible: boolean }
+      | {
+          defaultsToCarousel?: boolean | undefined
+          descriptionIsVisible?: boolean | undefined
+        }
     PubHeaderTheme:
       | undefined
       | {
-          backgroundImage: string
-          backgroundColor: string
-          textStyle: 'light' | 'dark' | 'black-blocks' | 'white-blocks'
+          backgroundImage?: string | undefined
+          backgroundColor?: string | undefined
+          textStyle?:
+            | 'light'
+            | 'dark'
+            | 'black-blocks'
+            | 'white-blocks'
+            | undefined
         }
   }
   scope: {
@@ -4603,67 +4631,25 @@ You need to be **logged in** and have access to this resource.
 `input?`
 
 ```ts
-
-  | {
-      avatar: null | string
-      collectionId: null | string
-      communityId: string
-      createPubToken: undefined
-      customPublishedAt: null | string
-      description: null | string
-      doi: null | string
-      downloads:
-        | null
-        | {
-            createdAt: string
-            type: 'formatted'
-            url: string
-          }[]
-      htmlDescription: null | string
-      htmlTitle: null | string
-      slug: string
-      title: string
-    }
-  | {
-      avatar: null | string
-      collectionId: undefined
-      communityId: string
-      createPubToken: null | string
-      customPublishedAt: null | string
-      description: null | string
-      doi: null | string
-      downloads:
-        | null
-        | {
-            createdAt: string
-            type: 'formatted'
-            url: string
-          }[]
-      htmlDescription: null | string
-      htmlTitle: null | string
-      slug: string
-      title: string
-    }
-  | {
-      avatar: null | string
-      collectionId: undefined
-      communityId: string
-      createPubToken: undefined
-      customPublishedAt: null | string
-      description: null | string
-      doi: null | string
-      downloads:
-        | null
-        | {
-            createdAt: string
-            type: 'formatted'
-            url: string
-          }[]
-      htmlDescription: null | string
-      htmlTitle: null | string
-      slug: string
-      title: string
-    }
+{
+  avatar: null | string
+  collectionId: null | string
+  createPubToken: null | string
+  customPublishedAt: null | string
+  description: null | string
+  doi: null | string
+  downloads:
+    | null
+    | {
+        createdAt: string
+        type: 'formatted'
+        url: string
+      }[]
+  htmlDescription: null | string
+  htmlTitle: null | string
+  slug: string
+  title: string
+}
 ```
 
 `rest?`
@@ -4763,8 +4749,7 @@ You need to be **logged in** and have access to this resource.
 `input`
 
 ```ts
-{
-}
+;undefined | null | {}
 ```
 
 `rest`
@@ -4839,8 +4824,7 @@ You need to be **logged in** and have access to this resource.
 `input`
 
 ```ts
-{
-}
+;undefined | null | {}
 ```
 
 `rest`
