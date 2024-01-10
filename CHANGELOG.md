@@ -77,3 +77,9 @@
 ### Patch Changes
 
 - 726f510: Initial Release
+
+## 1.0.2
+
+### Patch Changes
+
+- Improve types for facets and certain CRUD operations, make `pubpub.pub.text.importToPub` work
