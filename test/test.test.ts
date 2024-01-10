@@ -171,6 +171,7 @@ describe('PubPub', () => {
 
   // it('should be able to update a community', async () => {})
 
+  let importedPubId: string
   it('should be able to import a pub', async () => {
     const { body } = await pubpub.pub.text.import({
       files: [
@@ -190,6 +191,35 @@ describe('PubPub', () => {
     expect(JSON.stringify(doc)?.includes('heya')).toBeTruthy()
     expect(pub).toHaveProperty('title')
     expect(pub.title).toBe('imported pub')
+
+    importedPubId = pub.id
+  }, 20000)
+
+  it('should be able to import to a pub', async () => {
+    const { body } = await pubpub.pub.text.importToPub(
+      {
+        files: [
+          {
+            blob: new Blob([':D'], { type: 'text/plain' }),
+            filename: 'happy.txt',
+          },
+        ],
+        method: 'append',
+      },
+      {
+        params: {
+          pubId: importedPubId,
+        },
+      },
+    )
+
+    const { doc, pub } = body
+
+    expect(pub.id).toEqual(importedPubId)
+
+    const stringDoc = JSON.stringify(doc)
+    expect(stringDoc).toContain(':D')
+    expect(stringDoc).toContain('heya')
   }, 20000)
 
   it('should be able to query things', async () => {
