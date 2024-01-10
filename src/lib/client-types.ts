@@ -34,7 +34,7 @@ export type ProxiedFunction<
         : Partial<Omit<B, 'communityId'>> extends Omit<B, 'communityId'>
           ? // if there are no required arguments, you don't need to pass the body
             (
-              input?: Prettify<B>, //Prettify<Omit<B, 'communityId'>>,
+              input?: Prettify<Omit<B, 'communityId'>>, //Prettify<Omit<B, 'communityId'>>,
               rest?: Prettify<Omit<A[0], Property>>,
             ) => R
           : (
