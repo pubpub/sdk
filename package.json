@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsup",
     "postbuild": "attw . -P && size-limit",
-    "lint": "tsc",
+    "lint": "tsc --noEmit",
     "ci": "rm -rf dist && npm run lint && pnpm run test && pnpm run build",
     "prepublish": "pnpm run ci",
     "release": "pnpm run ci && changeset publish",
@@ -48,6 +48,7 @@
     "dist"
   ],
   "dependencies": {
+    "@analytics/core": "^0.12.7",
     "@anatine/zod-openapi": "^2.2.0",
     "@ts-rest/core": "github:pubpub/ts-rest#ts-rest-core-v3.30.52-gitpkg",
     "@types/uuid": "^3.3.0",
@@ -107,7 +108,7 @@
     "tsx": "^3.12.7",
     "typedoc": "^0.25.3",
     "typedoc-plugin-markdown": "4.0.0-next.36",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "unified": "^11.0.4",
     "unist-util-is": "^6.0.0",
     "unist-util-visit": "^5.0.0",
