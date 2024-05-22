@@ -1,5 +1,24 @@
 # pubpub-client
 
+## 1.1.0
+
+### Minor Changes
+
+- Add ability to authenticate using authorization tokens instead of username/password
+- Update changed types
+
+## 1.0.1
+
+### Patch Changes
+
+- 726f510: Initial Release
+
+## 1.0.2
+
+### Patch Changes
+
+- Improve types for facets and certain CRUD operations, make `pubpub.pub.text.importToPub` work
+
 ## 0.9.0
 
 ### Minor Changes
@@ -71,15 +90,3 @@
 ### Minor Changes
 
 - Add the ability to import and export pubs
-
-## 1.0.1
-
-### Patch Changes
-
-- 726f510: Initial Release
-
-## 1.0.2
-
-### Patch Changes
-
-- Improve types for facets and certain CRUD operations, make `pubpub.pub.text.importToPub` work

@@ -9,7 +9,8 @@ import {
   proxyClient,
   proxySDKWithClient,
   getRequestsMap,
-  filesRequestMap,
+  filesRequestsMap,
+  removedRequestsMap,
 } from './proxies.js'
 import type { PClient, DeepInput, DeepMerge } from './client-types.js'
 
@@ -20,6 +21,7 @@ export type PubPubSDK = DeepMerge<PClient, PubPub>
 
 export class PubPub {
   #cookie?: string
+  #authToken?: string
   loggedIn = false
 
   public client!: PClient
@@ -77,7 +79,8 @@ export class PubPub {
       }),
       communityId: this.communityId,
       getRequestsMap,
-      filesRequestsMap: filesRequestMap,
+      filesRequestsMap,
+      removedRequestsMap: removedRequestsMap,
     })
 
     this.client = authenticatedClient
@@ -198,30 +201,73 @@ export class PubPub {
     return poll()
   }
 
-  static async createSDK({
-    communityUrl,
-    email,
-    password,
-  }: {
-    /**
-     * The URL of the community to connect to
-     */
-    communityUrl: string
-    /**
-     * The email to login with
-     */
-    email: string
-    /**
-     * The password to login with
-     */
-    password: string
-  }) {
-    const [{ id }] = await (
-      await fetch(`${communityUrl}/api/communities`)
-    ).json()
+  static async createSDK(
+    options: {
+      /**
+       * The URL of the community to connect to
+       */
+      communityUrl: string
+    } & (
+      | {
+          /**
+           * The email to login with
+           */
+          email: string
+          /**
+           * The password to login with
+           */
+          password: string
+        }
+      | {
+          /**
+           * The auth token to use
+           */
+          authToken: string
+        }
+    ),
+  ) {
+    const res = await fetch(`${options.communityUrl}/api/communities`, {
+      ...('authToken' in options
+        ? {
+            headers: {
+              Authorization: `Bearer ${options.authToken}`,
+            },
+          }
+        : {}),
+    })
 
-    const sdk = new PubPub(id, communityUrl)
-    await sdk.login(email, password)
+    if (res.status === 403) {
+      throw new Error('Invalid auth token')
+    }
+
+    const [{ id }] = await res.json()
+
+    const sdk = new PubPub(id, options.communityUrl)
+    if ('authToken' in options) {
+      sdk.#authToken = options.authToken
+
+      const client = createClient({
+        baseUrl: options.communityUrl,
+        baseHeaders: {
+          Authorization: `Bearer ${options.authToken}`,
+        },
+      })
+      const authenticatedClient = proxyClient({
+        client,
+        communityId: id,
+        getRequestsMap,
+        filesRequestsMap,
+        removedRequestsMap: removedRequestsMap,
+      })
+
+      sdk.client = authenticatedClient
+
+      proxySDKWithClient(sdk, authenticatedClient)
+
+      return sdk as unknown as PubPubSDK
+    }
+
+    await sdk.login(options.email, options.password)
     return sdk as unknown as PubPubSDK
   }
 }

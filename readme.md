@@ -1,4 +1,3 @@
-
 <!--
 THIS FILE IS GENERATED. DO NOT EDIT IT DIRECTLY. EDIT THE TEMPLATE IN `docgen/snippets/readme.md` INSTEAD.
  -->
@@ -13,115 +12,416 @@ Official Node.js SDK for [PubPub](https://pubpub.org/).
 
 ## Contents
 
-* [Installation](#installation)
-* [Usage](#usage)
-* [Limitations](#limitations)
-  * [Creating or deleting communities](#creating-or-deleting-communities)
-  * [Creating, deleting, or modifying users](#creating-deleting-or-modifying-users)
-* [Guides](#guides)
-  * [Starting](#starting)
-  * [Querying](#querying)
-    * [`get`/`GET /api/<models>/<id>`](#getget-apimodelsid)
-    * [`getMany`/`GET /api/<models>`](#getmanyget-apimodels)
-* [API](#api)
-  * [`pubpub.auth`](#pubpubauth)
-    * [`pubpub.auth.login`](#pubpubauthlogin)
-    * [`pubpub.auth.logout`](#pubpubauthlogout)
-  * [`pubpub.collection`](#pubpubcollection)
-    * [`pubpub.collection.create`](#pubpubcollectioncreate)
-    * [`pubpub.collection.doi`](#pubpubcollectiondoi)
-    * [`pubpub.collection.get`](#pubpubcollectionget)
-    * [`pubpub.collection.getMany`](#pubpubcollectiongetmany)
-    * [`pubpub.collection.getResource`](#pubpubcollectiongetresource)
-    * [`pubpub.collection.remove`](#pubpubcollectionremove)
-    * [`pubpub.collection.update`](#pubpubcollectionupdate)
-  * [`pubpub.collectionAttribution`](#pubpubcollectionattribution)
-    * [`pubpub.collectionAttribution.batchCreate`](#pubpubcollectionattributionbatchcreate)
-    * [`pubpub.collectionAttribution.create`](#pubpubcollectionattributioncreate)
-    * [`pubpub.collectionAttribution.get`](#pubpubcollectionattributionget)
-    * [`pubpub.collectionAttribution.getMany`](#pubpubcollectionattributiongetmany)
-    * [`pubpub.collectionAttribution.remove`](#pubpubcollectionattributionremove)
-    * [`pubpub.collectionAttribution.update`](#pubpubcollectionattributionupdate)
-  * [`pubpub.collectionPub`](#pubpubcollectionpub)
-    * [`pubpub.collectionPub.create`](#pubpubcollectionpubcreate)
-    * [`pubpub.collectionPub.get`](#pubpubcollectionpubget)
-    * [`pubpub.collectionPub.remove`](#pubpubcollectionpubremove)
-    * [`pubpub.collectionPub.update`](#pubpubcollectionpubupdate)
-  * [`pubpub.community`](#pubpubcommunity)
-    * [`pubpub.community.create`](#pubpubcommunitycreate)
-    * [`pubpub.community.get`](#pubpubcommunityget)
-    * [`pubpub.community.getCommunities`](#pubpubcommunitygetcommunities)
-    * [`pubpub.community.update`](#pubpubcommunityupdate)
-  * [`pubpub.customScript`](#pubpubcustomscript)
-    * [`pubpub.customScript.set`](#pubpubcustomscriptset)
-  * [`pubpub.facets`](#pubpubfacets)
-    * [`pubpub.facets.update`](#pubpubfacetsupdate)
-  * [`pubpub.member`](#pubpubmember)
-    * [`pubpub.member.create`](#pubpubmembercreate)
-    * [`pubpub.member.get`](#pubpubmemberget)
-    * [`pubpub.member.getMany`](#pubpubmembergetmany)
-    * [`pubpub.member.remove`](#pubpubmemberremove)
-    * [`pubpub.member.update`](#pubpubmemberupdate)
-  * [`pubpub.page`](#pubpubpage)
-    * [`pubpub.page.create`](#pubpubpagecreate)
-    * [`pubpub.page.get`](#pubpubpageget)
-    * [`pubpub.page.getMany`](#pubpubpagegetmany)
-    * [`pubpub.page.remove`](#pubpubpageremove)
-    * [`pubpub.page.update`](#pubpubpageupdate)
-    * [`pubpub.pub.doi`](#pubpubpubdoi)
-    * [`pubpub.pub.get`](#pubpubpubget)
-    * [`pubpub.pub.getMany`](#pubpubpubgetmany)
-    * [`pubpub.pub.getResource`](#pubpubpubgetresource)
-    * [`pubpub.pub.queryMany`](#pubpubpubquerymany)
-    * [`pubpub.pub.remove`](#pubpubpubremove)
-    * [`pubpub.pub.text`](#pubpubpubtext)
-    * [`pubpub.pub.update`](#pubpubpubupdate)
-  * [`pubpub.pubAttribution`](#pubpubpubattribution)
-    * [`pubpub.pubAttribution.batchCreate`](#pubpubpubattributionbatchcreate)
-    * [`pubpub.pubAttribution.create`](#pubpubpubattributioncreate)
-    * [`pubpub.pubAttribution.get`](#pubpubpubattributionget)
-    * [`pubpub.pubAttribution.getMany`](#pubpubpubattributiongetmany)
-    * [`pubpub.pubAttribution.remove`](#pubpubpubattributionremove)
-    * [`pubpub.pubAttribution.update`](#pubpubpubattributionupdate)
-  * [`pubpub.pubEdge`](#pubpubpubedge)
-    * [`pubpub.pubEdge.create`](#pubpubpubedgecreate)
-    * [`pubpub.pubEdge.get`](#pubpubpubedgeget)
-    * [`pubpub.pubEdge.remove`](#pubpubpubedgeremove)
-    * [`pubpub.pubEdge.update`](#pubpubpubedgeupdate)
-    * [`pubpub.pubEdge.updateApprovedByTarget`](#pubpubpubedgeupdateapprovedbytarget)
-  * [`pubpub.release`](#pubpubrelease)
-    * [`pubpub.release.create`](#pubpubreleasecreate)
-  * [`pubpub.upload`](#pubpubupload)
-    * [`pubpub.upload.file`](#pubpubuploadfile)
-    * [`pubpub.upload.policy`](#pubpubuploadpolicy)
-  * [`pubpub.workerTask`](#pubpubworkertask)
-    * [`pubpub.workerTask.createExport`](#pubpubworkertaskcreateexport)
-    * [`pubpub.workerTask.createImport`](#pubpubworkertaskcreateimport)
-    * [`pubpub.workerTask.get`](#pubpubworkertaskget)
-  * [Other types](#other-types)
-    * [Attribution](#attribution)
-    * [CollectionPub](#collectionpub)
-    * [Discussion](#discussion)
-    * [Release](#release)
-    * [Pub](#pub)
-    * [Member](#member)
-    * [Page](#page)
-    * [Community](#community)
-    * [Collection](#collection)
-    * [User](#user)
-    * [Review](#review)
-    * [Submission](#submission)
-    * [Draft](#draft)
-* [Contributing](#contributing)
-  * [Development](#development)
-  * [Testing](#testing)
-  * [Publishing](#publishing)
-  * [Generating docs](#generating-docs)
-* [TODO](#todo)
-* [FAQ](#faq)
-  * [How do I get the ID of my community/page/collection?](#how-do-i-get-the-id-of-my-communitypagecollection)
-  * [Can I run this in the browser?](#can-i-run-this-in-the-browser)
-* [License](#license)
+- [PubPub SDK](#pubpub-sdk)
+  - [Contents](#contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Limitations](#limitations)
+    - [Creating or deleting communities](#creating-or-deleting-communities)
+    - [Creating, deleting, or modifying users](#creating-deleting-or-modifying-users)
+  - [Guides](#guides)
+    - [Starting](#starting)
+    - [Querying](#querying)
+      - [`get`/`GET /api/<models>/<id>`](#getget-apimodelsid)
+      - [`getMany`/`GET /api/<models>`](#getmanyget-apimodels)
+        - [Pagination](#pagination)
+          - [Defaults](#defaults)
+          - [Example](#example)
+        - [Sorting](#sorting)
+          - [Options](#options)
+          - [Defaults](#defaults-1)
+          - [Example](#example-1)
+        - [Includes](#includes)
+        - [Attributes](#attributes)
+          - [Default](#default)
+          - [Example](#example-2)
+        - [Filter](#filter)
+          - [Equality](#equality)
+          - [OR](#or)
+          - [AND](#and)
+          - [Existence](#existence)
+          - [String properties](#string-properties)
+          - [Enum filters](#enum-filters)
+          - [`id` filters](#id-filters)
+          - [`number` or `Date` filters](#number-or-date-filters)
+  - [API](#api)
+    - [`pubpub.auth`](#pubpubauth)
+      - [`pubpub.auth.login`](#pubpubauthlogin)
+        - [Access](#access)
+        - [Route Documentation](#route-documentation)
+        - [Parameters](#parameters)
+        - [Returns](#returns)
+      - [`pubpub.auth.logout`](#pubpubauthlogout)
+        - [Access](#access-1)
+        - [Route Documentation](#route-documentation-1)
+        - [Parameters](#parameters-1)
+        - [Returns](#returns-1)
+    - [`pubpub.collection`](#pubpubcollection)
+      - [`pubpub.collection.create`](#pubpubcollectioncreate)
+        - [Access](#access-2)
+        - [Route Documentation](#route-documentation-2)
+        - [Parameters](#parameters-2)
+        - [Returns](#returns-2)
+      - [`pubpub.collection.doi`](#pubpubcollectiondoi)
+        - [`pubpub.collection.doi.deposit`](#pubpubcollectiondoideposit)
+          - [Access](#access-3)
+          - [Route Documentation](#route-documentation-3)
+          - [Parameters](#parameters-3)
+          - [Returns](#returns-3)
+        - [`pubpub.collection.doi.preview`](#pubpubcollectiondoipreview)
+          - [Access](#access-4)
+          - [Route Documentation](#route-documentation-4)
+          - [Parameters](#parameters-4)
+          - [Returns](#returns-4)
+      - [`pubpub.collection.get`](#pubpubcollectionget)
+        - [Access](#access-5)
+        - [Route Documentation](#route-documentation-5)
+        - [Parameters](#parameters-5)
+        - [Returns](#returns-5)
+      - [`pubpub.collection.getMany`](#pubpubcollectiongetmany)
+        - [Access](#access-6)
+        - [Route Documentation](#route-documentation-6)
+        - [Parameters](#parameters-6)
+        - [Returns](#returns-6)
+      - [`pubpub.collection.getResource`](#pubpubcollectiongetresource)
+        - [Access](#access-7)
+        - [Route Documentation](#route-documentation-7)
+        - [Parameters](#parameters-7)
+        - [Returns](#returns-7)
+      - [`pubpub.collection.remove`](#pubpubcollectionremove)
+        - [Access](#access-8)
+        - [Route Documentation](#route-documentation-8)
+        - [Parameters](#parameters-8)
+        - [Returns](#returns-8)
+      - [`pubpub.collection.update`](#pubpubcollectionupdate)
+        - [Access](#access-9)
+        - [Route Documentation](#route-documentation-9)
+        - [Parameters](#parameters-9)
+        - [Returns](#returns-9)
+    - [`pubpub.collectionAttribution`](#pubpubcollectionattribution)
+      - [`pubpub.collectionAttribution.batchCreate`](#pubpubcollectionattributionbatchcreate)
+        - [Access](#access-10)
+        - [Route Documentation](#route-documentation-10)
+        - [Parameters](#parameters-10)
+        - [Returns](#returns-10)
+      - [`pubpub.collectionAttribution.create`](#pubpubcollectionattributioncreate)
+        - [Access](#access-11)
+        - [Route Documentation](#route-documentation-11)
+        - [Parameters](#parameters-11)
+        - [Returns](#returns-11)
+      - [`pubpub.collectionAttribution.get`](#pubpubcollectionattributionget)
+        - [Access](#access-12)
+        - [Route Documentation](#route-documentation-12)
+        - [Parameters](#parameters-12)
+        - [Returns](#returns-12)
+      - [`pubpub.collectionAttribution.getMany`](#pubpubcollectionattributiongetmany)
+        - [Access](#access-13)
+        - [Route Documentation](#route-documentation-13)
+        - [Parameters](#parameters-13)
+        - [Returns](#returns-13)
+      - [`pubpub.collectionAttribution.remove`](#pubpubcollectionattributionremove)
+        - [Access](#access-14)
+        - [Route Documentation](#route-documentation-14)
+        - [Parameters](#parameters-14)
+        - [Returns](#returns-14)
+      - [`pubpub.collectionAttribution.update`](#pubpubcollectionattributionupdate)
+        - [Access](#access-15)
+        - [Route Documentation](#route-documentation-15)
+        - [Parameters](#parameters-15)
+        - [Returns](#returns-15)
+    - [`pubpub.collectionPub`](#pubpubcollectionpub)
+      - [`pubpub.collectionPub.create`](#pubpubcollectionpubcreate)
+        - [Access](#access-16)
+        - [Route Documentation](#route-documentation-16)
+        - [Parameters](#parameters-16)
+        - [Returns](#returns-16)
+      - [`pubpub.collectionPub.get`](#pubpubcollectionpubget)
+        - [Access](#access-17)
+        - [Route Documentation](#route-documentation-17)
+        - [Parameters](#parameters-17)
+        - [Returns](#returns-17)
+      - [`pubpub.collectionPub.remove`](#pubpubcollectionpubremove)
+        - [Access](#access-18)
+        - [Route Documentation](#route-documentation-18)
+        - [Parameters](#parameters-18)
+        - [Returns](#returns-18)
+      - [`pubpub.collectionPub.update`](#pubpubcollectionpubupdate)
+        - [Access](#access-19)
+        - [Route Documentation](#route-documentation-19)
+        - [Parameters](#parameters-19)
+        - [Returns](#returns-19)
+    - [`pubpub.community`](#pubpubcommunity)
+      - [`pubpub.community.create`](#pubpubcommunitycreate)
+        - [Access](#access-20)
+        - [Route Documentation](#route-documentation-20)
+        - [Parameters](#parameters-20)
+        - [Returns](#returns-20)
+      - [`pubpub.community.get`](#pubpubcommunityget)
+        - [Access](#access-21)
+        - [Route Documentation](#route-documentation-21)
+        - [Parameters](#parameters-21)
+        - [Returns](#returns-21)
+      - [`pubpub.community.getCommunities`](#pubpubcommunitygetcommunities)
+        - [Access](#access-22)
+        - [Route Documentation](#route-documentation-22)
+        - [Parameters](#parameters-22)
+        - [Returns](#returns-22)
+      - [`pubpub.community.update`](#pubpubcommunityupdate)
+        - [Access](#access-23)
+        - [Route Documentation](#route-documentation-23)
+        - [Parameters](#parameters-23)
+        - [Returns](#returns-23)
+    - [`pubpub.customScript`](#pubpubcustomscript)
+      - [`pubpub.customScript.set`](#pubpubcustomscriptset)
+        - [Example](#example-3)
+        - [Access](#access-24)
+        - [Route Documentation](#route-documentation-24)
+        - [Parameters](#parameters-24)
+        - [Returns](#returns-24)
+    - [`pubpub.facets`](#pubpubfacets)
+      - [`pubpub.facets.update`](#pubpubfacetsupdate)
+        - [Access](#access-25)
+        - [Route Documentation](#route-documentation-25)
+        - [Parameters](#parameters-25)
+        - [Returns](#returns-25)
+    - [`pubpub.member`](#pubpubmember)
+      - [`pubpub.member.create`](#pubpubmembercreate)
+        - [Access](#access-26)
+        - [Route Documentation](#route-documentation-26)
+        - [Parameters](#parameters-26)
+        - [Returns](#returns-26)
+      - [`pubpub.member.get`](#pubpubmemberget)
+        - [Access](#access-27)
+        - [Route Documentation](#route-documentation-27)
+        - [Parameters](#parameters-27)
+        - [Returns](#returns-27)
+      - [`pubpub.member.getMany`](#pubpubmembergetmany)
+        - [Access](#access-28)
+        - [Route Documentation](#route-documentation-28)
+        - [Parameters](#parameters-28)
+        - [Returns](#returns-28)
+      - [`pubpub.member.remove`](#pubpubmemberremove)
+        - [Access](#access-29)
+        - [Route Documentation](#route-documentation-29)
+        - [Parameters](#parameters-29)
+        - [Returns](#returns-29)
+      - [`pubpub.member.update`](#pubpubmemberupdate)
+        - [Access](#access-30)
+        - [Route Documentation](#route-documentation-30)
+        - [Parameters](#parameters-30)
+        - [Returns](#returns-30)
+    - [`pubpub.page`](#pubpubpage)
+      - [`pubpub.page.create`](#pubpubpagecreate)
+        - [Access](#access-31)
+        - [Route Documentation](#route-documentation-31)
+        - [Parameters](#parameters-31)
+        - [Returns](#returns-31)
+      - [`pubpub.page.get`](#pubpubpageget)
+        - [Access](#access-32)
+        - [Route Documentation](#route-documentation-32)
+        - [Parameters](#parameters-32)
+        - [Returns](#returns-32)
+      - [`pubpub.page.getMany`](#pubpubpagegetmany)
+        - [Access](#access-33)
+        - [Route Documentation](#route-documentation-33)
+        - [Parameters](#parameters-33)
+        - [Returns](#returns-33)
+      - [`pubpub.page.remove`](#pubpubpageremove)
+        - [Access](#access-34)
+        - [Route Documentation](#route-documentation-34)
+        - [Parameters](#parameters-34)
+        - [Returns](#returns-34)
+      - [`pubpub.page.update`](#pubpubpageupdate)
+        - [Access](#access-35)
+        - [Route Documentation](#route-documentation-35)
+        - [Parameters](#parameters-35)
+        - [Returns](#returns-35)
+      - [`pubpub.pub.doi`](#pubpubpubdoi)
+        - [`pubpub.pub.doi.deposit`](#pubpubpubdoideposit)
+          - [Access](#access-36)
+          - [Route Documentation](#route-documentation-36)
+          - [Parameters](#parameters-36)
+          - [Returns](#returns-36)
+        - [`pubpub.pub.doi.preview`](#pubpubpubdoipreview)
+          - [Access](#access-37)
+          - [Route Documentation](#route-documentation-37)
+          - [Parameters](#parameters-37)
+          - [Returns](#returns-37)
+      - [`pubpub.pub.get`](#pubpubpubget)
+        - [Access](#access-38)
+        - [Route Documentation](#route-documentation-38)
+        - [Parameters](#parameters-38)
+        - [Returns](#returns-38)
+      - [`pubpub.pub.getMany`](#pubpubpubgetmany)
+        - [Access](#access-39)
+        - [Route Documentation](#route-documentation-39)
+        - [Parameters](#parameters-39)
+        - [Returns](#returns-39)
+      - [`pubpub.pub.getResource`](#pubpubpubgetresource)
+        - [Access](#access-40)
+        - [Route Documentation](#route-documentation-40)
+        - [Parameters](#parameters-40)
+        - [Returns](#returns-40)
+      - [`pubpub.pub.queryMany`](#pubpubpubquerymany)
+        - [Access](#access-41)
+        - [Route Documentation](#route-documentation-41)
+        - [Parameters](#parameters-41)
+        - [Returns](#returns-41)
+      - [`pubpub.pub.remove`](#pubpubpubremove)
+        - [Access](#access-42)
+        - [Route Documentation](#route-documentation-42)
+        - [Parameters](#parameters-42)
+        - [Returns](#returns-42)
+      - [`pubpub.pub.text`](#pubpubpubtext)
+        - [`pubpub.pub.text.convert`](#pubpubpubtextconvert)
+          - [Access](#access-43)
+          - [Route Documentation](#route-documentation-43)
+          - [Parameters](#parameters-43)
+          - [Returns](#returns-43)
+        - [`pubpub.pub.text.get`](#pubpubpubtextget)
+          - [Access](#access-44)
+          - [Route Documentation](#route-documentation-44)
+          - [Parameters](#parameters-44)
+          - [Returns](#returns-44)
+        - [`pubpub.pub.text.import`](#pubpubpubtextimport)
+          - [Access](#access-45)
+          - [Route Documentation](#route-documentation-45)
+          - [Parameters](#parameters-45)
+          - [Returns](#returns-45)
+        - [`pubpub.pub.text.importOld`](#pubpubpubtextimportold)
+          - [Access](#access-46)
+          - [Route Documentation](#route-documentation-46)
+          - [Parameters](#parameters-46)
+          - [Returns](#returns-46)
+        - [`pubpub.pub.text.importToPub`](#pubpubpubtextimporttopub)
+          - [Access](#access-47)
+          - [Route Documentation](#route-documentation-47)
+          - [Parameters](#parameters-47)
+          - [Returns](#returns-47)
+        - [`pubpub.pub.text.update`](#pubpubpubtextupdate)
+          - [Access](#access-48)
+          - [Route Documentation](#route-documentation-48)
+          - [Parameters](#parameters-48)
+          - [Returns](#returns-48)
+      - [`pubpub.pub.update`](#pubpubpubupdate)
+        - [Access](#access-49)
+        - [Route Documentation](#route-documentation-49)
+        - [Parameters](#parameters-49)
+        - [Returns](#returns-49)
+    - [`pubpub.pubAttribution`](#pubpubpubattribution)
+      - [`pubpub.pubAttribution.batchCreate`](#pubpubpubattributionbatchcreate)
+        - [Access](#access-50)
+        - [Route Documentation](#route-documentation-50)
+        - [Parameters](#parameters-50)
+        - [Returns](#returns-50)
+      - [`pubpub.pubAttribution.create`](#pubpubpubattributioncreate)
+        - [Access](#access-51)
+        - [Route Documentation](#route-documentation-51)
+        - [Parameters](#parameters-51)
+        - [Returns](#returns-51)
+      - [`pubpub.pubAttribution.get`](#pubpubpubattributionget)
+        - [Access](#access-52)
+        - [Route Documentation](#route-documentation-52)
+        - [Parameters](#parameters-52)
+        - [Returns](#returns-52)
+      - [`pubpub.pubAttribution.getMany`](#pubpubpubattributiongetmany)
+        - [Access](#access-53)
+        - [Route Documentation](#route-documentation-53)
+        - [Parameters](#parameters-53)
+        - [Returns](#returns-53)
+      - [`pubpub.pubAttribution.remove`](#pubpubpubattributionremove)
+        - [Access](#access-54)
+        - [Route Documentation](#route-documentation-54)
+        - [Parameters](#parameters-54)
+        - [Returns](#returns-54)
+      - [`pubpub.pubAttribution.update`](#pubpubpubattributionupdate)
+        - [Access](#access-55)
+        - [Route Documentation](#route-documentation-55)
+        - [Parameters](#parameters-55)
+        - [Returns](#returns-55)
+    - [`pubpub.pubEdge`](#pubpubpubedge)
+      - [`pubpub.pubEdge.create`](#pubpubpubedgecreate)
+        - [Access](#access-56)
+        - [Route Documentation](#route-documentation-56)
+        - [Parameters](#parameters-56)
+        - [Returns](#returns-56)
+      - [`pubpub.pubEdge.get`](#pubpubpubedgeget)
+        - [Access](#access-57)
+        - [Route Documentation](#route-documentation-57)
+        - [Parameters](#parameters-57)
+        - [Returns](#returns-57)
+      - [`pubpub.pubEdge.remove`](#pubpubpubedgeremove)
+        - [Access](#access-58)
+        - [Route Documentation](#route-documentation-58)
+        - [Parameters](#parameters-58)
+        - [Returns](#returns-58)
+      - [`pubpub.pubEdge.update`](#pubpubpubedgeupdate)
+        - [Access](#access-59)
+        - [Route Documentation](#route-documentation-59)
+        - [Parameters](#parameters-59)
+        - [Returns](#returns-59)
+      - [`pubpub.pubEdge.updateApprovedByTarget`](#pubpubpubedgeupdateapprovedbytarget)
+        - [Access](#access-60)
+        - [Route Documentation](#route-documentation-60)
+        - [Parameters](#parameters-60)
+        - [Returns](#returns-60)
+    - [`pubpub.release`](#pubpubrelease)
+      - [`pubpub.release.create`](#pubpubreleasecreate)
+        - [Access](#access-61)
+        - [Route Documentation](#route-documentation-61)
+        - [Parameters](#parameters-61)
+        - [Returns](#returns-61)
+    - [`pubpub.upload`](#pubpubupload)
+      - [`pubpub.upload.file`](#pubpubuploadfile)
+        - [Access](#access-62)
+        - [Route Documentation](#route-documentation-62)
+        - [Parameters](#parameters-62)
+        - [Returns](#returns-62)
+      - [`pubpub.upload.policy`](#pubpubuploadpolicy)
+        - [Access](#access-63)
+        - [Route Documentation](#route-documentation-63)
+        - [Parameters](#parameters-63)
+        - [Returns](#returns-63)
+    - [`pubpub.workerTask`](#pubpubworkertask)
+      - [`pubpub.workerTask.createExport`](#pubpubworkertaskcreateexport)
+        - [Access](#access-64)
+        - [Route Documentation](#route-documentation-64)
+        - [Parameters](#parameters-64)
+        - [Returns](#returns-64)
+      - [`pubpub.workerTask.createImport`](#pubpubworkertaskcreateimport)
+        - [Access](#access-65)
+        - [Route Documentation](#route-documentation-65)
+        - [Parameters](#parameters-65)
+        - [Returns](#returns-65)
+      - [`pubpub.workerTask.get`](#pubpubworkertaskget)
+        - [Access](#access-66)
+        - [Route Documentation](#route-documentation-66)
+        - [Parameters](#parameters-66)
+        - [Returns](#returns-66)
+    - [Other types](#other-types)
+      - [Attribution](#attribution)
+      - [CollectionPub](#collectionpub)
+      - [Discussion](#discussion)
+      - [Release](#release)
+      - [Pub](#pub)
+      - [Member](#member)
+      - [Page](#page)
+      - [Community](#community)
+      - [Collection](#collection)
+      - [User](#user)
+      - [Review](#review)
+      - [Submission](#submission)
+      - [Draft](#draft)
+  - [Contributing](#contributing)
+    - [Development](#development)
+    - [Testing](#testing)
+    - [Publishing](#publishing)
+    - [Generating docs](#generating-docs)
+  - [TODO](#todo)
+  - [FAQ](#faq)
+    - [How do I get the ID of my community/page/collection?](#how-do-i-get-the-id-of-my-communitypagecollection)
+    - [Can I run this in the browser?](#can-i-run-this-in-the-browser)
+  - [License](#license)
 
 ## Installation
 
@@ -238,8 +538,8 @@ By providing a `limit` and `offset` parameter, you can paginate the results.
 
 ###### Defaults
 
-* `limit`: `10`
-* `offset`: `0`
+- `limit`: `10`
+- `offset`: `0`
 
 ###### Example
 
@@ -267,8 +567,8 @@ The `orderBy` parameters can also be some fiels of the model, depending on the m
 
 ###### Defaults
 
-* `orderBy`: `createdAt`
-* `sortBy`: `DESC`
+- `orderBy`: `createdAt`
+- `sortBy`: `DESC`
 
 ###### Example
 
@@ -1616,11 +1916,11 @@ batchCreate: (input, rest?) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
     }[]
@@ -1668,11 +1968,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
   }[]
@@ -1697,11 +1997,11 @@ create: (input, rest?) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
     }
@@ -1759,11 +2059,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
   }
@@ -1788,11 +2088,11 @@ get: (input) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
       collection?: Collection
@@ -1836,11 +2136,11 @@ You need to be an **admin** of this community in order to access this resource.
               | 'avatar'
               | 'name'
               | 'order'
+              | 'userId'
+              | 'orcid'
               | 'isAuthor'
               | 'roles'
               | 'affiliation'
-              | 'orcid'
-              | 'userId'
             )[]
           | undefined
       }
@@ -1860,11 +2160,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
     collection?: Collection
@@ -1891,11 +2191,11 @@ getMany: (input?) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
       collection?: Collection
@@ -1939,14 +2239,14 @@ You need to be an **admin** of this community in order to access this resource.
               avatar?: StringFilter
               name?: StringFilter
               order?: NumberFilter
+              userId?: string | boolean | string[] | undefined
+              orcid?: StringFilter
               isAuthor?: boolean | undefined
               roles?:
                 | ( StringFilter
                   )[]
                 | undefined
               affiliation?: StringFilter
-              orcid?: StringFilter
-              userId?: string | boolean | string[] | undefined
               createdAt?: DateFilter
               updatedAt?: DateFilter
             }
@@ -1962,11 +2262,11 @@ You need to be an **admin** of this community in order to access this resource.
               | 'avatar'
               | 'name'
               | 'order'
+              | 'userId'
+              | 'orcid'
               | 'isAuthor'
               | 'roles'
               | 'affiliation'
-              | 'orcid'
-              | 'userId'
             )[]
           | undefined
       } & {
@@ -1976,14 +2276,14 @@ You need to be an **admin** of this community in order to access this resource.
         avatar?: StringFilter
         name?: StringFilter
         order?: NumberFilter
+        userId?: string | boolean | string[] | undefined
+        orcid?: StringFilter
         isAuthor?: boolean | undefined
         roles?:
           | ( StringFilter
             )[]
           | undefined
         affiliation?: StringFilter
-        orcid?: StringFilter
-        userId?: string | boolean | string[] | undefined
         createdAt?: DateFilter
         updatedAt?: DateFilter
       })
@@ -2011,11 +2311,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
     collection?: Collection
@@ -2091,11 +2391,11 @@ update: (input, rest?) =>
       avatar?: string | null | undefined
       name?: string | null | undefined
       order?: number | undefined
+      userId?: string | null | undefined
+      orcid?: string | null | undefined
       isAuthor?: boolean | null | undefined
       roles?: string[] | null | undefined
       affiliation?: string | null | undefined
-      orcid?: string | null | undefined
-      userId?: string | null | undefined
     }
     headers: Headers
   }>
@@ -2152,11 +2452,11 @@ Promise<{
     avatar?: string | null | undefined
     name?: string | null | undefined
     order?: number | undefined
+    userId?: string | null | undefined
+    orcid?: string | null | undefined
     isAuthor?: boolean | null | undefined
     roles?: string[] | null | undefined
     affiliation?: string | null | undefined
-    orcid?: string | null | undefined
-    userId?: string | null | undefined
   }
   headers: Headers
 }>
@@ -2299,6 +2599,8 @@ You need to be **logged in** and have access to this resource.
     collectionId: string
     communityId: string
     pubId?: string | undefined
+    limit?: number | undefined
+    offset?: number | undefined
   }
   cache?: RequestCache | undefined
   extraHeaders?:
@@ -2626,13 +2928,23 @@ get: (input) =>
       website: string | null
       facebook: string | null
       twitter: string | null
+      instagram: string | null
+      mastodon: string | null
+      linkedin: string | null
+      bluesky: string | null
+      github: string | null
       email: string | null
+      socialLinksLocation: 'header' | 'footer' | null
       issn: string | null
       isFeatured: boolean | null
       viewHash: string | null
       editHash: string | null
       premiumLicenseFlag: boolean | null
       defaultPubCollections: string[] | null
+      analyticsSettings:
+        | { type: 'google-analytics'; credentials: string }
+        | { type: 'simple-analytics'; credentials: null }
+        | null
       spamTagId: string | null
       organizationId: string | null
       scopeSummaryId: string | null
@@ -2808,13 +3120,29 @@ Promise<{
     website: string | null
     facebook: string | null
     twitter: string | null
+    instagram: string | null
+    mastodon: string | null
+    linkedin: string | null
+    bluesky: string | null
+    github: string | null
     email: string | null
+    socialLinksLocation: 'header' | 'footer' | null
     issn: string | null
     isFeatured: boolean | null
     viewHash: string | null
     editHash: string | null
     premiumLicenseFlag: boolean | null
     defaultPubCollections: string[] | null
+    analyticsSettings:
+      | {
+          type: 'google-analytics'
+          credentials: string
+        }
+      | {
+          type: 'simple-analytics'
+          credentials: null
+        }
+      | null
     spamTagId: string | null
     organizationId: string | null
     scopeSummaryId: string | null
@@ -2917,13 +3245,23 @@ getCommunities: (input?) =>
       website: string | null
       facebook: string | null
       twitter: string | null
+      instagram: string | null
+      mastodon: string | null
+      linkedin: string | null
+      bluesky: string | null
+      github: string | null
       email: string | null
+      socialLinksLocation: 'header' | 'footer' | null
       issn: string | null
       isFeatured: boolean | null
       viewHash: string | null
       editHash: string | null
       premiumLicenseFlag: boolean | null
       defaultPubCollections: string[] | null
+      analyticsSettings:
+        | { type: 'google-analytics'; credentials: string }
+        | { type: 'simple-analytics'; credentials: null }
+        | null
       spamTagId: string | null
       organizationId: string | null
       scopeSummaryId: string | null
@@ -3092,13 +3430,29 @@ Promise<{
     website: string | null
     facebook: string | null
     twitter: string | null
+    instagram: string | null
+    mastodon: string | null
+    linkedin: string | null
+    bluesky: string | null
+    github: string | null
     email: string | null
+    socialLinksLocation: 'header' | 'footer' | null
     issn: string | null
     isFeatured: boolean | null
     viewHash: string | null
     editHash: string | null
     premiumLicenseFlag: boolean | null
     defaultPubCollections: string[] | null
+    analyticsSettings:
+      | {
+          type: 'google-analytics'
+          credentials: string
+        }
+      | {
+          type: 'simple-analytics'
+          credentials: null
+        }
+      | null
     spamTagId: string | null
     organizationId: string | null
     scopeSummaryId: string | null
@@ -3204,13 +3558,24 @@ update: (input?, rest?) =>
       website?: string | null | undefined
       facebook?: string | null | undefined
       twitter?: string | null | undefined
+      instagram?: string | null | undefined
+      mastodon?: string | null | undefined
+      linkedin?: string | null | undefined
+      bluesky?: string | null | undefined
+      github?: string | null | undefined
       email?: string | null | undefined
+      socialLinksLocation?: 'header' | 'footer' | null | undefined
       issn?: string | null | undefined
       isFeatured?: boolean | null | undefined
       viewHash?: string | null | undefined
       editHash?: string | null | undefined
       premiumLicenseFlag?: boolean | null | undefined
       defaultPubCollections?: string[] | null | undefined
+      analyticsSettings?:
+        | { type: 'google-analytics'; credentials: string }
+        | { type: 'simple-analytics'; credentials: null }
+        | null
+        | undefined
       spamTagId?: string | null | undefined
       organizationId?: string | null | undefined
       scopeSummaryId?: string | null | undefined
@@ -3238,7 +3603,18 @@ You need to be **logged in** and have access to this resource.
   accentColorDark: string
   accentColorLight: string
   accentTextColor: string
+  analyticsSettings:
+    | null
+    | {
+        credentials: string
+        type: 'google-analytics'
+      }
+    | {
+        credentials: null
+        type: 'simple-analytics'
+      }
   avatar: null | string
+  bluesky: null | string
   citeAs: null | string
   defaultPubCollections: null | string[]
   description: null | string
@@ -3271,6 +3647,7 @@ You need to be **logged in** and have access to this resource.
       )[]
   footerLogoLink: null | string
   footerTitle: null | string
+  github: null | string
   headerColorType: null | 'light' | 'dark' | 'custom'
   headerLinks:
     | null
@@ -3300,8 +3677,11 @@ You need to be **logged in** and have access to this resource.
   hideHeaderLogo: null | boolean
   hideHero: null | boolean
   hideNav: null | boolean
+  instagram: null | string
   isFeatured: null | boolean
   issn: null | string
+  linkedin: null | string
+  mastodon: null | string
   navLinks:
     | null
     | (
@@ -3348,6 +3728,7 @@ You need to be **logged in** and have access to this resource.
   premiumLicenseFlag: null | boolean
   publishAs: null | string
   scopeSummaryId: null | string
+  socialLinksLocation: null | 'header' | 'footer'
   spamTagId: null | string
   subdomain: string
   title: string
@@ -3515,13 +3896,30 @@ Promise<{
     website?: string | null | undefined
     facebook?: string | null | undefined
     twitter?: string | null | undefined
+    instagram?: string | null | undefined
+    mastodon?: string | null | undefined
+    linkedin?: string | null | undefined
+    bluesky?: string | null | undefined
+    github?: string | null | undefined
     email?: string | null | undefined
+    socialLinksLocation?: 'header' | 'footer' | null | undefined
     issn?: string | null | undefined
     isFeatured?: boolean | null | undefined
     viewHash?: string | null | undefined
     editHash?: string | null | undefined
     premiumLicenseFlag?: boolean | null | undefined
     defaultPubCollections?: string[] | null | undefined
+    analyticsSettings?:
+      | {
+          type: 'google-analytics'
+          credentials: string
+        }
+      | {
+          type: 'simple-analytics'
+          credentials: null
+        }
+      | null
+      | undefined
     spamTagId?: string | null | undefined
     organizationId?: string | null | undefined
     scopeSummaryId?: string | null | undefined
@@ -5920,7 +6318,65 @@ Promise<{
 Create a pub and upload a file and import it to a pub.
 
 ```ts
-import: (input, rest?) => Promise<{ status: 201; body: { pub: { id: string; communityId: string; title: string; description: string | null; avatar: string | null; viewHash: string | null; editHash: string | null; scopeSummaryId: string | null; slug: string; metadata: { mtg_id: string; bibcode: string; mtg_presentation_id: string; } | null; doi: string | null; crossrefDepositRecordId: string | null; attributions: { id: string; pubId: string; title: string | null; avatar: string | null; name: string | null; order: number; isAuthor: boolean | null; roles: string[] | null; affiliation: string | null; orcid: string | null; userId: string | null; createdAt?: string | undefined; updatedAt?: string | undefined; }[]; htmlTitle: string | null; htmlDescription: string | null; customPublishedAt: string | null; labels: { id: string; title: string; color: string; publicApply: boolean; }[] | null; downloads: { createdAt: string; type: "formatted"; url: string; }[] | null; reviewHash: string | null; commentHash: string | null; draftId: string; createdAt?: string | undefined; updatedAt?: string | undefined; }; doc: { type: "doc"; content: any[]; attrs?: Record<string, any> | undefined; }; }; headers: Headers; }>;
+;(input, rest?) =>
+  Promise<{
+    status: 201
+    body: {
+      pub: {
+        id: string
+        communityId: string
+        title: string
+        description: string | null
+        avatar: string | null
+        viewHash: string | null
+        editHash: string | null
+        scopeSummaryId: string | null
+        slug: string
+        metadata: {
+          mtg_id: string
+          bibcode: string
+          mtg_presentation_id: string
+        } | null
+        doi: string | null
+        crossrefDepositRecordId: string | null
+        attributions: {
+          id: string
+          pubId: string
+          title: string | null
+          avatar: string | null
+          name: string | null
+          order: number
+          userId: string | null
+          orcid: string | null
+          isAuthor: boolean | null
+          roles: string[] | null
+          affiliation: string | null
+          createdAt?: string | undefined
+          updatedAt?: string | undefined
+        }[]
+        htmlTitle: string | null
+        htmlDescription: string | null
+        customPublishedAt: string | null
+        labels:
+          | { id: string; title: string; color: string; publicApply: boolean }[]
+          | null
+        downloads:
+          | { createdAt: string; type: 'formatted'; url: string }[]
+          | null
+        reviewHash: string | null
+        commentHash: string | null
+        draftId: string
+        createdAt?: string | undefined
+        updatedAt?: string | undefined
+      }
+      doc: {
+        type: 'doc'
+        content: any[]
+        attrs?: Record<string, any> | undefined
+      }
+    }
+    headers: Headers
+  }>
 ```
 
 ###### Access
@@ -6405,11 +6861,11 @@ batchCreate: (input, rest?) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
     }[]
@@ -6457,11 +6913,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
   }[]
@@ -6487,11 +6943,11 @@ create: (input, rest?) =>
           avatar: string | null
           name: string | null
           order: number
+          userId: string | null
+          orcid: string | null
           isAuthor: boolean | null
           roles: string[] | null
           affiliation: string | null
-          orcid: string | null
-          userId: string | null
           createdAt?: string | undefined
           updatedAt?: string | undefined
         }
@@ -6552,11 +7008,11 @@ Promise<
         avatar: string | null
         name: string | null
         order: number
+        userId: string | null
+        orcid: string | null
         isAuthor: boolean | null
         roles: string[] | null
         affiliation: string | null
-        orcid: string | null
-        userId: string | null
         createdAt?: string | undefined
         updatedAt?: string | undefined
       }
@@ -6587,11 +7043,11 @@ get: (input) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
       pub?: Pub
@@ -6635,11 +7091,11 @@ You need to be an **admin** of this community in order to access this resource.
               | 'avatar'
               | 'name'
               | 'order'
+              | 'userId'
+              | 'orcid'
               | 'isAuthor'
               | 'roles'
               | 'affiliation'
-              | 'orcid'
-              | 'userId'
             )[]
           | undefined
       }
@@ -6659,11 +7115,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
     pub?: Pub
@@ -6690,11 +7146,11 @@ getMany: (input?) =>
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
       pub?: Pub
@@ -6738,14 +7194,14 @@ You need to be an **admin** of this community in order to access this resource.
               avatar?: StringFilter
               name?: StringFilter
               order?: NumberFilter
+              userId?: string | boolean | string[] | undefined
+              orcid?: StringFilter
               isAuthor?: boolean | undefined
               roles?:
                 | ( StringFilter
                   )[]
                 | undefined
               affiliation?: StringFilter
-              orcid?: StringFilter
-              userId?: string | boolean | string[] | undefined
               createdAt?: DateFilter
               updatedAt?: DateFilter
             }
@@ -6761,11 +7217,11 @@ You need to be an **admin** of this community in order to access this resource.
               | 'avatar'
               | 'name'
               | 'order'
+              | 'userId'
+              | 'orcid'
               | 'isAuthor'
               | 'roles'
               | 'affiliation'
-              | 'orcid'
-              | 'userId'
             )[]
           | undefined
       } & {
@@ -6775,14 +7231,14 @@ You need to be an **admin** of this community in order to access this resource.
         avatar?: StringFilter
         name?: StringFilter
         order?: NumberFilter
+        userId?: string | boolean | string[] | undefined
+        orcid?: StringFilter
         isAuthor?: boolean | undefined
         roles?:
           | ( StringFilter
             )[]
           | undefined
         affiliation?: StringFilter
-        orcid?: StringFilter
-        userId?: string | boolean | string[] | undefined
         createdAt?: DateFilter
         updatedAt?: DateFilter
       })
@@ -6810,11 +7266,11 @@ Promise<{
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
     pub?: Pub
@@ -6901,11 +7357,11 @@ update: (input, rest?) =>
           avatar?: string | null | undefined
           name?: string | null | undefined
           order?: number | undefined
+          userId?: string | null | undefined
+          orcid?: string | null | undefined
           isAuthor?: boolean | null | undefined
           roles?: string[] | null | undefined
           affiliation?: string | null | undefined
-          orcid?: string | null | undefined
-          userId?: string | null | undefined
         }
         headers: Headers
       }
@@ -6965,11 +7421,11 @@ Promise<
         avatar?: string | null | undefined
         name?: string | null | undefined
         order?: number | undefined
+        userId?: string | null | undefined
+        orcid?: string | null | undefined
         isAuthor?: boolean | null | undefined
         roles?: string[] | null | undefined
         affiliation?: string | null | undefined
-        orcid?: string | null | undefined
-        userId?: string | null | undefined
       }
       headers: Headers
     }
@@ -7993,11 +8449,11 @@ Promise<
   avatar: string | null
   name: string | null
   order: number
+  userId: string | null
+  orcid: string | null
   isAuthor: boolean | null
   roles: string[] | null
   affiliation: string | null
-  orcid: string | null
-  userId: string | null
   createdAt?: string | undefined
   updatedAt?: string | undefined
 }
@@ -8036,11 +8492,11 @@ Promise<
       avatar: string | null
       name: string | null
       order: number
+      userId: string | null
+      orcid: string | null
       isAuthor: boolean | null
       roles: string[] | null
       affiliation: string | null
-      orcid: string | null
-      userId: string | null
       createdAt?: string | undefined
       updatedAt?: string | undefined
     }[]
@@ -8121,11 +8577,11 @@ Promise<
     avatar: string | null
     name: string | null
     order: number
+    userId: string | null
+    orcid: string | null
     isAuthor: boolean | null
     roles: string[] | null
     affiliation: string | null
-    orcid: string | null
-    userId: string | null
     createdAt?: string | undefined
     updatedAt?: string | undefined
   }[]
@@ -8277,13 +8733,23 @@ Promise<
   website: string | null
   facebook: string | null
   twitter: string | null
+  instagram: string | null
+  mastodon: string | null
+  linkedin: string | null
+  bluesky: string | null
+  github: string | null
   email: string | null
+  socialLinksLocation: 'header' | 'footer' | null
   issn: string | null
   isFeatured: boolean | null
   viewHash: string | null
   editHash: string | null
   premiumLicenseFlag: boolean | null
   defaultPubCollections: string[] | null
+  analyticsSettings:
+    | { type: 'google-analytics'; credentials: string }
+    | { type: 'simple-analytics'; credentials: null }
+    | null
   spamTagId: string | null
   organizationId: string | null
   scopeSummaryId: string | null
@@ -8330,8 +8796,8 @@ Promise<
   website: string | null
   facebook: string | null
   twitter: string | null
+  github: string | null
   slug: string
-  orcid: string | null
   firstName: string
   lastName: string
   fullName: string
@@ -8340,7 +8806,7 @@ Promise<
   publicEmail: string | null
   authRedirectHost: string | null
   location: string | null
-  github: string | null
+  orcid: string | null
   googleScholar: string | null
 }
 ```
@@ -8427,9 +8893,9 @@ pnpm generate-docs
 
 ## TODO
 
-* \[ ] Add CORS
-* \[ ] Add CRUD methods for discussions
-* \[ ] Reorder some methods (make attributions a submethod of pub, for example)
+- \[ ] Add CORS
+- \[ ] Add CRUD methods for discussions
+- \[ ] Reorder some methods (make attributions a submethod of pub, for example)
 
 ## FAQ
 
@@ -8444,4 +8910,3 @@ While the SDK was designed to also be run in the browser, we are not yet sending
 ## License
 
 GPL-3.0+, PubPub
-
