@@ -59,21 +59,26 @@ export type ProxiedFunction<
       : (input: Prettify<Arguments[0]>) => R
   : never
 
-export type ProxiedClient<T> = {
-  [K in Exclude<keyof T, RemovedRequests>]: T[K] extends (...args: any[]) => any
-    ? K extends GetRequests
-      ? // don't proxy get requests
-        T[K] extends (...args: infer A) => infer R
-        ? A[0] extends { params: any }
-          ? //  ? Q extends Partial<Q>
-            (input: A[0]) => R
-          : (input?: A[0]) => R
-        : T[K]
-      : ProxiedFunction<T[K]>
-    : T[K] extends object
-      ? ProxiedClient<T[K]>
-      : T[K]
-}
+export type ProxiedClient<T> = Omit<
+  {
+    [K in keyof T]: K extends RemovedRequests // do not include removed requests
+      ? never
+      : T[K] extends (...args: any[]) => any
+        ? K extends GetRequests
+          ? // don't proxy get requests
+            T[K] extends (...args: infer A) => infer R
+            ? A[0] extends { params: any }
+              ? //  ? Q extends Partial<Q>
+                (input: A[0]) => R
+              : (input?: A[0]) => R
+            : T[K]
+          : ProxiedFunction<T[K]>
+        : T[K] extends object
+          ? ProxiedClient<T[K]>
+          : T[K]
+  },
+  RemovedRequests
+>
 
 /**
  * The raw client inferred from `ts-rest`.
