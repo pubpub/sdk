@@ -35,6 +35,14 @@ Then, to run the tests, run
 pnpm test
 ```
 
+## Generating updated documentation
+
+To generate the updated documentation, run
+
+```bash
+pnpm generate-docs
+```
+
 ## Publishing
 
 Just run
