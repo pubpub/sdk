@@ -2,6 +2,17 @@
 import type { Client, PClient } from './client-types.js'
 
 /**
+ * Map of requests that should be removed from the client
+ */
+export const removedRequestsMap = {
+  authToken: true,
+  analytics: true,
+} as const
+
+export type RemovedRequestsMap = typeof removedRequestsMap
+export type RemovedRequests = keyof RemovedRequestsMap
+
+/**
  * Map of GET requests, used to correctly proxy the client
  *
  * There is no way of knowing from inspecting the client at runtime which requests are GET requests, so we have to manually specify them here
@@ -38,13 +49,13 @@ export type GetRequests = keyof GetRequestMap
  * formData.set(, 'title')
  *
  */
-export const filesRequestMap = {
+export const filesRequestsMap = {
   convert: true,
   importToPub: true,
   import: true,
 } as const
 
-export type FilesRequestMap = typeof filesRequestMap
+export type FilesRequestMap = typeof filesRequestsMap
 export type FilesRequests = keyof FilesRequestMap
 /**
  * This makes the client a bit nicer to use. The body is flattened and becomes the first arg, IF its not a get request,
@@ -65,16 +76,23 @@ export function proxyClient({
   communityId,
   getRequestsMap = {},
   filesRequestsMap = {},
+  removedRequestsMap = {},
 }: {
   client: Client
   communityId: string
   getRequestsMap?: Partial<GetRequestMap>
   filesRequestsMap?: Partial<FilesRequestMap>
+  removedRequestsMap?: Partial<RemovedRequestsMap>
 }): PClient {
   // Recursive function to traverse and proxy the client object
   function proxyObject<T extends Record<string, any>>(obj: T) {
     const newObj = {}
     for (const [key, value] of Object.entries(obj)) {
+      // Remove keys from the client
+      if (removedRequestsMap[key]) {
+        continue
+      }
+
       if (typeof value === 'function') {
         newObj[key] = function (...args) {
           // Check if this is a GET request

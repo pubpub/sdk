@@ -4,18 +4,21 @@ export async function setupSDK({
   url,
   email = '',
   password = '',
+  authToken = '',
 }: {
   url: string
   email?: string
   password?: string
+  authToken?: string
 }) {
   const pubpub = await PubPub.createSDK({
     communityUrl: url,
-    email,
-    password,
+    ...(authToken ? { authToken } : { email, password }),
   })
 
-  expect(pubpub.loggedIn).toBeTruthy()
+  if (!authToken) {
+    expect(pubpub.loggedIn).toBeTruthy()
+  }
 
   const { body } = await pubpub.pub.create()
 

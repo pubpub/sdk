@@ -7,23 +7,24 @@ import { sleep } from './utils/sleep.js'
 // we need to test imports somewhere else, bc they don't work locally
 const IMPORT_TEST_COMMUNITY_URL =
   process.env.IMPORT_TEST_COMMUNITY_URL ??
-  ('https://client-test.pubpub.org' as const)
+  ('https://client-test.duqduq.org' as const)
+
+let pubpub: PubPubSDK
+let pub = {} as Awaited<ReturnType<typeof pubpub.pub.create>>['body']
+
+let removed = false
+
+beforeAll(async () => {
+  // eslint-disable-next-line no-extra-semi
+  ;({ pub, pubpub } = await setupSDK({
+    url: IMPORT_TEST_COMMUNITY_URL,
+    // email: process.env.IMPORT_TEST_EMAIL ?? process.env.EMAIL,
+    // password: process.env.IMPORT_TEST_PASSWORD ?? process.env.PASSWORD,
+    authToken: process.env.IMPORT_TEST_AUTH_TOKEN ?? process.env.AUTH_TOKEN,
+  }))
+}, 30000)
 
 describe('imports', () => {
-  let pubpub: PubPubSDK
-  let pub = {} as Awaited<ReturnType<typeof pubpub.pub.create>>['body']
-
-  let removed = false
-
-  beforeAll(async () => {
-    // eslint-disable-next-line no-extra-semi
-    ;({ pub, pubpub } = await setupSDK({
-      url: IMPORT_TEST_COMMUNITY_URL,
-      email: process.env.IMPORT_TEST_EMAIL ?? process.env.EMAIL,
-      password: process.env.IMPORT_TEST_PASSWORD ?? process.env.PASSWORD,
-    }))
-  }, 30000)
-
   it('should be able to import a docx file to a pub', async () => {
     try {
       const imported = await pubpub.pub.text.import({
@@ -47,6 +48,7 @@ describe('imports', () => {
       throw e
     }
   }, 60000)
+
   it('should be able to export a file, and that file should include the manually added test text', async () => {
     try {
       const exported = await pubpub.exportPub({
