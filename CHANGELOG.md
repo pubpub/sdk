@@ -1,5 +1,11 @@
 # pubpub-client
 
+## 1.1.1
+
+### Patch Changes
+
+- Fix `communities.getCommunities` not working
+
 ## 1.1.0
 
 ### Minor Changes
