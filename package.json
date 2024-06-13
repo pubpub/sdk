@@ -11,7 +11,7 @@
     "postbuild": "attw . -P && size-limit",
     "lint": "tsc --noEmit",
     "ci": "rm -rf dist && npm run lint && pnpm run test && pnpm run build",
-    "pprepublish": "pnpm run ci",
+    "prepublish": "pnpm run ci",
     "release": "pnpm run ci && changeset publish",
     "prepare": "husky install",
     "size": "banal ./dist/index.js",
