@@ -65,6 +65,20 @@ describe('PubPub', () => {
     expect(json).toBeDefined()
   })
 
+  it('should be able to get a community', async () => {
+    const {
+      body: [community],
+    } = await pubpub.community.getCommunities()
+
+    const { body: communtiy2 } = await pubpub.community.get({
+      params: {
+        id: community.id,
+      },
+    })
+
+    expect(communtiy2.id).toEqual(community.id)
+  })
+
   it('should be able to get pubs', async () => {
     const { body: pubs } = await pubpub.pub.getMany({
       query: {

@@ -20,6 +20,7 @@ export type RemovedRequests = keyof RemovedRequestsMap
 export const getRequestsMap = {
   get: true,
   getMany: true,
+  getCommunities: true,
   logout: true,
   uploadPolicy: true,
 } as const

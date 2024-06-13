@@ -2790,7 +2790,10 @@ Create a community
 
 ```ts
 create: (input, rest?) =>
-  Promise<{ status: 201; body: string; headers: Headers }>
+  Promise<
+    | { status: 201; body: string; headers: Headers }
+    | { status: 409; body: string; headers: Headers }
+  >
 ```
 
 ##### Access
@@ -2830,11 +2833,18 @@ You need to be **logged in** and have access to this resource.
 ##### Returns
 
 ```ts
-Promise<{
-  status: 201
-  body: string
-  headers: Headers
-}>
+Promise<
+  | {
+      status: 201
+      body: string
+      headers: Headers
+    }
+  | {
+      status: 409
+      body: string
+      headers: Headers
+    }
+>
 ```
 
 #### `pubpub.community.get`
@@ -3287,8 +3297,14 @@ You need to be **logged in** and have access to this resource.
 
 ```ts
 {
-  cache: RequestCache
-  extraHeaders: Record<string, undefined | string>
+  cache?: RequestCache | undefined
+  extraHeaders?:
+    | ({
+        [x: string]: undefined
+        [x: number]: undefined
+        [x: symbol]: undefined
+      } & Record<string, string | undefined>)
+    | undefined
 }
 ```
 
@@ -6318,65 +6334,7 @@ Promise<{
 Create a pub and upload a file and import it to a pub.
 
 ```ts
-;(input, rest?) =>
-  Promise<{
-    status: 201
-    body: {
-      pub: {
-        id: string
-        communityId: string
-        title: string
-        description: string | null
-        avatar: string | null
-        viewHash: string | null
-        editHash: string | null
-        scopeSummaryId: string | null
-        slug: string
-        metadata: {
-          mtg_id: string
-          bibcode: string
-          mtg_presentation_id: string
-        } | null
-        doi: string | null
-        crossrefDepositRecordId: string | null
-        attributions: {
-          id: string
-          pubId: string
-          title: string | null
-          avatar: string | null
-          name: string | null
-          order: number
-          userId: string | null
-          orcid: string | null
-          isAuthor: boolean | null
-          roles: string[] | null
-          affiliation: string | null
-          createdAt?: string | undefined
-          updatedAt?: string | undefined
-        }[]
-        htmlTitle: string | null
-        htmlDescription: string | null
-        customPublishedAt: string | null
-        labels:
-          | { id: string; title: string; color: string; publicApply: boolean }[]
-          | null
-        downloads:
-          | { createdAt: string; type: 'formatted'; url: string }[]
-          | null
-        reviewHash: string | null
-        commentHash: string | null
-        draftId: string
-        createdAt?: string | undefined
-        updatedAt?: string | undefined
-      }
-      doc: {
-        type: 'doc'
-        content: any[]
-        attrs?: Record<string, any> | undefined
-      }
-    }
-    headers: Headers
-  }>
+import: (input, rest?) => Promise<{ status: 201; body: { pub: { id: string; communityId: string; title: string; description: string | null; avatar: string | null; viewHash: string | null; editHash: string | null; scopeSummaryId: string | null; slug: string; metadata: { mtg_id: string; bibcode: string; mtg_presentation_id: string; } | null; doi: string | null; crossrefDepositRecordId: string | null; attributions: { id: string; pubId: string; title: string | null; avatar: string | null; name: string | null; order: number; userId: string | null; orcid: string | null; isAuthor: boolean | null; roles: string[] | null; affiliation: string | null; createdAt?: string | undefined; updatedAt?: string | undefined; }[]; htmlTitle: string | null; htmlDescription: string | null; customPublishedAt: string | null; labels: { id: string; title: string; color: string; publicApply: boolean; }[] | null; downloads: { createdAt: string; type: "formatted"; url: string; }[] | null; reviewHash: string | null; commentHash: string | null; draftId: string; createdAt?: string | undefined; updatedAt?: string | undefined; }; doc: { type: "doc"; content: any[]; attrs?: Record<string, any> | undefined; }; }; headers: Headers; }>;
 ```
 
 ###### Access
